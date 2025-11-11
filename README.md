@@ -1,6 +1,9 @@
 # LOAD Robotics DECODE Robot Code
 This repository contains LOAD Robotics' robot code for the 2025-2026 FTC season DECODE.
 
+## Our Filesystem Chart
+I need to add the image to the repo before I can put it here
+
 ## NOTICE
 
 This repository contains the public FTC SDK for the DECODE (2025-2026) competition season.
