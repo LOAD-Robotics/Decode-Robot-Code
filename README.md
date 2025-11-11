@@ -1,8 +1,9 @@
 # LOAD Robotics DECODE Robot Code
 This repository contains LOAD Robotics' robot code for the 2025-2026 FTC season DECODE.
 
-## Our Filesystem Chart
-I need to add the image to the repo before I can put it here
+## Robot Hardware File Hierarchy
+![Filesystem Flowchart](FilesystemFlowchart.png "Robot Hardware File Hierarchy")
+This chart describes hierarchy of our hardware manager classes.
 
 ## NOTICE
 
