@@ -27,7 +27,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.firstinspires.ftc.teamcode.LOADCode.TeleOps;
+package org.firstinspires.ftc.teamcode.LOADCode.Testing_;
 
 import com.bylazar.configurables.annotations.IgnoreConfigurable;
 import com.bylazar.telemetry.TelemetryManager;
@@ -88,7 +88,6 @@ import java.util.concurrent.TimeUnit;
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list.
  *
  */
-
 @TeleOp(name="Follow AprilTag", group = "TestTeleOp")
 public class PedroDriveToAprilTag extends LinearOpMode
 {
@@ -119,7 +118,7 @@ public class PedroDriveToAprilTag extends LinearOpMode
     @IgnoreConfigurable
     static TelemetryManager telemetryM;
     /** Start Pose of our robot. This can be changed or saved from the autonomous period. */
-    private final Pose startPose = new Pose(60,96, Math.toRadians(0));
+    private final Pose startPose = new Pose(0,0, Math.toRadians(0));
 
     @Override public void runOpMode()
     {
