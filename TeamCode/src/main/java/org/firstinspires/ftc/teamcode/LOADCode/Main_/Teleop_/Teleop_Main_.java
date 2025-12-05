@@ -299,12 +299,12 @@ public class Teleop_Main_ extends LinearOpMode {
      * <ul>
      *     <li><b>Analog Inputs</b><ul>
      *         <li>Left Stick:<ul>
-     *             <li>X: <code>Tranfer Belt IN ONLY</code></li>
+     *             <li>X: <code>N/A</code></li>
      *             <li>Y: <code>Intake Direction/Power</code></li>
      *         </ul></li>
      *         <li>Right Stick:<ul>
      *             <li>X: <code>N/A</code></li>
-     *             <li>Y: <code>N/A</code></li>
+     *             <li>Y: <code>Transfer Belt IN ONLY</code></li>
      *         </ul></li>
      *         <li>Left Trigger: <code>N/A</code></li>
      *         <li>Right Trigger: <code>N/A</code></li>
