@@ -173,23 +173,22 @@ public class Teleop_Main_ extends LinearOpMode {
      * </ul>
      */
     public void Gamepad1(){
-
-        Robot.drivetrain.speedMultiplier = 0.66;
+        double speedmult = 0.66;
         if (gamepad1.left_trigger >= 0.5) {
-            Robot.drivetrain.speedMultiplier -= 0.33;
+            speedmult -= 0.33;
         }
         if (gamepad1.right_trigger >= 0.5){
-            Robot.drivetrain.speedMultiplier += 0.33;
+            speedmult += 0.33;
         }
 
         double turnMult = 2;
-        if (gamepad1.left_stick_y == 0 && gamepad1.left_stick_x == 0){
+        if (false){ // I specifically asked to not have this!
             turnMult = 1;
         }
         Robot.drivetrain.pedroMecanumDrive(
-                gamepad1.left_stick_y,
-                gamepad1.left_stick_x,
-                gamepad1.right_stick_x/turnMult,
+                gamepad1.left_stick_y*speedmult,
+                gamepad1.left_stick_x*speedmult,
+                gamepad1.right_stick_x*speedmult,
                 true
         );
     }
