@@ -127,7 +127,7 @@ public class Teleop_Main_ extends LinearOpMode {
             // System-related Telemetry
             telemetry.addLine();
             telemetry.addData("Status", "Run Time: " + runtime.toString());
-            telemetry.addData("Version: ", "11/4/25");
+            telemetry.addData("Version: ", "12/5/25");
             telemetry.update();
 
         }
