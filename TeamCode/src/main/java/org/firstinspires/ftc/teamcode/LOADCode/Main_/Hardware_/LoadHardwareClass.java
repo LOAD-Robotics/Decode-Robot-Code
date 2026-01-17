@@ -22,7 +22,7 @@
  * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
  * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
  * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * CAUSED AND NEAR ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
@@ -33,6 +33,8 @@ import com.bylazar.configurables.annotations.Configurable;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.skeletonarmy.marrow.zones.Point;
+import com.skeletonarmy.marrow.zones.PolygonZone;
 
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Intake;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Turret;
@@ -55,10 +57,23 @@ public class LoadHardwareClass {
 
     // Declare various enums & other variables that are useful across files
     public static Alliance selectedAlliance = null;
+    public Pose goalPose = new Pose(144, 144);
     public enum Alliance {
         RED,
         BLUE
     }
+
+    // Declare zones on the field for logic purposes
+    public static PolygonZone FarLaunchZone = new PolygonZone(
+            new Point(96,0),
+            new Point(48, 0),
+            new Point(72, 24)
+    );
+    public static PolygonZone ReallyNearLaunchZoneRed = new PolygonZone(
+            new Point(72, 72),
+            new Point(144, 144),
+            new Point(0, 144)
+    );
 
     /**
      * Copied from LinearOpMode.
@@ -90,7 +105,7 @@ public class LoadHardwareClass {
     public void init(Pose initialPose)    {
         // Initialize all subclasses
         drivetrain.init(myOpMode, initialPose);
-        turret.init(myOpMode);
+        turret.init(myOpMode, this);
         intake.init(myOpMode);
 
         // Misc telemetry
@@ -105,7 +120,7 @@ public class LoadHardwareClass {
     public void init(Pose initialPose, Follower follower)    {
         // Initialize all subclasses
         drivetrain.init(myOpMode, initialPose, follower);
-        turret.init(myOpMode);
+        turret.init(myOpMode, this);
         intake.init(myOpMode);
 
         // Misc telemetry

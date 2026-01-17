@@ -22,7 +22,7 @@
  * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
  * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
  * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * CAUSED AND NEAR ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
@@ -38,8 +38,6 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.LoadHardwareClass;
 
-//TODO, implement all our external libraries and functionality.
-
 @TeleOp(name="Teleop_Outreach_", group="TeleOp")
 public class Teleop_Outreach_ extends LinearOpMode {
 
@@ -48,7 +46,7 @@ public class Teleop_Outreach_ extends LinearOpMode {
     private TelemetryManager panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
 
     // Contains the start Pose of our robot. This can be changed or saved from the autonomous period.
-    private final Pose startPose = new Pose(135.6,9.8, Math.toRadians(90));
+    private final Pose startPose = new Pose(88.5,7.8, Math.toRadians(90));
 
     @Override
     public void runOpMode() {
@@ -57,13 +55,15 @@ public class Teleop_Outreach_ extends LinearOpMode {
 
         // Create a new instance of our Robot class
         LoadHardwareClass Robot = new LoadHardwareClass(this);
+        // Initialize all hardware of the robot
+        Robot.init(startPose);
+        // TODO uncomment this once the function has been verified
+        //Robot.turret.zeroTurret(isStopRequested());
 
         // Wait for the game to start (driver presses START)
         waitForStart();
         runtime.reset();
-
-        // Initialize all hardware of the robot
-        Robot.init(startPose);
+        Robot.drivetrain.startTeleOpDrive();
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
@@ -75,19 +75,18 @@ public class Teleop_Outreach_ extends LinearOpMode {
                     gamepad1.right_stick_x/2,
                     true
             );
-            if (gamepad1.x){
-                Robot.turret.setFlywheelRPM(5485.714285714286);
-                panelsTelemetry.addData("SetRPM", 5485.714285714286);
-            }else{
-                Robot.turret.setFlywheelRPM(0);
-                panelsTelemetry.addData("SetRPM", 0);
+
+            if (gamepad1.dpad_up){
+                Robot.turret.setHood(Robot.turret.getHood() + 2);
+            }else if (gamepad1.dpad_down){
+                Robot.turret.setHood(Robot.turret.getHood() + 2);
             }
+            telemetry.addData("Hood Angle", Robot.turret.getHood());
 
-            Robot.turret.updatePIDs();
-
-            telemetry.addData("FlywheelState", Robot.turret.flywheelState);
-            panelsTelemetry.addData("FlywheelRPM", Robot.turret.getFlywheelRPM());
-
+            telemetry.addLine();
+            telemetry.addData("Robot Pose X", Math.round(Robot.drivetrain.follower.getPose().getX()));
+            telemetry.addData("Robot Pose Y", Math.round(Robot.drivetrain.follower.getPose().getY()));
+            telemetry.addData("Robot Pose H", Math.round(Math.toDegrees(Robot.drivetrain.follower.getPose().getHeading())));
 
             // System-related Telemetry
             telemetry.addLine();
@@ -95,7 +94,6 @@ public class Teleop_Outreach_ extends LinearOpMode {
             telemetry.addData("Version: ", "11/4/25");
             telemetry.update();
             panelsTelemetry.update(telemetry);
-            //TODO, Add a more advanced telemetry handler for better organization, readability, and debugging
         }
     }
 }

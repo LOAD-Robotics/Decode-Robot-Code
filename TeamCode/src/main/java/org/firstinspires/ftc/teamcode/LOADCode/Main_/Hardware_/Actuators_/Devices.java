@@ -7,7 +7,13 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
+import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
+import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.hardware.Servo;
+
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 import dev.nextftc.control.ControlSystem;
 import dev.nextftc.control.KineticState;
@@ -46,14 +52,25 @@ public class Devices {
     }
 
     public static class DcMotorExClass {
-        // PID pidCoefficients
+
+        // Old PID Coefficients
+        PIDCoefficients old_pidCoefficients = new PIDCoefficients(0, 0, 0);
+        BasicFeedforwardParameters old_ffCoefficients = new BasicFeedforwardParameters(0,0,0);
+
+        // PID Coefficients
         PIDCoefficients pidCoefficients = new PIDCoefficients(0, 0, 0);
         BasicFeedforwardParameters ffCoefficients = new BasicFeedforwardParameters(0,0,0);
-        // Encoder ticks/rotation
-        // 1620rpm Gobilda - 103.8 ticks at the motor shaft
+        /**
+         * <h4>Encoder ticks/rotation:</h4><br>
+         *      1620rpm Gobilda - 103.8<br>
+         *      1150rpm Gobilda - 145.1<br>
+         *      223rpm Gobilda - 751.8<br>
+         */
         public double ticksPerRotation = 103.8;
         // Target position/velocity of the motor
         public double target = 0;
+        // Offset position of the motor
+        public double offset = 0;
         // Motor object
         private DcMotorEx motorObject = null;
 
@@ -80,6 +97,21 @@ public class Devices {
             motorObject  = opmode.hardwareMap.get(DcMotorEx.class, motorName);
         }
 
+        ControlSystem velPID = null;
+        ControlSystem posPID = null;
+
+        public void buildPIDs(){
+            if (old_pidCoefficients != pidCoefficients || old_ffCoefficients != ffCoefficients){
+                posPID = ControlSystem.builder().posPid(pidCoefficients).build();
+                velPID = ControlSystem.builder()
+                        .velPid(pidCoefficients)
+                        .basicFF(ffCoefficients)
+                        .build();
+            }
+            old_pidCoefficients = pidCoefficients;
+            old_ffCoefficients = ffCoefficients;
+        }
+
         /**
          * Sets the value of the PID coefficients of the motor.
          * @param coefficients The values to set the coefficients to.
@@ -100,6 +132,15 @@ public class Devices {
         public void resetEncoder(){
             motorObject.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             motorObject.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        }
+        /**
+         * Sets a position offset on the motor in encoder ticks.
+         */
+        public void setOffsetTicks(double ticks){
+            offset = ticks;
+        }
+        public void setOffsetDegrees(double degrees){
+            setOffsetTicks(degrees * (ticksPerRotation/360));
         }
         /**
          * Sets the runMode of the motor.
@@ -123,12 +164,13 @@ public class Devices {
         }
         public void setEncoderTicks(int ticks){
             motorObject.setTargetPosition(ticks);
+            setRunMode(DcMotor.RunMode.RUN_TO_POSITION);
         }
         /**
          * @return The current position of the turret motor in encoder ticks. Can be any value.
          */
         public double getEncoderTicks(){
-            return motorObject.getCurrentPosition();
+            return motorObject.getCurrentPosition() + offset;
         }
         /**
          * @param power A value between -1 and 1 that the turret motor's power will be set to.
@@ -175,15 +217,25 @@ public class Devices {
         /**
          * Uses a PID controller to move the motor to the desired position.
          * Must be called every loop to function properly.
-         * @param angle The angle in degrees to move the motor to. Can be any number.
+         * @param angle The angle in degrees to move the motor to. Can be any number. </br>
          */
         public void setAngle(double angle){
-            target = angle;
-            ControlSystem turretPID = ControlSystem.builder().posPid(pidCoefficients).build();
-            KineticState currentKineticState = new KineticState(getAngleAbsolute(), getDegreesPerSecond());
-            turretPID.setGoal(new KineticState(target));
-            setPower(turretPID.calculate(currentKineticState));
+            setAngle(angle, 0);
         }
+        /**
+         * Uses a PID controller to move the motor to the desired position.
+         * Must be called every loop to function properly.
+         * @param angle The angle in degrees to move the motor to. Can be any number.
+         * @param velocity The velocity in degrees/sec that the motor should be spinning at when it reaches the target point.
+         */
+        public void setAngle(double angle, double velocity){
+            target = angle;
+            buildPIDs();
+            KineticState currentKineticState = new KineticState(getAngleAbsolute(), getDegreesPerSecond());
+            posPID.setGoal(new KineticState(target, velocity));
+            setPower(posPID.calculate(currentKineticState));
+        }
+
         /**
          * Uses a PID controller to accelerate the motor to the desired RPM.
          * Must be called every loop to function properly.
@@ -191,14 +243,11 @@ public class Devices {
          */
         public void setRPM(double rpm){
             target = rpm;
+            buildPIDs();
             double degreesPerSecond = target*6;
-            ControlSystem PID = ControlSystem.builder()
-                    .velPid(pidCoefficients)
-                    .basicFF(ffCoefficients)
-                    .build();
             KineticState currentKineticState = new KineticState(getAngleAbsolute(), getDegreesPerSecond());
-            PID.setGoal(new KineticState(0, degreesPerSecond));
-            setPower(PID.calculate(currentKineticState));
+            velPID.setGoal(new KineticState(0, degreesPerSecond));
+            setPower(velPID.calculate(currentKineticState));
         }
     }
 
@@ -229,6 +278,69 @@ public class Devices {
          */
         public double getAngle(){
             return servo.getPosition();
+        }
+    }
+
+    public static class REVColorSensorV3Class {
+        private NormalizedColorSensor sensor;
+
+        public void init(@NonNull OpMode opmode, String sensorName){
+            sensor = opmode.hardwareMap.get(NormalizedColorSensor.class, sensorName);
+        }
+
+        public NormalizedRGBA getNormalizedColors(){
+            return sensor.getNormalizedColors();
+        }
+
+        public double getGain(){
+            return sensor.getGain();
+        }
+
+        public void setGain(double gain){
+            sensor.setGain((float) gain);
+        }
+
+        public double getDistance(DistanceUnit units){
+            return ((DistanceSensor) sensor).getDistance(units);
+        }
+    }
+
+    public static class DualProximitySensorClass {
+        private final REVColorSensorV3Class sensor1 = new REVColorSensorV3Class();
+        private final REVColorSensorV3Class sensor2 = new REVColorSensorV3Class();
+
+        public double threshold = 2;
+        public DistanceUnit units = DistanceUnit.CM;
+
+        public void init(@NonNull OpMode opmode, String sensor1Name, String sensor2Name){
+            sensor1.init(opmode, sensor1Name);
+            sensor2.init(opmode, sensor2Name);
+        }
+
+        public void setGain(double gain){
+            sensor1.setGain(gain);
+            sensor2.setGain(gain);
+        }
+
+        public boolean objectDetected(){
+            return (sensor1.getDistance(units) < threshold || sensor2.getDistance(units) < threshold);
+        }
+
+        public double[] getDistances(){
+            return new double[]{sensor1.getDistance(units), sensor2.getDistance(units)};
+        }
+    }
+
+    public static class REVHallEffectSensorClass {
+        private DigitalChannel sensor;
+
+        public void init(@NonNull OpMode opMode, String sensorName){
+            sensor = opMode.hardwareMap.get(DigitalChannel.class, sensorName);
+            sensor.setMode(DigitalChannel.Mode.INPUT);
+        }
+
+        public Boolean getTriggered(){
+            return !sensor.getState();
         }
     }
 }
