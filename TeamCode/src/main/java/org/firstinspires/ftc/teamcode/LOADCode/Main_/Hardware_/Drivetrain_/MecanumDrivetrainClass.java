@@ -61,9 +61,9 @@ public class MecanumDrivetrainClass {
      */
     public void pedroMecanumDrive(double forward, double strafe, double rotate, boolean robotCentric){
         follower.setTeleOpDrive(
-                -forward * speedMultiplier,
-                -strafe * speedMultiplier,
-                -rotate * speedMultiplier,
+                -forward,
+                -strafe,
+                -rotate,
                 robotCentric);
         follower.update();
     }
