@@ -32,179 +32,115 @@ package org.firstinspires.ftc.teamcode.LOADCode.Main_.Teleop_;
 import static org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.LoadHardwareClass.selectedAlliance;
 
 import com.bylazar.configurables.annotations.Configurable;
+import com.bylazar.telemetry.JoinedTelemetry;
 import com.bylazar.telemetry.PanelsTelemetry;
-import com.bylazar.telemetry.TelemetryManager;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.util.ElapsedTime;
 import com.skeletonarmy.marrow.TimerEx;
-import com.skeletonarmy.marrow.prompts.OptionPrompt;
-import com.skeletonarmy.marrow.prompts.Prompter;
 
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Intake;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Intake.intakeMode;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Intake.transferState;
-import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Turret;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Turret.flywheelState;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Turret.gatestate;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Drivetrain_.MecanumDrivetrainClass;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Drivetrain_.Pedro_Paths;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.LoadHardwareClass;
 
-
-// FIRST COMMENT FROM MY NEW COMPUTER =D
-// - ARI
-
 @Configurable
 @TeleOp(name="Teleop_Main_", group="TeleOp")
 public class Teleop_Main_ extends LinearOpMode {
+    private final JoinedTelemetry debug = new JoinedTelemetry(PanelsTelemetry.INSTANCE.getFtcTelemetry(), telemetry);
 
-    // Declare OpMode members.
-    private final ElapsedTime runtime = new ElapsedTime();
-    private final TelemetryManager panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
+    private final double stickDeadZones = 0.2;
 
-    // Variables for storing data for the second gamepad controls
-    public static double DylanStickDeadzones = 0.2;
-
-    public int shootingState = 0;
-    public boolean turretOn = true;
-    public TimerEx stateTimer = new TimerEx(1);
-    public double hoodOffset = 0;
+    private int shootingState = 0;
+    private final TimerEx stateTimer = new TimerEx(1);
+    private double hoodOffset = 0;
 
     // Create a new instance of our Robot class
-    LoadHardwareClass Robot = new LoadHardwareClass(this);
+    private final LoadHardwareClass Robot = new LoadHardwareClass(this);
     // Create a new Paths instance
-    Pedro_Paths Paths = new Pedro_Paths();
-    // Create a new instance of Prompter for selecting the alliance
-    Prompter prompter = null;
-    enum startPoses {
-        FAR,
-        NEAR
-    }
+    private final Pedro_Paths Paths = new Pedro_Paths();
 
-    // Contains the start Pose of our robot. This can be changed or saved from the autonomous period.
-    private Pose startPose = Paths.farStart;
+    // Controls mapping variables
+
+    private double drivetrain_drive;
+    private double drivetrain_strafe;
+    private double drivetrain_rotate;
+
+    private double drivetrain_speed_medium;
+    private double drivetrain_speed_slow;
+
+    private boolean drivetrain_reset_pose;
+
+    private float intake;
+
+    private boolean toggle_flywheel;
+    private boolean start_shooting;
+
+    private boolean hood_tweak_up;
+    private boolean hood_tweak_down;
+
+
 
     @Override
     public void runOpMode() {
 
-        // Create a new prompter for selecting alliance
-        prompter = new Prompter(this);
-        prompter.prompt("alliance", () -> {
-            if (selectedAlliance == null){
-                return new OptionPrompt<>("Select Alliance", LoadHardwareClass.Alliance.RED, LoadHardwareClass.Alliance.BLUE);
-            }else{
-                return null;
-            }
-        });
-        prompter.prompt("startPose", () -> {
-            if (MecanumDrivetrainClass.robotPose == null){
-                return new OptionPrompt<>("Select Start Pose",
-                        startPoses.FAR,
-                        startPoses.NEAR
-                        );
-            }else{
-                startPose = MecanumDrivetrainClass.robotPose;
-                return null;
-            }
-        });
-        prompter.onComplete(() -> {
-            if (selectedAlliance == null){
-                selectedAlliance = prompter.get("alliance");
-            }
-            telemetry.addData("Selection", "Complete");
-            telemetry.addData("Alliance", selectedAlliance);
-            if (MecanumDrivetrainClass.robotPose == null){
-                startPoses pose = prompter.get("startPose");
-                if (pose.equals(startPoses.FAR)) {
-                    startPose = Paths.autoMirror(Paths.farStart, selectedAlliance);
-                    telemetry.addData("Start Pose", "Far Start Pose");
-                } else if (pose.equals(startPoses.NEAR)) {
-                    startPose = Paths.autoMirror(Paths.nearStart, selectedAlliance);
-                    telemetry.addData("Start Pose", "Near Start Pose");
-                }
-            }else{
-                startPose = MecanumDrivetrainClass.robotPose;
-                telemetry.addData("Start Pose", "Ending Pose of Auto");
-            }
-            telemetry.update();
-        });
-
-        // Runs repeatedly while in init
-        while (opModeInInit()) {
-            prompter.run();
-        }
-
         // Wait for the game to start (driver presses START)
         waitForStart();
-        // Initialize all hardware of the robot
-        Robot.init(startPose);
-        runtime.reset();
+        // Initialize all hardware of the robot and build paths for auto movement
+        Robot.init(MecanumDrivetrainClass.robotPose);
         Paths.buildPaths(selectedAlliance, Robot.drivetrain.follower);
         Robot.drivetrain.startTeleOpDrive();
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
-            if (!Turret.zeroed){
-                while (!isStopRequested() && Robot.turret.zeroTurret()){
-                    sleep(0);
-                }
-            }
+            Run_Controls();
+            updateInputs();
 
-            Gamepad1();
-            Gamepad2();
-
-            Robot.turret.updatePIDs();
-
-            double flywheelPercentage = (int) Math.round(Robot.turret.getFlywheelRPM()/Robot.turret.getFlywheelCurrentMaxSpeed() *100);
-            telemetry.addData("Flywheel Percentage", flywheelPercentage+"%");
-            panelsTelemetry.addData("Flywheel Percentage", flywheelPercentage+"%");
-
-            telemetry.addData("SpeedMult", Robot.drivetrain.speedMultiplier);
-            telemetry.addLine();
-            //positional telemetry
-            telemetry.addData("X Position", Robot.drivetrain.follower.getPose().getX());
-            telemetry.addData("Y Position", Robot.drivetrain.follower.getPose().getY());
-            telemetry.addData("Heading", Math.toDegrees(Robot.drivetrain.follower.getPose().getHeading()));
-            telemetry.addData("Distance From Goal", Robot.drivetrain.distanceFromGoal());
-
-            telemetry.addLine();
-            // Turret-related Telemetry
-            panelsTelemetry.addData("Turret Target Angle", Robot.turret.rotation.target);
-            panelsTelemetry.addData("Turret Actual Angle", Robot.turret.rotation.getAngleAbsolute());
-            telemetry.addData("Turret Target Angle", Robot.turret.rotation.target);
-            telemetry.addData("Turret Actual Angle", Robot.turret.rotation.getAngleAbsolute());
-            telemetry.addData("Turret Hood Angle", Robot.turret.getHood());
-
-            telemetry.addLine();
-            panelsTelemetry.addData("Flywheel Target Speed", Robot.turret.flywheel.target);
-            panelsTelemetry.addData("Flywheel Actual Speed", Robot.turret.getFlywheelRPM());
-            panelsTelemetry.addData("Flywheel Power", Robot.turret.flywheel.getPower());
-            telemetry.addData("Flywheel Target Speed", Robot.turret.flywheel.target);
-            telemetry.addData("Flywheel Actual Speed", Robot.turret.getFlywheelRPM());
-            telemetry.addData("Flywheel State", Robot.turret.getFlywheelRPM());
-
-            // Intake-related Telemetry
-            telemetry.addLine();
-            telemetry.addData("Intake Mode", Robot.intake.getMode());
-
-            // Color Sensor Telemetry
-            telemetry.addLine();
-            telemetry.addData("Upper Sensor", Robot.intake.getTopSensorState());
-            telemetry.addData("Lower Sensor", Robot.intake.getBottomSensorState());
-
-            // System-related Telemetry
-            telemetry.addLine();
-            telemetry.addData("Status", "Run Time: " + runtime);
-            telemetry.addData("Version: ", "12/12/25");
-            telemetry.update();
-            panelsTelemetry.update();
+            debug.addLine("DRIVETRAIN DATA");
+            debug.addData("Speed Multiplier", Robot.drivetrain.speedMultiplier);
+            debug.addData("X Position", Robot.drivetrain.follower.getPose().getX());
+            debug.addData("Y Position", Robot.drivetrain.follower.getPose().getY());
+            debug.addData("Heading", Math.toDegrees(Robot.drivetrain.follower.getPose().getHeading()));
+            debug.addData("Distance From Goal", Robot.drivetrain.distanceFromGoal());
+            debug.addLine("TURRET ROTATION DATA");
+            debug.addData("Target Angle", Robot.turret.rotation.target);
+            debug.addData("Actual Angle", Robot.turret.rotation.getAngleAbsolute());
+            debug.addLine("HOOD DATA");
+            debug.addData("Servo Angle", Robot.turret.getHood());
+            debug.addData("Current Offset", hoodOffset);
+            debug.addLine("FLYWHEEL DATA");
+            debug.addData("Speed Percent", Robot.turret.getFlywheelPercent()+"%");
+            debug.addData("Target Speed", Robot.turret.flywheel.target);
+            debug.addData("Actual Speed", Robot.turret.getFlywheelRPM());
+            debug.addData("Motor Set Power", Robot.turret.flywheel.getPower());
+            debug.addLine("INTAKE DATA");
+            debug.addData("Current Mode", Robot.intake.getMode());
+            debug.addData("Upper Sensor", Robot.intake.getTopSensorState());
+            debug.addData("Lower Sensor", Robot.intake.getBottomSensorState());
+            debug.update();
         }
+    }
+    
+    public void updateInputs(){
+        drivetrain_drive =          gamepad1.left_stick_y;
+        drivetrain_strafe =         gamepad1.left_stick_x;
+        drivetrain_rotate =         gamepad1.right_stick_x;
+        drivetrain_speed_medium =   gamepad1.left_trigger;
+        drivetrain_speed_slow =     gamepad1.right_trigger;
+        drivetrain_reset_pose =     gamepad1.guide;
+        intake =                    gamepad1.right_stick_y;
+        toggle_flywheel =           gamepad1.yWasPressed();
+        start_shooting =            gamepad1.bWasPressed();
+        hood_tweak_up =             gamepad1.dpadUpWasPressed();
+        hood_tweak_down =           gamepad1.dpadDownWasPressed();
     }
 
     /**
-     * <h1>Gamepad 1 Controls (Ari's Pick V1)</h1>
+     * <h1>Gamepad 1 Controls</h1>
      * <ul>
      *     <li><b>Analog Inputs</b><ul>
      *         <li>Left Stick:<ul>
@@ -243,173 +179,166 @@ public class Teleop_Main_ extends LinearOpMode {
      *     </ul>
      * </ul>
      */
-    public void Gamepad1() {
+    private void Run_Controls() {
 
-        if (gamepad1.left_trigger >= 0.5 && gamepad1.right_trigger >= 0.5) {
-            Robot.drivetrain.speedMultiplier = 0.66;
-        } else if (gamepad1.left_trigger >= 0.5) {
-            Robot.drivetrain.speedMultiplier = 0.33;
-        } else if (gamepad1.right_trigger >= 0.5) {
+        // Update Turret Aimbot
+        Robot.turret.updateAimbot(true, true, hoodOffset);
+        // Update Flywheel Controls
+        Robot.turret.updateFlywheel();
+
+        // Run the manual hood controls constantly, so that it's angle
+        // can be tweaked even while the state machine is running.
+        manualHoodControls();
+        drivetrainControls();
+        robotPoseResetting();
+
+        // Activate the shooting state machine
+        if (startShootingStateMachine()) {
+            shootingState++;
+        }
+        switch (shootingState) {
+            case 0:
+                // These controls are only on when
+                manualFlywheelControls();
+                manualIntakeControls();
+                debug.addData("Shooting State", "OFF");
+                return;
+            case 1:
+                shootingStateMachine1();
+                debug.addData("Shooting State", "FIRING BEGAN");
+                return;
+            case 2:
+                shootingStateMachine2();
+                debug.addData("Shooting State", "FIRING FINISHED");
+                return;
+            case 3:
+                shootingStateMachine3();
+                debug.addData("Shooting State", "RESETTING");
+        }
+    }
+
+    // These functions contain the manual controls for the robot subsystems.
+    /**
+     * This function contains the manual intake controls, for use when the shooting state machine is not in effect.
+     */
+    private void manualIntakeControls (){
+        // Intake Controls
+        if (Math.abs(intake) >= stickDeadZones){
+            Robot.intake.setMode(intakeMode.INTAKING);
+        }else{
+            Robot.intake.setMode(intakeMode.IDLE);
+        }
+    }
+    /**
+     * This function runs all the controls for the flywheel, both the manual toggling,
+     * and automatic activation based on the number of artifacts in the robot.
+     */
+    private void manualFlywheelControls (){
+        // Flywheel Controls
+        if (toggle_flywheel) {
+            if (Robot.turret.flywheelMode == flywheelState.OFF) {
+                Robot.turret.setFlywheelState(flywheelState.ON);
+            } else {
+                Robot.turret.setFlywheelState(flywheelState.OFF);
+            }
+        }
+        // This turns on the flywheel if it detects two balls within the robot
+        if (Robot.intake.getTopSensorState() && Robot.intake.getBottomSensorState()){
+            Robot.turret.setFlywheelState(flywheelState.ON);
+        }
+    }
+    /**
+     * This function contains the controls to manually
+     * tweak the hood angle to compensate for any hardware errors.
+     */
+    private void manualHoodControls (){
+        // Hood Controls
+        if (hood_tweak_up){
+            hoodOffset += 10;
+        }else if (hood_tweak_down){
+            hoodOffset -= 10;
+        }
+    }
+    /**
+     * This function contains the controls for the robot's drivetrain, including
+     * the speed modifier controls for more precision when driving.
+     */
+    private void drivetrainControls(){
+        // Adjusts the speed of the drivetrain based on inputs
+        if (drivetrain_speed_slow >= stickDeadZones) {
+            Robot.drivetrain.speedMultiplier -= 0.33;
+        }else if (drivetrain_speed_medium >= stickDeadZones) {
+            Robot.drivetrain.speedMultiplier -= 0.66;
+        }else{
             Robot.drivetrain.speedMultiplier = 1;
-        } else {
-            Robot.drivetrain.speedMultiplier = 0.66;
         }
 
-        if (gamepad1.bWasPressed()){
+        // Applies a conditional multiplier to the turning to allow driving while turning
+        double turn = drivetrain_rotate;
+        if (!(drivetrain_drive < stickDeadZones && drivetrain_strafe < stickDeadZones)){
+            turn = turn/2;
+        }
+
+        // Sends the inputs to the
+        Robot.drivetrain.pedroMecanumDrive(
+                drivetrain_drive,
+                drivetrain_strafe,
+                turn,
+                true
+        );
+    }
+    /**
+     * Handles the resetting of the robot's pose on the field in case of odometry drift.
+     */
+    private void robotPoseResetting(){
+        if (drivetrain_reset_pose){
             if (selectedAlliance == LoadHardwareClass.Alliance.RED){
                 Robot.drivetrain.follower.setPose(new Pose(8, 8, Math.toRadians(90)));
             }else if (selectedAlliance == LoadHardwareClass.Alliance.BLUE){
                 Robot.drivetrain.follower.setPose(new Pose(136, 8, Math.toRadians(90)));
             }
         }
-
-        double turnMult = 2;
-//        if (gamepad1.left_stick_y == 0 && gamepad1.left_stick_x == 0){
-//            turnMult = 1;
-//        }
-        Robot.drivetrain.pedroMecanumDrive(
-                gamepad1.left_stick_y,
-                gamepad1.left_stick_x,
-                gamepad1.right_stick_x / turnMult,
-                true
-        );
     }
-
-    /**
-     * <h1>Gamepad 2 Controls (Dylan's Pick V1)</h1>
-     * <ul>
-     *     <li><b>Analog Inputs</b><ul>
-     *         <li>Left Stick:<ul>
-     *             <li>X: <code>N/A</code></li>
-     *             <li>Y: <code>Intake IN</code></li>
-     *         </ul></li>
-     *         <li>Right Stick:<ul>
-     *             <li>X: <code>Belt IN</code></li>
-     *             <li>Y: <code>N/A</code></li>
-     *         </ul></li>
-     *         <li>Left Trigger: <code>N/A</code></li>
-     *         <li>Right Trigger: <code>N/A</code></li>
-     *     </ul></li>
-     *
-     *     <li><b>Button Inputs</b></li><ul>
-     *         <li>Letter Buttons:<ul>
-     *             <li>A: <code>Toggle Turret Autoaim (Default on, locks to forward when off</code></li>
-     *             <li>B: <code>Shoot</code></li>
-     *             <li>X: <code>N/A</code></li>
-     *             <li>Y: <code>Flywheel Toggle</code></li>
-     *         </ul></li>
-     *         <li>Letter Buttons:<ul>
-     *             <li>DpadUp: <code>Hood Up (Does not work currently)</code></code></li>
-     *             <li>DpadDown: <code>Hood Down (Does not work currently)</code></li>
-     *             <li>DpadLeft: <code>Sets hood to ideal angle for far zone shooting</code></li>
-     *             <li>DpadRight: <code>N/A</code></li>
-     *         </ul></li>
-     *         <li>Bumpers:<ul>
-     *             <li>Left Bumper: <code>Transfer Belt Out</code></li>
-     *             <li>Right Bumper: <code>Transfer Belt In</code></li>
-     *         </ul></li>
-     *         <li>Stick Buttons:<ul>
-     *             <li>Left Stick Button: <code>N/A</code></li>
-     *             <li>Right Stick Button: <code>N/A</code></li>
-     *         </ul></li>
-     *         <li>Other Buttons:<ul>
-     *             <li>Back Button: <code>Intake Reverse</code></li>
-     *         </ul></li>
-     *     </ul>
-     * </ul>
-     */
-    public void Gamepad2() {
-
-        // Turret Aimbot
-        if (gamepad2.aWasPressed()){
-            turretOn = !turretOn;
+    // These functions contain the logic for each state of the shooting state machine
+    private void shootingStateMachine1 (){
+        if (Robot.intake.getMode() == intakeMode.OFF){
+            stateTimer.restart();
+            stateTimer.start();
         }
-        Robot.turret.updateAimbot(turretOn, true, hoodOffset);
-
-        //Intake Controls (Left Stick Y)
-        if (shootingState == 0) {
-            if (Math.abs(gamepad2.left_stick_y) >= DylanStickDeadzones &&
-                    Math.abs(gamepad2.right_stick_y) >= DylanStickDeadzones) {
-                Robot.intake.setMode(intakeMode.INTAKING);
-            }else if (Math.abs(gamepad2.left_stick_y) >= DylanStickDeadzones &&
-                    Math.abs(gamepad2.right_stick_y) < DylanStickDeadzones) {
-                Robot.intake.setMode(intakeMode.NO_BELT);
-            }else if (Math.abs(gamepad2.left_stick_y) < DylanStickDeadzones &&
-                    Math.abs(gamepad2.right_stick_y) >= DylanStickDeadzones) {
-                Robot.intake.setMode(intakeMode.SHOOTING);
-            }else if (gamepad2.back){
-                Robot.intake.setMode(intakeMode.REVERSING);
-            }else{ // OFF
-                Robot.intake.setMode(intakeMode.OFF);
-            }
-
-            /* TODO Uncomment once autobelt control is finished
-            if (Math.abs(gamepad2.left_stick_y) >= DylanStickDeadzones) {
-                Robot.intake.setMode(intakeMode.INTAKING);
-            }else{ // OFF
-                Robot.intake.setMode(intakeMode.OFF);
-            }
-             */
-
-            //Flywheel Toggle Control (Y Button)
-            if (gamepad2.yWasPressed()) {
-                if (Robot.turret.flywheelMode == flywheelState.OFF) {
-                    Robot.turret.setFlywheelState(flywheelState.ON);
-                } else {
-                    Robot.turret.setFlywheelState(flywheelState.OFF);
-                }
-            }
-        }
-        Robot.turret.updateFlywheel();
-
-        // Hood Controls
-        if (gamepad2.dpadUpWasPressed()){
-            hoodOffset += 10;
-        }else if (gamepad2.dpadDownWasPressed()){
-            hoodOffset -= 10;
-        }
-
-
-        //Shoot (B Button Press)
-        // Increment the shooting state
-        if (gamepad2.bWasPressed() && shootingState < 1 && Robot.turret.getFlywheelRPM() > Robot.turret.getFlywheelCurrentMaxSpeed()-100) {
+        Robot.intake.setMode(intakeMode.INTAKING);
+        Robot.turret.setGateState(gatestate.OPEN);
+        if (stateTimer.isDone() && Robot.intake.getTopSensorState() && !Robot.intake.getBottomSensorState()){
             shootingState++;
         }
-        switch (shootingState) {
-            case 0:
-                telemetry.addData("Shooting State", "OFF");
-                return;
-            case 1:
-                if (Robot.intake.getMode() == intakeMode.OFF){
-                    stateTimer.restart();
-                    stateTimer.start();
-                }
-                Robot.intake.setMode(intakeMode.INTAKING);
-                Robot.turret.setGateState(gatestate.OPEN);
-                telemetry.addData("Shooting State", "STARTED");
-                if (stateTimer.isDone() && Robot.intake.getTopSensorState() && !Robot.intake.getBottomSensorState()){
-                    shootingState++;
-                }
-                return;
-            case 2:
-                if (Robot.intake.getMode() == intakeMode.INTAKING){
-                    stateTimer.restart();
-                    stateTimer.start();
-                }
-                Robot.intake.setMode(Intake.intakeMode.SHOOTING);
-                Robot.intake.setTransfer(transferState.UP);
-                telemetry.addData("Shooting State", "TRANSFERRED");
-                if (stateTimer.isDone()) {
-                    shootingState++;
-                }
-                return;
-            case 3:
-                Robot.turret.setFlywheelState(flywheelState.OFF);
-                Robot.turret.setGateState(gatestate.CLOSED);
-                Robot.intake.setMode(intakeMode.OFF);
-                Robot.intake.setTransfer(transferState.DOWN);
-                telemetry.addData("Shooting State", "RESET");
-                shootingState = 0;
+    }
+    private void shootingStateMachine2 (){
+        if (Robot.intake.getMode() == intakeMode.INTAKING){
+            stateTimer.restart();
+            stateTimer.start();
         }
+        Robot.intake.setMode(Intake.intakeMode.SHOOTING);
+        Robot.intake.setTransfer(transferState.UP);
+
+        if (stateTimer.isDone()) {
+            shootingState++;
+        }
+    }
+    private void shootingStateMachine3 (){
+        Robot.turret.setFlywheelState(flywheelState.OFF);
+        Robot.turret.setGateState(gatestate.CLOSED);
+        Robot.intake.setMode(intakeMode.OFF);
+        Robot.intake.setTransfer(transferState.DOWN);
+        shootingState = 0;
+    }
+    /**
+     * Returns whether or not to begin the shooting state machine,
+     * based on gamepad inputs and the current flywheel speed.
+     */
+    private boolean startShootingStateMachine(){
+        return (
+                start_shooting &&
+                shootingState == 1 &&
+                Robot.turret.isFlywheelReadyToShoot()
+        );
     }
 }

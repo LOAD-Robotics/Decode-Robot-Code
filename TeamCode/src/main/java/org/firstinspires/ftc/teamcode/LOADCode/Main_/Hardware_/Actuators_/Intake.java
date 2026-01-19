@@ -19,7 +19,7 @@ public class Intake {
     public enum intakeMode {
         INTAKING,
         SHOOTING,
-        NO_BELT,
+        IDLE,
         REVERSING,
         OFF
     }
@@ -64,9 +64,9 @@ public class Intake {
      */
     public void setMode(intakeMode direction){
         if (direction == intakeMode.INTAKING){
-            //if (!(getTopSensorState() && getBottomSensorState())){
+            if (!(getTopSensorState() && getBottomSensorState())){
                 belt.setPower(1);
-            //}
+            }
             intake.setPower(1);
         }else if (direction == intakeMode.SHOOTING){
             intake.setPower(0);
@@ -74,8 +74,8 @@ public class Intake {
         }else if (direction == intakeMode.REVERSING){
             intake.setPower(-1);
             belt.setPower(-1);
-        }else if (direction == intakeMode.NO_BELT){
-            intake.setPower(1);
+        }else if (direction == intakeMode.IDLE){
+            intake.setPower(0.1);
             belt.setPower(0);
         }else{
             intake.setPower(0);
