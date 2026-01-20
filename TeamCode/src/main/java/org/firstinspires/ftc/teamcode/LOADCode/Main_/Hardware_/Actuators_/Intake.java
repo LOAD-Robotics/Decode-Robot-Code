@@ -20,7 +20,7 @@ public class Intake {
         AUTO_INTAKING,
         INTAKING,
         SHOOTING,
-        IDLE,
+        NO_BELT,
         REVERSING,
         OFF
     }
@@ -78,8 +78,8 @@ public class Intake {
         }else if (direction == intakeMode.REVERSING){
             intake.setPower(-1);
             belt.setPower(-1);
-        }else if (direction == intakeMode.IDLE){
-            intake.setPower(0.1);
+        }else if (direction == intakeMode.NO_BELT){
+            intake.setPower(1);
             belt.setPower(0);
         }else{
             intake.setPower(0);
