@@ -46,12 +46,11 @@ import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.LoadHardwareClass
 public class Teleop_Tuning_ extends LinearOpMode {
 
     // Declare OpMode members.
-    private ElapsedTime runtime = new ElapsedTime();
-    private ElapsedTime loopTimer = new ElapsedTime();
-    private TelemetryManager panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
+    private final ElapsedTime runtime = new ElapsedTime();
+    private final ElapsedTime loopTimer = new ElapsedTime();
+    private final TelemetryManager panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
 
     // Panels variables
-    public static double hoodTargetPos = 0;
     public static int turretTurnIncrement = 2;
     int turretTurnMultiplier = 1;
     int turretTurnAngle = 0;
@@ -111,7 +110,7 @@ public class Teleop_Tuning_ extends LinearOpMode {
                 }
 
             }else if (gamepad1.b){
-                Robot.turret.updateAimbotWithVelocity();
+                Robot.turret.updateAimbotWithVelocity(true, true, 0);
             }else if (gamepad1.a){
                 Robot.turret.rotation.setAngle(0);
             }else{
@@ -168,7 +167,7 @@ public class Teleop_Tuning_ extends LinearOpMode {
             // System-related Telemetry
             telemetry.addLine();
             telemetry.addLine("SYSTEM DATA");
-            telemetry.addData("Status", "Run Time: " + runtime.toString());
+            telemetry.addData("Status", "Run Time: " + runtime);
             telemetry.addData("Loop Time", loopTimer.toString());
             panelsTelemetry.addData("Loop Time", loopTimer.toString());
             telemetry.addData("Version: ", "12/26/25");

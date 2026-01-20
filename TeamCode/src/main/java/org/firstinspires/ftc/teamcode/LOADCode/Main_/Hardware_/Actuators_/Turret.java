@@ -158,6 +158,7 @@ public class Turret {
      *             Otherwise, sets the hood to the highest launch angle.
      */
     public void updateAimbot(boolean turret, boolean hood, double hoodOffset){
+        updatePIDs();
         if (turret){
             // Set the turret rotation
             if (LoadHardwareClass.selectedAlliance == LoadHardwareClass.Alliance.RED){
@@ -169,26 +170,36 @@ public class Turret {
             rotation.setAngle(90);
         }
         if (hood){
-            // Set the hood angle
-            Pose goalPose = new Pose(0,144,0);
-            if (LoadHardwareClass.selectedAlliance == LoadHardwareClass.Alliance.RED) {goalPose = new Pose(144, 144, 0);}
-            setHood(hoodLUT.get(Robot.drivetrain.follower.getPose().distanceFrom(goalPose)) + hoodOffset);
+            updateHoodAimbot(hoodOffset);
         }else{
             setHood(0);
         }
     }
     // FIXME does not work currently
-    public void updateAimbotWithVelocity(){
-        // Set the turret rotation
-        if (LoadHardwareClass.selectedAlliance == LoadHardwareClass.Alliance.RED){
-            rotation.setAngle(Math.max(0, calcLocalizer()+redOffset)%360, -Math.toDegrees(Robot.drivetrain.follower.getAngularVelocity()));
+    public void updateAimbotWithVelocity(boolean turret, boolean hood, double hoodOffset){
+        updatePIDs();
+        if (turret){
+            // Set the turret rotation
+            if (LoadHardwareClass.selectedAlliance == LoadHardwareClass.Alliance.RED){
+                rotation.setAngle(Math.max(0, calcLocalizer()+redOffset)%360, -Math.toDegrees(Robot.drivetrain.follower.getAngularVelocity()));
+            }else{
+                rotation.setAngle(Math.max(0, calcLocalizer()+blueOffset)%360, -Math.toDegrees(Robot.drivetrain.follower.getAngularVelocity()));
+            }
         }else{
-            rotation.setAngle(Math.max(0, calcLocalizer()+blueOffset)%360, -Math.toDegrees(Robot.drivetrain.follower.getAngularVelocity()));
+            rotation.setAngle(90);
         }
+        if (hood){
+            updateHoodAimbot(hoodOffset);
+        }else{
+            setHood(0);
+        }
+    }
+
+    private void updateHoodAimbot(double hoodOffset){
         // Set the hood angle
-        Pose goalPose = new Pose(0-posOffset,144+posOffset,0);
-        if (LoadHardwareClass.selectedAlliance == LoadHardwareClass.Alliance.RED) {goalPose = new Pose(144+posOffset, 144+posOffset, 0);}
-        //setHood(hoodLUT.get(Robot.drivetrain.follower.getPose().distanceFrom(goalPose)));
+        Pose goalPose = new Pose(0,144,0);
+        if (LoadHardwareClass.selectedAlliance == LoadHardwareClass.Alliance.RED) {goalPose = new Pose(144, 144, 0);}
+        setHood(hoodLUT.get(Robot.drivetrain.follower.getPose().distanceFrom(goalPose)) + hoodOffset);
     }
 
     /**
@@ -216,22 +227,6 @@ public class Turret {
      */
     public double getHood(){
         return hood.getAngle() * 360 * 5;
-    }
-
-    /**
-     * Gets the current state of the turret gate.
-     * Outputs one of the following modes.
-     * <ul>
-     *     <li><code>gatestate.OPEN</code></li>
-     *     <li><code>gatestate.CLOSED</code></li>
-     * </ul>
-     */
-    public gatestate getGate(){
-        if (gate.getAngle() == 0.47){
-            return gatestate.OPEN;
-        } else {
-            return gatestate.CLOSED;
-        }
     }
 
     /**
@@ -269,6 +264,13 @@ public class Turret {
      */
     public double getFlywheelRPM(){
         return flywheel.getRPM();
+    }
+    public int getFlywheelPercent(){
+        return (int) Math.round(Robot.turret.getFlywheelRPM()/ Robot.turret.getFlywheelCurrentMaxSpeed() *100);
+    }
+
+    public boolean isFlywheelReadyToShoot(){
+        return getFlywheelRPM() > getFlywheelCurrentMaxSpeed() - 100;
     }
 
     /**
