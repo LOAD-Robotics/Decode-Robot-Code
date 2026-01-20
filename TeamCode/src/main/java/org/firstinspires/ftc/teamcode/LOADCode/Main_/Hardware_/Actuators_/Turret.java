@@ -23,7 +23,7 @@ public class Turret {
     private final Devices.DcMotorExClass flywheel2 = new Devices.DcMotorExClass();
     private final Devices.ServoClass hood = new Devices.ServoClass();
     private final Devices.ServoClass gate = new Devices.ServoClass();
-    public final Devices.REVHallEffectSensorClass hall = new Devices.REVHallEffectSensorClass(); // Offset 20 degrees from directly forwards
+    public final Devices.REVHallEffectSensorClass hall = new Devices.REVHallEffectSensorClass();
 
     // Turret PID coefficients
     public static PIDCoefficients turretCoefficients = new PIDCoefficients(0.02, 0.00000000005, 0.004); // 223RPM Motor
@@ -131,9 +131,6 @@ public class Turret {
 
         // Generate Lookup Table & Initialize servo position
         hoodLUT.createLUT();
-        Pose goalPose = new Pose(0,144,0);
-        if (LoadHardwareClass.selectedAlliance == LoadHardwareClass.Alliance.RED) {goalPose = new Pose(144, 144, 0);}
-        //setHood(hoodLUT.get(Robot.drivetrain.follower.getPose().distanceFrom(goalPose)));
         setHood(0);
     }
 
@@ -297,9 +294,6 @@ public class Turret {
                 zeroed = true;
             }
         }
-        opMode.telemetry.addLine("ZEROING TURRET");
-        opMode.telemetry.addData("Turret Power", rotation.getPower());
-        opMode.telemetry.update();
         return !zeroed;
     }
 

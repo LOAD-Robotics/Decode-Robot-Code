@@ -176,6 +176,7 @@ public class Teleop_Main_ extends LinearOpMode {
             telemetry.addData("Turret Target Angle", Robot.turret.rotation.target);
             telemetry.addData("Turret Actual Angle", Robot.turret.rotation.getAngleAbsolute());
             telemetry.addData("Turret Hood Angle", Robot.turret.getHood());
+            telemetry.addData("Hall Effect Triggered", Robot.turret.hall.getTriggered());
 
             telemetry.addLine();
             panelsTelemetry.addData("Flywheel Target Speed", Robot.turret.flywheel.target);
@@ -343,9 +344,9 @@ public class Teleop_Main_ extends LinearOpMode {
                 Robot.intake.setMode(intakeMode.OFF);
             }
 
-            /* TODO Uncomment once autobelt control is finished
+            /* TODO Uncomment once auto belt control is finished
             if (Math.abs(gamepad2.left_stick_y) >= DylanStickDeadzones) {
-                Robot.intake.setMode(intakeMode.INTAKING);
+                Robot.intake.setMode(intakeMode.AUTO_INTAKING);
             }else{ // OFF
                 Robot.intake.setMode(intakeMode.OFF);
             }
