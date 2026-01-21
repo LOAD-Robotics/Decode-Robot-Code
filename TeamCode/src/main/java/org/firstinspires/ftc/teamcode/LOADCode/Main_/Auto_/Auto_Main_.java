@@ -18,7 +18,6 @@ import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Drivetrain_.Pedro
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.LoadHardwareClass;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-import dev.nextftc.core.commands.delays.Delay;
 import dev.nextftc.core.commands.groups.SequentialGroup;
 import dev.nextftc.core.commands.utility.InstantCommand;
 import dev.nextftc.extensions.pedro.PedroComponent;
@@ -60,7 +59,8 @@ public class Auto_Main_ extends NextFTCOpMode {
                 new OptionPrompt<>("Select Auto",
                         new Near_12Ball(),
                         new Near_9Ball(),
-                        new Leave_Far_Generic()
+                        new Far_9Ball(),
+                        new Far_6Ball()
                         //new test_Auto(),
                         //new Complex_Test_Auto()
                 ));
@@ -142,7 +142,14 @@ public class Auto_Main_ extends NextFTCOpMode {
 //            startPose = startingPose;
 //        }
 
+        /**
+         * @return The start pose of the robot for this auto.
+         */
         abstract Pose getStartPose();
+
+        /**
+         * @return A boolean indicating whether the turret is enabled.
+         */
         abstract boolean getTurretEnabled();
 
         /** Override this to schedule the auto command*/
@@ -153,9 +160,9 @@ public class Auto_Main_ extends NextFTCOpMode {
         public abstract String toString();
     }
 
-    private class Leave_Far_Generic extends Auto{
+    private class Far_6Ball extends Auto{
         public Pose startPose = paths.farStart;
-        public boolean turretEnabled = false;
+        public boolean turretEnabled = true;
 
         @Override
         public Pose getStartPose(){
@@ -169,17 +176,57 @@ public class Auto_Main_ extends NextFTCOpMode {
         @Override
         public void runAuto(){
             new SequentialGroup(
-                    Commands.runPath(paths.farStart_to_NoTurret_FarShoot, true, 1),
+                    Commands.runPath(paths.farStart_to_farShoot, true, 1),
                     Commands.shootBalls(),
+                    Commands.setFlywheelState(Turret.flywheelState.ON),
                     Commands.setIntakeMode(Intake.intakeMode.INTAKING),
                     Commands.runPath(paths.farShoot_noTurret_to_farPreload, true, 1),
-                    Commands.setIntakeMode(Intake.intakeMode.OFF)
+                    Commands.runPath(paths.farPreload_to_farShoot, true, 1),
+                    Commands.shootBalls(),
+                    Commands.runPath(paths.farShoot_to_farLeave, true, 1)
             ).schedule();
         }
 
         @NonNull
         @Override
-        public String toString(){return "Far Zone No Turret Generic";}
+        public String toString(){return "Far Zone 6 Ball";}
+    }
+
+    private class Far_9Ball extends Auto{
+        public Pose startPose = paths.farStart;
+        public boolean turretEnabled = true;
+
+        @Override
+        public Pose getStartPose(){
+            return startPose;
+        }
+        @Override
+        public boolean getTurretEnabled(){
+            return turretEnabled;
+        }
+
+        @Override
+        public void runAuto(){
+            new SequentialGroup(
+                    Commands.runPath(paths.farStart_to_farShoot, true, 1),
+                    Commands.shootBalls(),
+                    Commands.setFlywheelState(Turret.flywheelState.ON),
+                    Commands.setIntakeMode(Intake.intakeMode.INTAKING),
+                    Commands.runPath(paths.farShoot_to_farPreload, true, 1),
+                    Commands.runPath(paths.farPreload_to_farShoot, true, 1),
+                    Commands.shootBalls(),
+                    Commands.setFlywheelState(Turret.flywheelState.ON),
+                    Commands.setIntakeMode(Intake.intakeMode.INTAKING),
+                    Commands.runPath(paths.farShoot_to_midPreload, true, 1),
+                    Commands.runPath(paths.midPreload_to_farShoot, true, 1),
+                    Commands.shootBalls(),
+                    Commands.runPath(paths.farShoot_to_farLeave, true, 1)
+            ).schedule();
+        }
+
+        @NonNull
+        @Override
+        public String toString(){return "Far Zone 9 Ball";}
     }
 
     private class Near_9Ball extends Auto{
@@ -218,7 +265,7 @@ public class Auto_Main_ extends NextFTCOpMode {
 
         @NonNull
         @Override
-        public String toString(){return "Near Zone 9 Ball Auto";}
+        public String toString(){return "Near Zone 9 Ball";}
     }
 
     private class Near_12Ball extends Auto{
@@ -262,49 +309,7 @@ public class Auto_Main_ extends NextFTCOpMode {
 
         @NonNull
         @Override
-        public String toString(){return "Near Zone 12 Ball Auto";}
-    }
-
-    /**
-     * This auto starts at the far zone
-     */
-    private class Complex_Test_Auto extends Auto{
-        public Pose startPose = paths.farStart;
-        public boolean turretEnabled = true;
-
-        @Override
-        public Pose getStartPose(){
-            return startPose;
-        }
-        @Override
-        public boolean getTurretEnabled(){
-            return turretEnabled;
-        }
-
-        @Override
-        void runAuto() {
-            new SequentialGroup(
-                    new Delay(1),
-                    //Commands.shootBalls(),
-                    Commands.setIntakeMode(Intake.intakeMode.INTAKING),
-                    Commands.runPath(paths.farStart_to_farPreload, true, 1),
-                    Commands.setIntakeMode(Intake.intakeMode.OFF),
-                    Commands.runPath(paths.farPreload_to_farShoot, true, 1),
-                    //Commands.shootBalls(),
-                    Commands.setIntakeMode(Intake.intakeMode.INTAKING),
-                    Commands.runPath(paths.farStart_to_midPreload, true, 1),
-                    Commands.setIntakeMode(Intake.intakeMode.OFF),
-                    Commands.runPath(paths.midPreload_to_farShoot, true, 1),
-                    //Commands.shootBalls(),
-                    Commands.runPath(paths.farShoot_to_farLeave, true, 1)
-            ).schedule();
-        }
-
-        @NonNull
-        @Override
-        public String toString() {
-            return "Complex Test Auto";
-        }
+        public String toString(){return "Near Zone 12 Ball";}
     }
 
     private class test_Auto extends Auto{

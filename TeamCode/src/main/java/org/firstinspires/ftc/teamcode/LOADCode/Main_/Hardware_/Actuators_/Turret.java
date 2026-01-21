@@ -26,7 +26,7 @@ public class Turret {
     public final Devices.REVHallEffectSensorClass hall = new Devices.REVHallEffectSensorClass(); // Offset 20 degrees from directly forwards
 
     // Turret PID coefficients
-    public static PIDCoefficients turretCoefficients = new PIDCoefficients(0.02, 0.00000000005, 0.004); // 223RPM Motor
+    public static PIDCoefficients turretCoefficients = new PIDCoefficients(0.07, 0.00000000001, 0.003); // 223RPM Motor
 
     // Flywheel PID coefficients for various speeds
     //public static PIDCoefficients flywheelCoefficients = new PIDCoefficients(0.0002, 0, 0); // 4500 RPM
@@ -78,7 +78,8 @@ public class Turret {
     PolygonZone robotZone = new PolygonZone(15, 15);
 
     // The variable to store the InterpLUT table for turret hood aimbot
-    public Utils_.InterpLUT hoodLUT = new Utils_.InterpLUT();
+    public Utils_.InterpLUT hoodLUTnear = new Utils_.InterpLUT();
+    public Utils_.InterpLUT hoodLUTfar = new Utils_.InterpLUT();
 
     public void init(OpMode opmode, LoadHardwareClass robot){
         // Store important objects in their respective variables
@@ -118,22 +119,30 @@ public class Turret {
         flywheel2.setFFCoefficients(actualFlywheelFFCoefficients);
 
         // TODO Build hood InterpLUT for autoaim
+        // Safety points for LUTs
+        hoodLUTnear.add(0, 0);
+        hoodLUTfar.add(0, 0);
+
         // Near zone measurements
-        hoodLUT.add(0, 0);
-        hoodLUT.add(53.5,108);
-        hoodLUT.add(71,168);
-        hoodLUT.add(77, 181);
-        hoodLUT.add(88,190);
-        hoodLUT.add(94.5,190);
+        hoodLUTnear.add(0, 0);
+        hoodLUTnear.add(53.5,108);
+        hoodLUTnear.add(71,168);
+        hoodLUTnear.add(77, 181);
+        hoodLUTnear.add(88,185);
+        hoodLUTnear.add(94.5,185);
+        hoodLUTnear.add(96, 180);
+
         // Far zone measurements
-        hoodLUT.add(103, 200);
-        hoodLUT.add(204, 200);
+        hoodLUTfar.add(103, 200);
+        hoodLUTfar.add(204, 200);
+
+        // Safety points for LUTs
+        hoodLUTnear.add(300, 200);
+        hoodLUTfar.add(300, 200);
 
         // Generate Lookup Table & Initialize servo position
-        hoodLUT.createLUT();
-        Pose goalPose = new Pose(0,144,0);
-        if (LoadHardwareClass.selectedAlliance == LoadHardwareClass.Alliance.RED) {goalPose = new Pose(144, 144, 0);}
-        //setHood(hoodLUT.get(Robot.drivetrain.follower.getPose().distanceFrom(goalPose)));
+        hoodLUTnear.createLUT();
+        hoodLUTfar.createLUT();
         setHood(0);
     }
 
@@ -161,6 +170,10 @@ public class Turret {
      *             Otherwise, sets the hood to the highest launch angle.
      */
     public void updateAimbot(boolean turret, boolean hood, double hoodOffset){
+
+        robotZone.setPosition(Robot.drivetrain.follower.getPose().getX(), Robot.drivetrain.follower.getPose().getY());
+        robotZone.setRotation(Robot.drivetrain.follower.getPose().getHeading());
+
         if (turret){
             // Set the turret rotation
             if (LoadHardwareClass.selectedAlliance == LoadHardwareClass.Alliance.RED){
@@ -175,7 +188,12 @@ public class Turret {
             // Set the hood angle
             Pose goalPose = new Pose(0,144,0);
             if (LoadHardwareClass.selectedAlliance == LoadHardwareClass.Alliance.RED) {goalPose = new Pose(144, 144, 0);}
-            setHood(hoodLUT.get(Robot.drivetrain.follower.getPose().distanceFrom(goalPose)) + hoodOffset);
+            if (robotZone.isInside(LoadHardwareClass.FarLaunchZone)){
+                setHood(hoodLUTfar.get(Robot.drivetrain.follower.getPose().distanceFrom(goalPose)));
+            }else{
+                setHood(hoodLUTnear.get(Robot.drivetrain.follower.getPose().distanceFrom(goalPose)));
+            }
+            setHood(getHood() + hoodOffset);
         }else{
             setHood(0);
         }
@@ -199,7 +217,7 @@ public class Turret {
      */
     public void setGateState(gatestate state){
         if (state == gatestate.CLOSED){
-            gate.setAngle(0.47);
+            gate.setAngle(0.48);
         }else if (state == gatestate.OPEN){
             gate.setAngle(0.5);
         }
@@ -242,8 +260,8 @@ public class Turret {
      * Currently uses Pinpoint Odometry and trigonometry to get the angle.
      */
     public double calcLocalizer (){
-        Pose goalPose = new Pose(0-posOffset,144+posOffset,0);
-        if (LoadHardwareClass.selectedAlliance == LoadHardwareClass.Alliance.RED) {goalPose = new Pose(144+posOffset, 144+posOffset, 0);}
+        Pose goalPose = new Pose(4,140,0);
+        if (LoadHardwareClass.selectedAlliance == LoadHardwareClass.Alliance.RED) {goalPose = new Pose(140, 140, 0);}
 
         return (Math.toDegrees(Math.atan2(
                 goalPose.getY()-Robot.drivetrain.follower.getPose().getY(),

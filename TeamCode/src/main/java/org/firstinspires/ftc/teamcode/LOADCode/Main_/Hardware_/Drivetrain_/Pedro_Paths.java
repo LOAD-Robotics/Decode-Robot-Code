@@ -19,9 +19,9 @@ public class Pedro_Paths {
     public Pose nearStart = new Pose(118, 132, Math.toRadians(306));
     public Pose farStart = new Pose(88, 7.4, Math.toRadians(90));
     // Preload Poses
-    public Pose nearPreload = new Pose(127.000, 83.500, Math.toRadians(0));
-    public Pose midPreload = new Pose(132.000, 59.500, Math.toRadians(0));
-    public Pose farPreload = new Pose(132.000, 35.500, Math.toRadians(0));
+    public Pose nearPreload = new Pose(124.000, 83.500, Math.toRadians(0));
+    public Pose midPreload = new Pose(130.000, 59.500, Math.toRadians(0));
+    public Pose farPreload = new Pose(130.000, 35.500, Math.toRadians(0));
     // Shooting Poses
     public Pose nearShoot = new Pose(115, 120, Math.toRadians(-35));
     public Pose midShoot = new Pose(85, 85, Math.toRadians(-15));
@@ -31,7 +31,7 @@ public class Pedro_Paths {
     // Leave Poses
     public Pose nearLeave = new Pose(90,120, Math.toRadians(90));
     public Pose midLeave = new Pose(95,55, Math.toRadians(90));
-    public Pose farLeave = new Pose(115,20, Math.toRadians(90));
+    public Pose farLeave = new Pose(105,20, Math.toRadians(90));
 
     /**
      * <h4>Define all path variables</h4>
@@ -40,9 +40,8 @@ public class Pedro_Paths {
     public PathChain nearStart_to_nearPreload, nearStart_to_midPreload, nearStart_to_farPreload;
     public PathChain farStart_to_nearPreload, farStart_to_midPreload, farStart_to_farPreload;
     // Start Poses to Shooting Poses
-    public PathChain nearStart_to_midShoot;
-    //public PathChain nearStart_to_nearShoot, nearStart_to_midShoot, nearStart_to_farShoot;
-    //public PathChain farStart_to_nearShoot, farStart_to_midShoot, farStart_to_farShoot;
+    public PathChain nearStart_to_midShoot, nearStart_to_nearShoot;
+    public PathChain farStart_to_midShoot, farStart_to_farShoot;
     // Preloads to Shooting Positions
     public PathChain nearPreload_to_nearShoot, nearPreload_to_midShoot, nearPreload_to_farShoot;
     public PathChain midPreload_to_nearShoot, midPreload_to_midShoot, midPreload_to_farShoot;
@@ -180,12 +179,35 @@ public class Pedro_Paths {
                 .build();
     }
     public void buildStart1ToShootings(){
+        nearStart_to_nearShoot = follower.pathBuilder()
+                .addPath(new BezierLine(
+                        nearStart,
+                        nearShoot
+                ))
+                .setLinearHeadingInterpolation(nearStart.getHeading(), nearShoot.getHeading())
+                .build();
         nearStart_to_midShoot = follower.pathBuilder()
                 .addPath(new BezierLine(
                         nearStart,
                         midShoot
                 ))
                 .setLinearHeadingInterpolation(nearStart.getHeading(), midShoot.getHeading())
+                .build();
+    }
+    public void buildStart2ToShootings(){
+        farStart_to_midShoot = follower.pathBuilder()
+                .addPath(new BezierLine(
+                        farStart,
+                        midShoot
+                ))
+                .setLinearHeadingInterpolation(farStart.getHeading(), midShoot.getHeading())
+                .build();
+        farStart_to_farShoot = follower.pathBuilder()
+                .addPath(new BezierLine(
+                        farStart,
+                        farShoot
+                ))
+                .setLinearHeadingInterpolation(farStart.getHeading(), farShoot.getHeading())
                 .build();
     }
     public void buildPreload1ToShootings(){
@@ -517,6 +539,7 @@ public class Pedro_Paths {
         buildStart2ToPreloads();
         // Paths going from each start position to each of the shooting positions.
         buildStart1ToShootings();
+        buildStart2ToShootings();
         // Paths going from each preload to each shooting position
         buildPreload1ToShootings();
         buildPreload2ToShootings();

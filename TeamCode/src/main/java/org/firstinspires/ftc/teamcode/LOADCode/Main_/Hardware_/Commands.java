@@ -24,9 +24,13 @@ public class Commands {
     }
 
     // Delay timer for shooting sequence
-    private static final TimerEx shootingTimer = new TimerEx(1);
-    private static Command resetShootingTimer() {
-        return new LambdaCommand("resetShootingTimer").setStart(shootingTimer::restart);
+    private static final TimerEx shootingTimerHalfSec = new TimerEx(0.5);
+    private static final TimerEx shootingTimer2sec = new TimerEx(2);
+    private static Command resetShootingTimer1sec() {
+        return new LambdaCommand("resetShootingTimer1.5sec").setStart(shootingTimerHalfSec::restart);
+    }
+    private static Command resetShootingTimer2sec() {
+        return new LambdaCommand("resetShootingTimer2sec").setStart(shootingTimer2sec::restart);
     }
 
     public Command runPath(PathChain path, boolean holdEnd, double maxPower) {
@@ -75,14 +79,14 @@ public class Commands {
                 // Shoot the first two balls
                 setIntakeMode(Intake.intakeMode.INTAKING),
                 setGateState(Turret.gatestate.OPEN),
-                resetShootingTimer(),
-                new WaitUntil(() -> Robot.intake.getTopSensorState() && !Robot.intake.getBottomSensorState() && shootingTimer.isDone()),
+                resetShootingTimer2sec(),
+                new WaitUntil(() -> (Robot.intake.getTopSensorState() && !Robot.intake.getBottomSensorState() && shootingTimer2sec.isDone())),
 
                 // Shoot the last ball
                 setIntakeMode(Intake.intakeMode.SHOOTING),
                 setTransferState(Intake.transferState.UP),
-                resetShootingTimer(),
-                new WaitUntil(shootingTimer::isDone),
+                resetShootingTimer1sec(),
+                new WaitUntil(shootingTimerHalfSec::isDone),
 
                 // Reset the systems
                 setIntakeMode(Intake.intakeMode.OFF),
