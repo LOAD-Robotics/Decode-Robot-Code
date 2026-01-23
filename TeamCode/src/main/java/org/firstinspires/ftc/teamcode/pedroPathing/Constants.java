@@ -16,7 +16,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 public class Constants {
     public static FollowerConstants followerConstants = new FollowerConstants()
-            .mass(13.6) // TODO: Change this to the actual weight of the robot
+            .mass(12.9) // TODO: Change this to the actual weight of the robot
             .forwardZeroPowerAcceleration(-31.6509)
             .lateralZeroPowerAcceleration(-69.7608)
             // Set following parameters to true to enable dual PID
