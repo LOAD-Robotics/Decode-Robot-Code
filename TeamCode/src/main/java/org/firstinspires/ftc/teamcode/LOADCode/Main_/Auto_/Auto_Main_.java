@@ -61,8 +61,6 @@ public class Auto_Main_ extends NextFTCOpMode {
                         new Near_9Ball(),
                         new Far_9Ball(),
                         new Far_6Ball()
-                        //new test_Auto(),
-                        //new Complex_Test_Auto()
                 ));
         prompter.onComplete(() -> {
                     selectedAlliance = prompter.get("alliance");
@@ -128,20 +126,6 @@ public class Auto_Main_ extends NextFTCOpMode {
      * The methods runAuto() and ToString() must be overridden for each auto.
      */
     abstract static class Auto{
-//        /**
-//         * This constructor must be called from the child class using <code>super()</code>
-//         * @param startingPose Indicates the starting pose of the robot
-//         * @param runTurret Indicates whether to run the turret auto aim functions
-//         */
-//        Auto(Pose startingPose, Boolean runTurret){
-//            turretOn = runTurret;
-//            startPose = startingPose;
-//        }
-//        Auto(Pose startingPose){
-//            turretOn = true;
-//            startPose = startingPose;
-//        }
-
         /**
          * @return The start pose of the robot for this auto.
          */
@@ -161,16 +145,13 @@ public class Auto_Main_ extends NextFTCOpMode {
     }
 
     private class Far_6Ball extends Auto{
-        public Pose startPose = paths.farStart;
-        public boolean turretEnabled = true;
-
         @Override
         public Pose getStartPose(){
-            return startPose;
+            return paths.farStart;
         }
         @Override
         public boolean getTurretEnabled(){
-            return turretEnabled;
+            return true;
         }
 
         @Override
@@ -193,16 +174,13 @@ public class Auto_Main_ extends NextFTCOpMode {
     }
 
     private class Far_9Ball extends Auto{
-        public Pose startPose = paths.farStart;
-        public boolean turretEnabled = true;
-
         @Override
         public Pose getStartPose(){
-            return startPose;
+            return paths.farStart;
         }
         @Override
         public boolean getTurretEnabled(){
-            return turretEnabled;
+            return true;
         }
 
         @Override
@@ -230,16 +208,13 @@ public class Auto_Main_ extends NextFTCOpMode {
     }
 
     private class Near_9Ball extends Auto{
-        public Pose startPose = paths.nearStart;
-        public boolean turretEnabled = true;
-
         @Override
         public Pose getStartPose(){
-            return startPose;
+            return paths.nearStart;
         }
         @Override
         public boolean getTurretEnabled(){
-            return turretEnabled;
+            return true;
         }
 
         @Override
@@ -269,16 +244,13 @@ public class Auto_Main_ extends NextFTCOpMode {
     }
 
     private class Near_12Ball extends Auto{
-        public Pose startPose = paths.nearStart;
-        public boolean turretEnabled = true;
-
         @Override
         public Pose getStartPose(){
-            return startPose;
+            return paths.nearStart;
         }
         @Override
         public boolean getTurretEnabled(){
-            return turretEnabled;
+            return true;
         }
 
         @Override
@@ -342,4 +314,6 @@ public class Auto_Main_ extends NextFTCOpMode {
         @Override
         public String toString(){return "Test Auto";}
     }
+
+
 }
