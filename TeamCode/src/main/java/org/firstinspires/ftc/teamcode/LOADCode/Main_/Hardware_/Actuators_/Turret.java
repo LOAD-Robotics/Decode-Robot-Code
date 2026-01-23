@@ -123,8 +123,9 @@ public class Turret {
         hoodLUTnear.add(0, 0);
         hoodLUTfar.add(0, 0);
 
+        // --------------------------------------------------------
+
         // Near zone measurements
-        hoodLUTnear.add(0, 0);
         hoodLUTnear.add(53.5,108);
         hoodLUTnear.add(71,168);
         hoodLUTnear.add(77, 181);
@@ -135,6 +136,8 @@ public class Turret {
         // Far zone measurements
         hoodLUTfar.add(103, 200);
         hoodLUTfar.add(204, 200);
+
+        // --------------------------------------------------------
 
         // Safety points for LUTs
         hoodLUTnear.add(300, 200);
