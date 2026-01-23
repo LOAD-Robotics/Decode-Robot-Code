@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>LOAD Auto Generator</title>
+
+  <!-- Prism CSS (Tomorrow Night theme looks close to Android Studio dark) -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <!-- Prism core and Java language support -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+
+  <style>
+    /* === Code Output Box === */
+    #output {
+      background-color: #1e1e1e;
+      color: #e0e0e0;
+      font-family: monospace;
+      border: 1px solid #444;
+      padding: 8px;
+      margin-top: 20px;
+      border-radius: 4px;
+      width: 100%;
+      min-height: 300px;       /* always at least this tall */
+      max-height: 600px;       /* never taller than this */
+      white-space: pre;
+      overflow-y: auto;        /* vertical scrollbar when needed */
+      overflow-x: auto;        /* horizontal scrollbar when needed */
+      box-sizing: border-box;
+    }
+
+    #outputContainer {
+      background-color: #1e1e1e;
+      padding: 10px;
+      border-radius: 4px;
+      overflow: scroll;            /* force scrollbars always visible */
+    }
+
+    /* === Buttons === */
+    #addCommand,
+    #copyOutput,
+    .cmdRow .deleteBtn {
+      color: #ffffff;
+    }
+
+    button {
+      cursor: pointer;
+      background-color: #5e81ac;
+      border: none;
+      color: #ffffff;
+      border-radius: 4px;
+      padding: 8px 12px;
+    }
+    button:hover {
+      background-color: #81a1c1;
+    }
+
+    /* === Input Fields === */
+    input:not(:disabled),
+    select:not(:disabled),
+    textarea:not(:disabled) {
+      background-color: #e0e0e0;
+      color: #000000;
+    }
+
+    input:disabled,
+    select:disabled,
+    textarea:disabled {
+      background-color: #ffffff;
+      color: #000000;
+    }
+
+    input, select, textarea {
+      border: 1px solid #444;
+      padding: 8px;
+      margin-top: 5px;
+      border-radius: 4px;
+    }
+
+    /* === Command Row Layout === */
+    .cmdRow {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .cmdRow .deleteBtn {
+      flex-shrink: 0;
+      margin-right: 10px;
+    }
+
+    /* === Prism Code Styling === */
+    pre[class*="language-"] {
+      background: #1e1e1e !important;
+      color: #e0e0e0 !important;
+      border: none !important;
+      box-shadow: none !important;
+      border-radius: 6px !important;
+      margin: 0 !important;
+      padding: 10px !important;
+      line-height: 1.5 !important;
+      white-space: pre-wrap !important;
+      word-break: break-word !important;
+      overflow: scroll !important; /* force scrollbars always visible */
+      width: 100% !important;
+      box-sizing: border-box !important;
+      display: block !important;
+    }
+
+    code[class*="language-"] {
+      background: none !important;
+      border: none !important;
+      box-shadow: none !important;
+      font-family: Consolas, Monaco, 'Courier New', monospace !important;
+      font-size: 14px !important;
+      color: #e0e0e0 !important;
+    }
+
+    /* === Page Layout === */
+    body {
+      background-color: #ffffff;
+      color: #000000;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1, h2 {
+      color: #485d97;
+    }
+
+    label {
+      display: block;
+      margin-top: 10px;
+    }
+
+    #commands {
+      margin-top: 20px;
+    }
+
+    .responsive-img {
+      max-width: 100%;   /* never exceed container width */
+      height: auto;      /* keep aspect ratio */
+      display: block;    /* remove inline gaps */
+      margin: 0 auto;    /* center horizontally */
+    }
+
+  </style>
+</head>
+<body>
+  <h1>LOAD Robotics Auto Generator</h1>
+  <p>
+    The numbers next to the destinations indicate <br/>
+    the position on the field map below. The positions are <br/>
+    drawn for the Red side only, but are mirrored to the Blue side.
+  </p>
+
+  <h2>Step 1: Setup</h2>
+  <label>Auto Name:
+    <input type="text" id="autoName" placeholder="Auto_MyAuto">
+  </label>
+  <label>Start Pose:
+    <select id="startPose"></select>
+  </label>
+  <label>Turret Enabled:
+    <select id="turretEnabled">
+      <option value="true">True</option>
+      <option value="false">False</option>
+    </select>
+  </label>
+
+  <h2>Step 2: Commands</h2>
+  <div id="commands"></div>
+  <button id="addCommand" onclick="addCommand()">Add Command</button>
+
+  <h2>Generated Auto Class</h2>
+  <pre id="outputContainer"><code id="output" class="language-java"></code></pre>
+  <button id="copyOutput">Copy to Clipboard</button>
+
+  <script>
+    const poses = {
+      start: [
+        { gui: "Near Start (1)", pose: "nearStart" },
+        { gui: "Far Start (2)", pose: "farStart" }
+      ],
+      preloads: [
+        { gui: "Near Preload (3)", pose: "nearPreload" },
+        { gui: "Mid Preload (4)", pose: "midPreload" },
+        { gui: "Far Preload (5)", pose: "farPreload" },
+        { gui: "Ramp (6)", pose: "ramp" },
+        { gui: "HP Preloads (7)", pose: "hpPreloads" },
+        { gui: "HP Random (7)", pose: "hpRandom" }
+      ],
+      shooting: [
+        { gui: "Near Shoot (8)", pose: "nearShoot" },
+        { gui: "Mid Shoot (9)", pose: "midShoot" },
+        { gui: "Far Shoot (10)", pose: "farShoot" }
+      ],
+      leave: [
+        { gui: "Near Leave (11)", pose: "nearLeave" },
+        { gui: "Mid Leave (12)", pose: "midLeave" },
+        { gui: "Far Leave (13)", pose: "farLeave" }
+      ],
+      gate: [
+        { gui: "Open Gate (14)", pose: "openGate" }
+      ]
+    };
+
+    const existingPaths = {
+      nearStart: ["midShoot", "nearShoot"],
+      farStart: ["midShoot", "farShoot"],
+
+      nearPreload: ["nearShoot", "midShoot", "farShoot"],
+      midPreload: ["nearShoot", "midShoot", "farShoot"],
+      farPreload: ["nearShoot", "midShoot", "farShoot"],
+      ramp: [],
+      hpPreloads: [],
+      hpRandom: [],
+
+      nearShoot: ["nearPreload", "midPreload", "farPreload", "nearLeave", "midLeave"],
+      midShoot: ["nearPreload", "midPreload", "farPreload", "nearLeave", "midLeave"],
+      farShoot: ["nearPreload", "midPreload", "farPreload", "midLeave", "farLeave"],
+
+      nearLeave: [],
+      midLeave: [],
+      farLeave: [],
+
+      openGate: []
+    };
+
+    let commands = [];
+    let currentPose = null;
+    let firstRunPathPlaced = false;
+    let resizeTimer;
+
+    // Populate Start Pose dropdown from poses.start
+    function populateStartPose() {
+      const startSel = document.getElementById("startPose");
+      startSel.innerHTML = "";
+      poses.start.forEach(p => {
+        const o = document.createElement("option");
+        o.value = p.pose;      // actual Java constant
+        o.textContent = p.gui; // display label
+        startSel.appendChild(o);
+      });
+    }
+
+    function addCommand() {
+      const cmdDiv = document.createElement("div");
+      cmdDiv.className = "cmdRow";
+
+      const select = document.createElement("select");
+      let options = [];
+
+      const shootPreloadsAlreadyUsed = commands.some(c => c.type === "Shoot Preloads");
+
+      if (commands.length === 0) {
+        // First command: allow Wait or Shoot Preloads
+        options = ["Shoot Preloads", "Wait"];
+      } else if (commands.length === 1) {
+        const firstCmd = commands[0].type;
+        if (!shootPreloadsAlreadyUsed) {
+          if (firstCmd === "Wait") {
+            // Second command must be Shoot Preloads only
+            options = ["Shoot Preloads"];
+          } else {
+            // First was Shoot Preloads, so second can be Drive or Wait
+            options = ["Drive", "Wait"];
+          }
+        } else {
+          // Shoot Preloads already used, so only Drive/Wait
+          options = ["Drive", "Wait"];
+        }
+      } else {
+        // After second command, never allow Shoot Preloads again
+        options = ["Drive", "Wait"];
+      }
+
+      options.forEach(opt => {
+        const o = document.createElement("option");
+        o.value = opt;
+        o.textContent = opt;
+        select.appendChild(o);
+      });
+
+      const paramContainer = document.createElement("span");
+      paramContainer.style.marginLeft = "10px";
+
+      cmdDiv.appendChild(select);
+      cmdDiv.appendChild(paramContainer);
+      document.getElementById("commands").appendChild(cmdDiv);
+
+      select.onchange = () => {
+        renderParamInput(select.value, paramContainer);
+        updateCommands();
+      };
+      renderParamInput(select.value, paramContainer);
+      updateCommands();
+    }
+
+    function renderParamInput(type, container) {
+      container.innerHTML = "";
+      if (type === "Wait") {
+        const forLabel = document.createElement("span");
+        forLabel.textContent = "for ";
+        const secLabel = document.createElement("span");
+        secLabel.textContent = " seconds";
+        const input = document.createElement("input");
+        input.type = "number";
+        input.min = "0";
+        input.step = "0.1";
+        input.size = 5;
+        input.placeholder = "0";
+        container.appendChild(forLabel);
+        container.appendChild(input);
+        container.appendChild(secLabel);
+        input.oninput = updateCommands;
+      } else if (type === "Shoot Preloads") {
+        const fromLabel = document.createElement("span");
+        fromLabel.textContent = "from ";
+        const sel = document.createElement("select");
+
+        const startPose = document.getElementById("startPose").value;
+        const allowedDestinations = existingPaths[startPose] || [];
+
+        allowedDestinations.forEach(dest => {
+          const p = [...poses.shooting, ...poses.preloads].find(x => x.pose === dest);
+          if (p) {
+            const o = document.createElement("option");
+            o.value = p.pose;        // actual constant
+            o.textContent = p.gui;   // display label
+            sel.appendChild(o);
+          }
+        });
+
+        container.appendChild(fromLabel);
+        container.appendChild(sel);
+        sel.onchange = updateCommands;
+      } else if (type === "Drive") {
+        const toLabel = document.createElement("span");
+        toLabel.textContent = "to ";
+        const sel = document.createElement("select");
+        let allowedDestinations = [];
+
+        if (poses.preloads.some(p => p.pose === currentPose)) {
+          allowedDestinations = [...poses.shooting, ...poses.leave, ...poses.gate];
+        } else if (poses.shooting.some(p => p.pose === currentPose)) {
+          allowedDestinations = [...poses.preloads, ...poses.leave, ...poses.gate];
+        } else if (poses.start.some(p => p.pose === currentPose)) {
+          allowedDestinations = poses.shooting;
+        } else if (poses.leave.some(p => p.pose === currentPose)) {
+          allowedDestinations = [];
+        } else if (poses.gate.some(p => p.pose === currentPose)) {
+          allowedDestinations = [...poses.shooting, { gui: "Ramp (6)", pose: "ramp" }];
+        }
+
+        allowedDestinations.forEach(p => {
+          const o = document.createElement("option");
+          o.value = p.pose;
+          o.textContent = p.gui;
+          sel.appendChild(o);
+        });
+
+        container.appendChild(toLabel);
+        container.appendChild(sel);
+
+        // Checkbox container
+        const shootContainer = document.createElement("span");
+        shootContainer.style.marginLeft = "10px";
+        const shootLabel = document.createElement("span");
+        shootLabel.textContent = "(Shoot when destination reached? ";
+        const shootBox = document.createElement("input");
+        shootBox.type = "checkbox";
+        shootBox.style.marginLeft = "5px";
+        const closeParen = document.createElement("span");
+        closeParen.textContent = ")";
+        shootContainer.appendChild(shootLabel);
+        shootContainer.appendChild(shootBox);
+        shootContainer.appendChild(closeParen);
+        container.appendChild(shootContainer);
+
+        shootContainer.style.display = poses.shooting.some(p => p.pose === sel.value) ? "inline" : "none";
+
+        sel.onchange = () => {
+          updateCommands();
+          if (poses.shooting.some(p => p.pose === sel.value)) {
+            shootContainer.style.display = "inline";
+          } else {
+            shootContainer.style.display = "none";
+            shootBox.checked = false;
+          }
+        };
+
+        shootBox.onchange = updateCommands;
+      }
+    }
+
+    function canDeleteCommand(cmdDiv) {
+      const allCmds = Array.from(document.querySelectorAll("#commands .cmdRow"));
+      const idx = allCmds.indexOf(cmdDiv);
+    
+      // Always allow deletion if only one command exists
+      if (allCmds.length === 1) return true;
+    
+      // Constraint: cannot delete the first runPath special case
+      const type = cmdDiv.querySelector("select").value;
+      if (type === "Shoot Preloads" && idx === 0) {
+        return false;
+      }
+    
+      return true;
+    }
+
+    
+
+    function updateCommands() {
+      commands = [];
+      const cmdDivs = document.querySelectorAll("#commands .cmdRow");
+      cmdDivs.forEach(div => {
+        const selects = div.querySelectorAll("select");
+        const sel = selects[0].value;          // command type
+        let param = null;
+        let shootFlag = false;
+        if (selects.length > 1) {
+          param = selects[1].value;            // destination dropdown
+          const shootBox = div.querySelector("input[type='checkbox']");
+          if (shootBox) shootFlag = shootBox.checked;
+        } else {
+          const input = div.querySelector("input");
+          if (input) param = input.value;      // wait time textbox
+        }
+        commands.push({type: sel, param: param, shoot: shootFlag});
+      });
+     
+      currentPose = document.getElementById("startPose").value;
+      firstRunPathPlaced = false;
+      let codeLines = [];
+     
+      commands.forEach(cmd => {
+        if (cmd.type === "Wait") {
+          const time = parseFloat(cmd.param || "0");
+          if (time > 0) {
+            codeLines.push(`new Delay(${time})`);
+          }
+        } else if (cmd.type === "Shoot Preloads") {
+          firstRunPathPlaced = true;
+
+          // Destination chosen from dropdown
+          const dest = cmd.param || "midShoot";
+
+          // Always spin up flywheel before shooting
+          codeLines.push(`Commands.setFlywheelState(Turret.flywheelState.ON)`);
+
+          // Check if path exists in master list
+          const pathExists = (existingPaths[currentPose] || []).includes(dest);
+          let runPathLine = `Commands.runPath(paths.${currentPose}_to_${dest}, true, 1)`;
+          if (!pathExists) {
+            runPathLine += ` // TODO create this path`;
+          }
+          codeLines.push(runPathLine);
+
+
+          // Update robot pose to destination
+          currentPose = dest;
+
+          // Shoot balls immediately after reaching destination
+          codeLines.push(`Commands.shootBalls()`);
+        } else if (cmd.type === "Drive") {
+          const dest = cmd.param || "midPreload";
+
+          if (poses.preloads.some(p => p.pose === dest)) {
+            codeLines.push(`Commands.setIntakeMode(Intake.intakeMode.INTAKING)`);
+          } else if (poses.shooting.some(p => p.pose === dest)) {
+            codeLines.push(`Commands.setFlywheelState(Turret.flywheelState.ON)`);
+          } else if (poses.leave.some(p => p.pose === dest)) {
+            codeLines.push(`Commands.setIntakeMode(Intake.intakeMode.OFF)`);
+            codeLines.push(`Commands.setFlywheelState(Turret.flywheelState.OFF)`);
+          }
+
+          // Check if path exists in master list
+          const pathExists = (existingPaths[currentPose] || []).includes(dest);
+          let runPathLine = `Commands.runPath(paths.${currentPose}_to_${dest}, true, 1)`;
+          if (!pathExists) {
+            runPathLine += ` // TODO create this path`;
+          }
+          codeLines.push(runPathLine);
+
+
+          currentPose = dest;
+
+          // Special case: ramp destination
+          if (dest === "ramp") {
+            codeLines.push(`Commands.waitForArtifacts()`);
+          }
+
+          // Special case: HP Random destination
+          if (dest === "hpRandom") {
+            codeLines.push(`Commands.smartIntakeHP()`);
+          }
+
+          // Append shootBalls if checkbox checked and destination is shooting
+          if (cmd.shoot && poses.shooting.some(p => p.pose === dest)) {
+            codeLines.push(`Commands.shootBalls()`);
+          }
+        }
+      });
+
+      cmdDivs.forEach((div, idx) => {
+        const selects = div.querySelectorAll("select");
+        const sel = selects[0]; // command type
+        let paramEl = null;
+        if (selects.length > 1) {
+          paramEl = selects[1]; // destination dropdown
+        } else {
+          paramEl = div.querySelector("input"); // wait time textbox
+        }
+        
+        // Disable editing unless this is the last command
+        const isLast = (idx === cmdDivs.length - 1);
+        const shootBox = div.querySelector("input[type='checkbox']");
+        if (!isLast) {
+          if (sel) sel.disabled = true;
+          if (paramEl) paramEl.disabled = true;
+          if (shootBox) shootBox.disabled = true;
+        } else {
+          if (sel) sel.disabled = false;
+          if (paramEl) paramEl.disabled = false;
+          if (shootBox) shootBox.disabled = false;
+        }
+ 
+        // Handle delete button
+        let deleteBtn = div.querySelector("button.deleteBtn");
+        const canDelete = (cmdDivs.length === 1) || canDeleteCommand(div);
+
+        if (canDelete) {
+          // Create if missing
+          if (!deleteBtn) {
+            deleteBtn = document.createElement("button");
+            deleteBtn.textContent = "Delete";
+            deleteBtn.className = "deleteBtn";
+            deleteBtn.onclick = () => {
+              div.remove();
+              updateCommands();
+            };
+
+            // Insert at the left side of the row
+            div.insertBefore(deleteBtn, div.firstChild);
+          }
+        } else {
+          // Remove if present
+          if (deleteBtn) {
+            deleteBtn.remove();
+          }
+        }
+      });
+
+      generateOutput(codeLines);
+
+      // Disable Add Command if current pose is a Leave
+      const addBtn = document.querySelector("button[onclick='addCommand()']");
+      if (poses.leave.some(p => p.pose === currentPose)) {
+        addBtn.disabled = true;
+        addBtn.style.opacity = "0.5";
+      } else {
+        addBtn.disabled = false;
+        addBtn.style.opacity = "1.0";
+      }
+    }
+
+    function sanitizeClassName(raw) {
+      // Trim whitespace
+      let name = raw.trim();
+     
+      // Replace invalid characters with underscores
+      name = name.replace(/[^a-zA-Z0-9]/g, "_");
+     
+      // Collapse multiple underscores into a single one
+      name = name.replace(/_+/g, "_");
+     
+      // Remove trailing underscore(s)
+      name = name.replace(/_$/, "");
+     
+      // Capitalize first letter
+      if (name.length > 0) {
+        name = name.charAt(0).toUpperCase() + name.slice(1);
+      }
+     
+      return name;
+    }
+
+
+    function generateOutput(codeLines) {
+      const rawName = document.getElementById("autoName").value || "MyAuto";
+      const className = sanitizeClassName(rawName);
+      const startPoseValue = document.getElementById("startPose").value;
+      const turret = document.getElementById("turretEnabled").value;
+
+      // Look up the GUI/pose object from poses.start
+      const startPoseObj = poses.start.find(p => p.pose === startPoseValue);
+      const startPoseConstant = startPoseObj ? startPoseObj.pose : startPoseValue;
+
+      const output =
+`public class Auto_${className} extends Auto {
+    @Override
+    public String toString() {return "${rawName}";}
+    @Override
+    public Pose getStartPose() {return paths.${startPoseConstant};}
+    @Override
+    public boolean getTurretEnabled() {return ${turret};}
+    @Override
+    public void runAuto() {
+        new SequentialGroup(
+            ${codeLines.join(",\n            ")}
+        ).schedule();
+    }
+}`;
+
+      const codeBox = document.getElementById("output");
+      codeBox.textContent = output;
+      Prism.highlightElement(codeBox);
+    }
+
+    function copyOutput() {
+      const text = document.getElementById("output");
+      text.select();
+      document.execCommand("copy");
+      alert("Copied to clipboard!");
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      populateStartPose();
+
+      const codeBox = document.getElementById("output");
+      generateOutput([]); // populate with default class skeleton
+     
+      // Measure baseline height
+      codeBox.style.height = "auto";
+      const baselineHeight = codeBox.scrollHeight;
+      codeBox.dataset.minHeight = baselineHeight; // store for later
+      codeBox.style.height = baselineHeight + "px";
+    });
+
+
+    document.getElementById("autoName").addEventListener("input", updateCommands);
+    document.getElementById("turretEnabled").addEventListener("change", updateCommands);
+    document.getElementById("startPose").addEventListener("change", () => {
+      const rows = document.querySelectorAll("#commands .cmdRow");
+      rows.forEach(row => {
+        const selects = row.querySelectorAll("select");
+        if (selects.length > 1 && selects[0].value === "RunPathSpecial") {
+          const paramSel = selects[1];
+          const oldValue = paramSel.value;   // remember current selection
+          paramSel.innerHTML = "";
+     
+          const startPose = document.getElementById("startPose").value;
+          let allowedDestinations = [];
+          let defaultDest = null;
+     
+          if (startPose === "nearStart") {
+            allowedDestinations = poses.shooting.filter(p => p.pose === "nearShoot" || p.pose === "midShoot");
+            defaultDest = "midShoot";
+          } else if (startPose === "farStart") {
+            allowedDestinations = poses.shooting.filter(p => p.pose === "midShoot" || p.pose === "farShoot");
+            defaultDest = "farShoot";
+          }
+
+          allowedDestinations.forEach(p => {
+            const o = document.createElement("option");
+            o.value = p.pose;
+            o.textContent = p.gui;
+            paramSel.appendChild(o);
+          });
+
+          if (allowedDestinations.some(p => p.pose === oldValue)) {
+            paramSel.value = oldValue;
+          } else {
+            paramSel.value = defaultDest;
+          }
+        }
+      });
+      updateCommands();
+    });
+    document.getElementById("copyOutput").addEventListener("click", () => {
+      const codeText = document.getElementById("output").textContent;
+      navigator.clipboard.writeText(codeText).then(() => {
+        alert("Copied to clipboard!");
+      });
+    });
+  </script>
+  <div>
+    <picture>
+      <!-- Mobile version (below ~768px) -->
+      <source srcset="https://i.imgur.com/qIwy8mM.png" media="(max-width: 768px)">
+      <!-- Default / larger screens -->
+      <img src="https://i.imgur.com/Kqy38cl.png" class="responsive-img" align="left">
+    </picture>
+</body>
+</html>
