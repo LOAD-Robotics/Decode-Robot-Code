@@ -22,6 +22,9 @@ public class Pedro_Paths {
     public Pose nearPreload = new Pose(124.000, 83.500, Math.toRadians(0));
     public Pose midPreload = new Pose(130.000, 59.500, Math.toRadians(0));
     public Pose farPreload = new Pose(130.000, 35.500, Math.toRadians(0));
+    public Pose hpPreload = new Pose(136, 8, -90);
+    public Pose rampIntake = new Pose(133, 55, 65);
+    public Pose hpIntake = null;
     // Shooting Poses
     public Pose nearShoot = new Pose(115, 120, Math.toRadians(-35));
     public Pose midShoot = new Pose(85, 85, Math.toRadians(-15));
@@ -32,36 +35,83 @@ public class Pedro_Paths {
     public Pose nearLeave = new Pose(90,120, Math.toRadians(90));
     public Pose midLeave = new Pose(95,55, Math.toRadians(90));
     public Pose farLeave = new Pose(105,20, Math.toRadians(90));
+    // Open Gate Pose
+    public Pose openGate = new Pose(128, 68, 90);
 
     /**
-     * <h4>Define all path variables</h4>
+     * <h4>Define all path variables.</h4></br>
+     * Comments indicate the start pose of the paths
      */
-    // Start Poses to Preloads
-    public PathChain nearStart_to_nearPreload, nearStart_to_midPreload, nearStart_to_farPreload;
-    public PathChain farStart_to_nearPreload, farStart_to_midPreload, farStart_to_farPreload;
-    // Start Poses to Shooting Poses
+    /**
+     * <hr></br>
+     * <h4>Near Start Pose</h4>
+     */
     public PathChain nearStart_to_midShoot, nearStart_to_nearShoot;
+    /**
+     * <hr></br>
+     * <h4>Far Start Pose</h4>
+     */
     public PathChain farStart_to_midShoot, farStart_to_farShoot;
-    // Preloads to Shooting Positions
+    /**
+     * <hr></br>
+     * <h4>Near Preload Pose</h4>
+     */
     public PathChain nearPreload_to_nearShoot, nearPreload_to_midShoot, nearPreload_to_farShoot;
+    /**
+     * <hr></br>
+     * <h4>Mid Preload Pose</h4>
+     */
     public PathChain midPreload_to_nearShoot, midPreload_to_midShoot, midPreload_to_farShoot;
+    /**
+     * <hr></br>
+     * <h4>Far Preload Pose</h4>
+     */
     public PathChain farPreload_to_nearShoot, farPreload_to_midShoot, farPreload_to_farShoot;
-    // Shooting Positions to Preloads
+    /**
+     * <hr></br>
+     * <h4>Human Player Preload Pose</h4>
+     */
+    /**
+     * <hr></br>
+     * <h4>Ramp Intake Pose</h4>
+     */
+    /**
+     * <hr></br>
+     * <h4>Human Player Random Intake Pose</h4>
+     */
+    /**
+     * <hr></br>
+     * <h4>Near Shooting Pose</h4>
+     */
     public PathChain nearShoot_to_nearPreload, nearShoot_to_midPreload, nearShoot_to_farPreload;
-    public PathChain midShoot_to_nearPreload, midShoot_to_midPreload, midShoot_to_farPreload;
-    public PathChain farShoot_to_nearPreload, farShoot_to_midPreload, farShoot_to_farPreload;
-    // No-turret Shooting Positions to Preloads
-    public PathChain midShoot_noTurret_to_nearPreload, midShoot_noTurret_to_midPreload, midShoot_noTurret_to_farPreload;
-    public PathChain farShoot_noTurret_to_nearPreload, farShoot_noTurret_to_midPreload, farShoot_noTurret_to_farPreload;
-    // Shooting Positions to Leave Positions
+    public PathChain nearShoot_to_hpPreload, nearShoot_to_rampIntake, nearShoot_to_hpIntake;
     public PathChain nearShoot_to_nearLeave, nearShoot_to_midLeave;
+    public PathChain nearShoot_to_openGate;
+    /**
+     * <hr></br>
+     * <h4>Mid Shooting Pose</h4>
+     */
+    public PathChain midShoot_to_nearPreload, midShoot_to_midPreload, midShoot_to_farPreload;
+    public PathChain midShoot_to_hpPreload, midShoot_to_rampIntake, midShoot_to_hpIntake;
     public PathChain midShoot_to_nearLeave, midShoot_to_midLeave;
+    public PathChain midShoot_to_openGate;
+    /**
+     * <hr></br>
+     * <h4>Far Shooting Pose</h4>
+     */
+    public PathChain farShoot_to_nearPreload, farShoot_to_midPreload, farShoot_to_farPreload;
+    public PathChain farShoot_to_hpPreload, farShoot_to_rampIntake, farShoot_to_hpIntake;
     public PathChain farShoot_to_midLeave, farShoot_to_farLeave;
-    // Start Positions to Leave Positions
-    public PathChain nearStart_to_nearLeave, nearStart_to_midLeave;
-    public PathChain farStart_to_midLeave, farStart_to_farLeave;
-    // Start Positions to No-Turret shoot Positions
-    public PathChain nearStart_to_NoTurret_MidShoot, farStart_to_NoTurret_FarShoot;
+    public PathChain farShoot_to_openGate;
+    /**
+     * <hr></br>
+     * <h4>Open Gate Pose</h4>
+     */
+    public PathChain openGate_to_nearShoot, openGate_to_midShoot, openGate_to_farShoot;
+    public PathChain openGate_to_rampIntake;
+
+
+
 
     public Pose autoMirror(Pose pose, LoadHardwareClass.Alliance alliance){
         if (alliance == LoadHardwareClass.Alliance.BLUE){
@@ -87,97 +137,6 @@ public class Pedro_Paths {
         }
     }
 
-    public void buildStart1ToPreloads(){
-        nearStart_to_nearPreload = follower.pathBuilder() 
-                .addPath(new BezierCurve(
-                        nearStart,
-                        new Pose(89.000, 136.600),
-                        new Pose(89.000, 78.000),
-                        new Pose(95.000, 83.500),
-                        new Pose(110.000, 83.500)
-                ))
-                .setLinearHeadingInterpolation(nearStart.getHeading(), Math.toRadians(0))
-                .addPath(new BezierLine(
-                        new Pose(110.000, 83.500),
-                        nearPreload
-                ))
-                .setConstantHeadingInterpolation(Math.toRadians(0))
-                .build();
-        nearStart_to_midPreload = follower.pathBuilder() 
-                .addPath(new BezierCurve(
-                        nearStart,
-                        new Pose(89.000, 136.600),
-                        new Pose(89.000, 54.000),
-                        new Pose(95.000, 59.500),
-                        new Pose(110.000, 59.500)
-                ))
-                .setLinearHeadingInterpolation(nearStart.getHeading(), Math.toRadians(0))
-                .addPath(new BezierLine(
-                        new Pose(110.000, 59.500),
-                        midPreload
-                ))
-                .setConstantHeadingInterpolation(Math.toRadians(0))
-                .build();
-        nearStart_to_farPreload = follower.pathBuilder() 
-                .addPath(new BezierCurve(
-                        nearStart,
-                        new Pose(89.000, 136.600),
-                        new Pose(89.000, 30.000),
-                        new Pose(95.000, 35.500),
-                        new Pose(110.000, 35.500)
-                ))
-                .setLinearHeadingInterpolation(nearStart.getHeading(), Math.toRadians(0))
-                .addPath(new BezierLine(
-                        new Pose(110.000, 35.500),
-                        farPreload
-                ))
-                .setConstantHeadingInterpolation(Math.toRadians(0))
-                .build();
-    }
-    public void buildStart2ToPreloads(){
-        farStart_to_nearPreload = follower.pathBuilder() 
-                .addPath(new BezierCurve(
-                        farStart,
-                        new Pose(89.000, 79.000),
-                        new Pose(95.000, 83.500),
-                        new Pose(110.000, 83.500)
-                ))
-                .setLinearHeadingInterpolation(farStart.getHeading(), Math.toRadians(0))
-                .addPath(new BezierLine(
-                        new Pose(110.000, 83.500),
-                        nearPreload
-                ))
-                .setConstantHeadingInterpolation(Math.toRadians(0))
-                .build();
-        farStart_to_midPreload = follower.pathBuilder() 
-                .addPath(new BezierCurve(
-                        farStart,
-                        new Pose(89.000, 55.000),
-                        new Pose(95.000, 59.500),
-                        new Pose(110.000, 59.500)
-                ))
-                .setLinearHeadingInterpolation(nearStart.getHeading(), Math.toRadians(0))
-                .addPath(new BezierLine(
-                        new Pose(110.000, 59.500),
-                        midPreload
-                ))
-                .setConstantHeadingInterpolation(Math.toRadians(0))
-                .build();
-        farStart_to_farPreload = follower.pathBuilder()
-                .addPath(new BezierCurve(
-                        farStart,
-                        new Pose(89.000, 25),
-                        new Pose(95.000, 35.500),
-                        new Pose(110.000, 35.500)
-                ))
-                .setLinearHeadingInterpolation(farStart.getHeading(), Math.toRadians(0))
-                .addPath(new BezierLine(
-                        new Pose(110.000, 35.500),
-                        farPreload
-                ))
-                .setConstantHeadingInterpolation(Math.toRadians(0))
-                .build();
-    }
     public void buildStart1ToShootings(){
         nearStart_to_nearShoot = follower.pathBuilder()
                 .addPath(new BezierLine(
@@ -363,57 +322,6 @@ public class Pedro_Paths {
                 .setLinearHeadingInterpolation(farShoot.getHeading(), farPreload.getHeading())
                 .build();
     }
-    public void buildShooting2NoTurretToPreloads(){
-        midShoot_noTurret_to_nearPreload = follower.pathBuilder()
-                .addPath(new BezierLine(
-                        noTurretMidShoot,
-                        nearPreload
-                ))
-                .setLinearHeadingInterpolation(noTurretMidShoot.getHeading(), nearPreload.getHeading())
-                .build();
-        midShoot_noTurret_to_midPreload = follower.pathBuilder()
-                .addPath(new BezierCurve(
-                        noTurretMidShoot,
-                        new Pose(75, 56),
-                        midPreload
-                ))
-                .setLinearHeadingInterpolation(noTurretMidShoot.getHeading(), midPreload.getHeading())
-                .build();
-        midShoot_noTurret_to_farPreload = follower.pathBuilder()
-                .addPath(new BezierCurve(
-                        noTurretMidShoot,
-                        new Pose(68, 30),
-                        farPreload
-                ))
-                .setLinearHeadingInterpolation(noTurretMidShoot.getHeading(), farPreload.getHeading())
-                .build();
-    }
-    public void buildShooting3NoTurretToPreloads(){
-        farShoot_noTurret_to_nearPreload = follower.pathBuilder()
-                .addPath(new BezierCurve(
-                        noTurretFarShoot,
-                        new Pose(73, 88),
-                        nearPreload
-                ))
-                .setLinearHeadingInterpolation(noTurretFarShoot.getHeading(), nearPreload.getHeading())
-                .build();
-        farShoot_noTurret_to_midPreload = follower.pathBuilder()
-                .addPath(new BezierCurve(
-                        noTurretFarShoot,
-                        new Pose(78, 62),
-                        midPreload
-                ))
-                .setLinearHeadingInterpolation(noTurretFarShoot.getHeading(), midPreload.getHeading())
-                .build();
-        farShoot_noTurret_to_farPreload = follower.pathBuilder()
-                .addPath(new BezierCurve(
-                        noTurretFarShoot,
-                        new Pose(82.5, 35),
-                        farPreload
-                ))
-                .setLinearHeadingInterpolation(noTurretFarShoot.getHeading(), farPreload.getHeading())
-                .build();
-    }
     public void buildShooting1ToLeaves(){
         nearShoot_to_nearLeave = follower.pathBuilder()
                 .addPath(new BezierLine(
@@ -462,54 +370,6 @@ public class Pedro_Paths {
                 .setConstantHeadingInterpolation(farShoot.getHeading())
                 .build();
     }
-    public void buildStart1ToLeaves(){
-        nearStart_to_nearLeave = follower.pathBuilder()
-                .addPath(new BezierLine(
-                        nearStart,
-                        nearLeave
-                ))
-                .setConstantHeadingInterpolation(nearStart.getHeading())
-                .build();
-        nearStart_to_midLeave = follower.pathBuilder()
-                .addPath(new BezierLine(
-                        nearStart,
-                        farLeave
-                ))
-                .setConstantHeadingInterpolation(nearStart.getHeading())
-                .build();
-    }
-    public void buildStart2ToLeaves(){
-        farStart_to_midLeave = follower.pathBuilder()
-                .addPath(new BezierLine(
-                        farStart,
-                        nearLeave
-                ))
-                .setConstantHeadingInterpolation(farStart.getHeading())
-                .build();
-        farStart_to_farLeave = follower.pathBuilder()
-                .addPath(new BezierLine(
-                        farStart,
-                        farLeave
-                ))
-                .setConstantHeadingInterpolation(farStart.getHeading())
-                .build();
-    }
-    public void buildStartsToNoTurretShoots(){
-        nearStart_to_NoTurret_MidShoot = follower.pathBuilder()
-                .addPath(new BezierLine(
-                        nearStart,
-                        noTurretMidShoot
-                ))
-                .setLinearHeadingInterpolation(nearStart.getHeading(), noTurretMidShoot.getHeading())
-                .build();
-        farStart_to_NoTurret_FarShoot = follower.pathBuilder()
-                .addPath(new BezierLine(
-                        farStart,
-                        noTurretFarShoot
-                ))
-                .setLinearHeadingInterpolation(farStart.getHeading(), noTurretFarShoot.getHeading())
-                .build();
-    }
 
 
     /**
@@ -534,9 +394,6 @@ public class Pedro_Paths {
 
 
         /// All paths are for the RED side of the field. they will be mirrored if necessary.
-        // Paths going from each start position to each of the preloads.
-        buildStart1ToPreloads();
-        buildStart2ToPreloads();
         // Paths going from each start position to each of the shooting positions.
         buildStart1ToShootings();
         buildStart2ToShootings();
@@ -548,17 +405,9 @@ public class Pedro_Paths {
         buildShooting1ToPreloads();
         buildShooting2ToPreloads();
         buildShooting3ToPreloads();
-        // Paths going from each no-turret shooting position to each preload
-        buildShooting2NoTurretToPreloads();
-        buildShooting3NoTurretToPreloads();
         // Paths going from each shooting position to the leave positions.
         buildShooting1ToLeaves();
         buildShooting2ToLeaves();
         buildShooting3ToLeaves();
-        // Paths going from the start positions to the leave positions
-        buildStart1ToLeaves();
-        buildStart2ToLeaves();
-        // Paths going from the start positions to the no-turret shooting positions
-        buildStartsToNoTurretShoots();
     }
 }
