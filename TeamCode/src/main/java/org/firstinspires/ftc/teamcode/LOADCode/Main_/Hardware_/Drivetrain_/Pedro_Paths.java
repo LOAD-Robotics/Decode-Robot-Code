@@ -11,6 +11,7 @@ import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.LoadHardwareClass
 public class Pedro_Paths {
     // The variable to store PedroPathing's follower object for path building
     private Follower follower;
+    private LoadHardwareClass.Alliance alliance = LoadHardwareClass.selectedAlliance;
 
     /**
      * Define primary poses to be used in paths
@@ -36,7 +37,10 @@ public class Pedro_Paths {
     public Pose midLeave = new Pose(95,55, Math.toRadians(90));
     public Pose farLeave = new Pose(105,20, Math.toRadians(90));
     // Open Gate Pose
-    public Pose openGate = new Pose(128, 68, 90);
+    public Pose openGateBasic = new Pose(127.5, 72, Math.toRadians(90));
+    public Pose openGateBasicReversed = new Pose(127.5, 72, Math.toRadians(-90));
+    public Pose openGateIntakeGate = new Pose(131, 61.5, Math.toRadians(20));
+    public Pose openGateIntakeRamp = new Pose(133, 55, Math.toRadians(40));
 
     /**
      * <h4>Define all path variables.</h4></br>
@@ -57,11 +61,13 @@ public class Pedro_Paths {
      * <h4>Near Preload Pose</h4>
      */
     public PathChain nearPreload_to_nearShoot, nearPreload_to_midShoot, nearPreload_to_farShoot;
+    public PathChain nearPreload_to_openGateBasic;
     /**
      * <hr></br>
      * <h4>Mid Preload Pose</h4>
      */
     public PathChain midPreload_to_nearShoot, midPreload_to_midShoot, midPreload_to_farShoot;
+    public PathChain midPreload_to_openGateBasic;
     /**
      * <hr></br>
      * <h4>Far Preload Pose</h4>
@@ -84,36 +90,41 @@ public class Pedro_Paths {
      * <h4>Near Shooting Pose</h4>
      */
     public PathChain nearShoot_to_nearPreload, nearShoot_to_midPreload, nearShoot_to_farPreload;
-    public PathChain nearShoot_to_hpPreload, nearShoot_to_rampIntake, nearShoot_to_hpIntake;
+    public PathChain nearShoot_to_hpPreload, nearShoot_to_hpIntake;
     public PathChain nearShoot_to_nearLeave, nearShoot_to_midLeave;
-    public PathChain nearShoot_to_openGate;
+    public PathChain nearShoot_to_openGateIntake, nearShoot_to_openGateBasic;
     /**
      * <hr></br>
      * <h4>Mid Shooting Pose</h4>
      */
     public PathChain midShoot_to_nearPreload, midShoot_to_midPreload, midShoot_to_farPreload;
-    public PathChain midShoot_to_hpPreload, midShoot_to_rampIntake, midShoot_to_hpIntake;
+    public PathChain midShoot_to_hpPreload, midShoot_to_hpIntake;
     public PathChain midShoot_to_nearLeave, midShoot_to_midLeave;
-    public PathChain midShoot_to_openGate;
+    public PathChain midShoot_to_openGateIntake, midShoot_to_openGateBasic;
     /**
      * <hr></br>
      * <h4>Far Shooting Pose</h4>
      */
     public PathChain farShoot_to_nearPreload, farShoot_to_midPreload, farShoot_to_farPreload;
-    public PathChain farShoot_to_hpPreload, farShoot_to_rampIntake, farShoot_to_hpIntake;
+    public PathChain farShoot_to_hpPreload, farShoot_to_hpIntake;
     public PathChain farShoot_to_midLeave, farShoot_to_farLeave;
-    public PathChain farShoot_to_openGate;
+    public PathChain farShoot_to_openGateIntake, farShoot_to_openGateBasic;
     /**
      * <hr></br>
-     * <h4>Open Gate Pose</h4>
+     * <h4>Open Gate Basic Pose (No Intake)</h4>
      */
-    public PathChain openGate_to_nearShoot, openGate_to_midShoot, openGate_to_farShoot;
-    public PathChain openGate_to_rampIntake;
+    public PathChain openGateBasic_to_nearShoot, openGateBasic_to_midShoot, openGateBasic_to_farShoot;
+    /**
+     * <hr></br>
+     * <h4>Open Gate Basic Pose (Intake)</h4>
+     */
+    public PathChain openGateIntake_to_nearShoot, openGateIntake_to_midShoot, openGateIntake_to_farShoot;
 
 
 
 
-    public Pose autoMirror(Pose pose, LoadHardwareClass.Alliance alliance){
+
+    public Pose autoMirror(Pose pose){
         if (alliance == LoadHardwareClass.Alliance.BLUE){
             return new Pose(
                     144 - pose.getX(),
@@ -187,7 +198,7 @@ public class Pedro_Paths {
         nearPreload_to_farShoot = follower.pathBuilder()
                 .addPath(new BezierCurve(
                         nearPreload,
-                        new Pose(80.000, 83.500),
+                        autoMirror(new Pose(80.000, 83.500)),
                         farShoot
                 ))
                 .setLinearHeadingInterpolation(nearPreload.getHeading(), farShoot.getHeading())
@@ -197,7 +208,7 @@ public class Pedro_Paths {
         midPreload_to_nearShoot = follower.pathBuilder()
                 .addPath(new BezierCurve(
                         midPreload,
-                        new Pose(65,59.5),
+                        autoMirror(new Pose(65,59.5)),
                         nearShoot
                 ))
                 .setLinearHeadingInterpolation(midPreload.getHeading(), nearShoot.getHeading())
@@ -205,7 +216,7 @@ public class Pedro_Paths {
         midPreload_to_midShoot = follower.pathBuilder()
                 .addPath(new BezierCurve(
                         midPreload,
-                        new Pose(65,59.5),
+                        autoMirror(new Pose(65,59.5)),
                         midShoot
                 ))
                 .setLinearHeadingInterpolation(midPreload.getHeading(), midShoot.getHeading())
@@ -213,7 +224,7 @@ public class Pedro_Paths {
         midPreload_to_farShoot = follower.pathBuilder()
                 .addPath(new BezierCurve(
                         midPreload,
-                        new Pose(90.000, 59.500),
+                        autoMirror(new Pose(90.000, 59.500)),
                         farShoot
                 ))
                 .setLinearHeadingInterpolation(midPreload.getHeading(), farShoot.getHeading())
@@ -223,8 +234,8 @@ public class Pedro_Paths {
         farPreload_to_nearShoot = follower.pathBuilder()
                 .addPath(new BezierCurve(
                         farPreload,
-                        new Pose(75,30),
-                        new Pose(80,100),
+                        autoMirror(new Pose(75,30)),
+                        autoMirror(new Pose(80,100)),
                         nearShoot
                 ))
                 .setLinearHeadingInterpolation(midPreload.getHeading(), nearShoot.getHeading())
@@ -232,7 +243,7 @@ public class Pedro_Paths {
         farPreload_to_midShoot = follower.pathBuilder()
                 .addPath(new BezierCurve(
                         farPreload,
-                        new Pose(85,32),
+                        autoMirror(new Pose(90,41)),
                         midShoot
                 ))
                 .setLinearHeadingInterpolation(midPreload.getHeading(), midShoot.getHeading())
@@ -249,7 +260,7 @@ public class Pedro_Paths {
         nearShoot_to_nearPreload = follower.pathBuilder()
                 .addPath(new BezierCurve(
                         nearShoot,
-                        new Pose(60, 80),
+                        autoMirror(new Pose(60, 80)),
                         nearPreload
                 ))
                 .setLinearHeadingInterpolation(nearShoot.getHeading(), nearPreload.getHeading())
@@ -257,7 +268,7 @@ public class Pedro_Paths {
         nearShoot_to_midPreload = follower.pathBuilder()
                 .addPath(new BezierCurve(
                         nearShoot,
-                        new Pose(60, 55),
+                        autoMirror(new Pose(60, 55)),
                         midPreload
                 ))
                 .setLinearHeadingInterpolation(nearShoot.getHeading(), midPreload.getHeading())
@@ -265,7 +276,7 @@ public class Pedro_Paths {
         nearShoot_to_farPreload = follower.pathBuilder()
                 .addPath(new BezierCurve(
                         nearShoot,
-                        new Pose(60, 27),
+                        autoMirror(new Pose(60, 27)),
                         farPreload
                 ))
                 .setLinearHeadingInterpolation(nearShoot.getHeading(), farPreload.getHeading())
@@ -282,7 +293,7 @@ public class Pedro_Paths {
         midShoot_to_midPreload = follower.pathBuilder()
                 .addPath(new BezierCurve(
                         midShoot,
-                        new Pose(75, 56),
+                        autoMirror(new Pose(75, 56)),
                         midPreload
                 ))
                 .setLinearHeadingInterpolation(midShoot.getHeading(), midPreload.getHeading())
@@ -290,7 +301,7 @@ public class Pedro_Paths {
         midShoot_to_farPreload = follower.pathBuilder()
                 .addPath(new BezierCurve(
                         midShoot,
-                        new Pose(68, 30),
+                        autoMirror(new Pose(68, 30)),
                         farPreload
                 ))
                 .setLinearHeadingInterpolation(midShoot.getHeading(), farPreload.getHeading())
@@ -300,7 +311,7 @@ public class Pedro_Paths {
         farShoot_to_nearPreload = follower.pathBuilder()
                 .addPath(new BezierCurve(
                         farShoot,
-                        new Pose(73, 88),
+                        autoMirror(new Pose(73, 88)),
                         nearPreload
                 ))
                 .setLinearHeadingInterpolation(farShoot.getHeading(), nearPreload.getHeading())
@@ -308,7 +319,7 @@ public class Pedro_Paths {
         farShoot_to_midPreload = follower.pathBuilder()
                 .addPath(new BezierCurve(
                         farShoot,
-                        new Pose(78, 62),
+                        autoMirror(new Pose(78, 62)),
                         midPreload
                 ))
                 .setLinearHeadingInterpolation(farShoot.getHeading(), midPreload.getHeading())
@@ -316,7 +327,7 @@ public class Pedro_Paths {
         farShoot_to_farPreload = follower.pathBuilder()
                 .addPath(new BezierCurve(
                         farShoot,
-                        new Pose(82.5, 35),
+                        autoMirror(new Pose(82.5, 35)),
                         farPreload
                 ))
                 .setLinearHeadingInterpolation(farShoot.getHeading(), farPreload.getHeading())
@@ -370,27 +381,132 @@ public class Pedro_Paths {
                 .setConstantHeadingInterpolation(farShoot.getHeading())
                 .build();
     }
+    public void buildMidShootToOpenGates(){
+        midShoot_to_openGateBasic = follower.pathBuilder()
+                .addPath(new BezierCurve(
+                    midShoot,
+                    autoMirror(new Pose(94, 71)),
+                    openGateBasic
+                ))
+                .setLinearHeadingInterpolation(midShoot.getHeading(), openGateBasic.getHeading())
+                .build();
+        midShoot_to_openGateIntake = follower.pathBuilder()
+                .addPath(new BezierCurve(
+                        midShoot,
+                        autoMirror(new Pose(96, 66.5)),
+                        openGateIntakeGate
+                ))
+                .setLinearHeadingInterpolation(midShoot.getHeading(), openGateIntakeRamp.getHeading())
+                .addPath(new BezierLine(
+                        openGateIntakeGate,
+                        openGateIntakeRamp
+                ))
+                .setLinearHeadingInterpolation(openGateIntakeGate.getHeading(), openGateIntakeRamp.getHeading())
+                .build();
+    }
+    public void buildFarShootToOpenGates(){
+        farShoot_to_openGateBasic = follower.pathBuilder()
+                .addPath(new BezierCurve(
+                        farShoot,
+                        autoMirror(new Pose(94, 71)),
+                        openGateBasic
+                ))
+                .setLinearHeadingInterpolation(midShoot.getHeading(), openGateBasic.getHeading())
+                .build();
+        farShoot_to_openGateIntake = follower.pathBuilder()
+                .addPath(new BezierCurve(
+                        farShoot,
+                        autoMirror(new Pose(96, 66.5)),
+                        openGateIntakeGate
+                ))
+                .setLinearHeadingInterpolation(farShoot.getHeading(), openGateIntakeRamp.getHeading())
+                .addPath(new BezierLine(
+                        openGateIntakeGate,
+                        openGateIntakeRamp
+                ))
+                .setLinearHeadingInterpolation(openGateIntakeGate.getHeading(), openGateIntakeRamp.getHeading())
+                .build();
+    }
+    public void buildOpenGateIntakeToShootings(){
+        openGateIntake_to_farShoot = follower.pathBuilder()
+                .addPath(new BezierCurve(
+                        openGateIntakeRamp,
+                        autoMirror(new Pose(94, 71)),
+                        farShoot
+                ))
+                .setLinearHeadingInterpolation(openGateIntakeRamp.getHeading(), farShoot.getHeading())
+                .build();
+        openGateIntake_to_midShoot = follower.pathBuilder()
+                .addPath(new BezierCurve(
+                        openGateIntakeRamp,
+                        autoMirror(new Pose(97, 60)),
+                        midShoot
+                ))
+                .setLinearHeadingInterpolation(openGateIntakeRamp.getHeading(), midShoot.getHeading())
+                .build();
+    }
+    public void buildOpenGateBasicToShootings(){
+        openGateBasic_to_farShoot = follower.pathBuilder()
+                .addPath(new BezierCurve(
+                        openGateIntakeRamp,
+                        autoMirror(new Pose(94, 71)),
+                        farShoot
+                ))
+                .setLinearHeadingInterpolation(openGateBasic.getHeading(), farShoot.getHeading())
+                .build();
+        openGateBasic_to_midShoot = follower.pathBuilder()
+                .addPath(new BezierCurve(
+                        openGateBasic,
+                        autoMirror(new Pose(97, 67)),
+                        midShoot
+                ))
+                .setLinearHeadingInterpolation(openGateBasic.getHeading(), midShoot.getHeading())
+                .build();
+    }
+    public void buildPreloadsToOpenGateBasic(){
+        nearPreload_to_openGateBasic = follower.pathBuilder()
+                .addPath(new BezierCurve(
+                        nearPreload,
+                        autoMirror(new Pose(115, 75)),
+                        openGateBasic
+                ))
+                .setLinearHeadingInterpolation(nearPreload.getHeading(), openGateBasic.getHeading())
+                .build();
+        midPreload_to_openGateBasic = follower.pathBuilder()
+                .addPath(new BezierCurve(
+                        midPreload,
+                        autoMirror(new Pose(110, 59)),
+                        openGateBasicReversed
+                ))
+                .setLinearHeadingInterpolation(midPreload.getHeading(), openGateBasicReversed.getHeading())
+                .build();
+    }
 
 
     /**
      * Builds all the paths, mirroring them to the other side of the field if necessary
      */
-    public void buildPaths(LoadHardwareClass.Alliance Alliance, Follower follow){
+    public void buildPaths(Follower follow){
         follower = follow;
+        alliance = LoadHardwareClass.selectedAlliance;
 
-        nearStart = autoMirror(nearStart, Alliance);
-        farStart = autoMirror(farStart, Alliance);
-        nearPreload = autoMirror(nearPreload, Alliance);
-        midPreload = autoMirror(midPreload, Alliance);
-        farPreload = autoMirror(farPreload, Alliance);
-        nearShoot = autoMirror(nearShoot, Alliance);
-        midShoot = autoMirror(midShoot, Alliance);
-        farShoot = autoMirror(farShoot, Alliance);
-        noTurretMidShoot = autoMirror(noTurretMidShoot, Alliance);
-        noTurretFarShoot = autoMirror(noTurretFarShoot, Alliance);
-        nearLeave = autoMirror(nearLeave, Alliance);
-        midLeave = autoMirror(midLeave, Alliance);
-        farLeave = autoMirror(farLeave, Alliance);
+        nearStart = autoMirror(nearStart);
+        farStart = autoMirror(farStart);
+        nearPreload = autoMirror(nearPreload);
+        midPreload = autoMirror(midPreload);
+        farPreload = autoMirror(farPreload);
+        nearShoot = autoMirror(nearShoot);
+        midShoot = autoMirror(midShoot);
+        farShoot = autoMirror(farShoot);
+        noTurretMidShoot = autoMirror(noTurretMidShoot);
+        noTurretFarShoot = autoMirror(noTurretFarShoot);
+        nearLeave = autoMirror(nearLeave);
+        midLeave = autoMirror(midLeave);
+        farLeave = autoMirror(farLeave);
+        openGateBasic = autoMirror(openGateBasic);
+        openGateBasicReversed = autoMirror(openGateBasicReversed);
+        openGateIntakeGate = autoMirror(openGateIntakeGate);
+        openGateIntakeRamp = autoMirror(openGateIntakeRamp);
 
 
         /// All paths are for the RED side of the field. they will be mirrored if necessary.
@@ -409,5 +525,11 @@ public class Pedro_Paths {
         buildShooting1ToLeaves();
         buildShooting2ToLeaves();
         buildShooting3ToLeaves();
+        // Paths going from shooting positions to open gate positions
+        buildFarShootToOpenGates();
+        buildMidShootToOpenGates();
+        buildOpenGateIntakeToShootings();
+        buildOpenGateBasicToShootings();
+        buildPreloadsToOpenGateBasic();
     }
 }

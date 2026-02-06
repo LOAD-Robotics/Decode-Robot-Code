@@ -32,4 +32,6 @@
 
 // TODO: create paths to pick up human player zone Artifacts and to open the gate
 
-//TODO Link the PID update to the flywheel state so it can float instead of break at zero power
+// DONE Link the PID update to the flywheel state so it can float instead of break at zero power
+
+// TODO: create a custom Pose class that automirrors internally

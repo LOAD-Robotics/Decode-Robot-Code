@@ -18,6 +18,7 @@ import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Drivetrain_.Pedro
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.LoadHardwareClass;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
+import dev.nextftc.core.commands.delays.WaitUntil;
 import dev.nextftc.core.commands.groups.SequentialGroup;
 import dev.nextftc.core.commands.utility.InstantCommand;
 import dev.nextftc.extensions.pedro.PedroComponent;
@@ -60,22 +61,30 @@ public class Auto_Main_ extends NextFTCOpMode {
                         new Near_12Ball(),
                         new Near_9Ball(),
                         new Far_9Ball(),
-                        new Far_6Ball()
+                        new Far_6Ball(),
+                        new test_Auto()
                 ));
         prompter.onComplete(() -> {
                     selectedAlliance = prompter.get("alliance");
                     selectedAuto = prompter.get("auto");
-                    telemetry.addData("Selection", "Complete");
-                    telemetry.addData("Alliance", selectedAlliance.toString());
-                    telemetry.addData("Auto", selectedAuto);
                     telemetry.update();
                     // Build paths
-                    paths.buildPaths(selectedAlliance, follower());
+                    paths.buildPaths(follower());
                     // Initialize all hardware of the robot
-                    Robot.init(paths.autoMirror(selectedAuto.getStartPose(), selectedAlliance), follower());
+                    Robot.init(selectedAuto.getStartPose(), follower());
                     while (opModeInInit() && Robot.turret.zeroTurret()){
+                        telemetry.addLine("TURRET ZEROING");
+                        telemetry.addData("Selection", "Complete");
+                        telemetry.addData("Alliance", selectedAlliance.toString());
+                        telemetry.addData("Auto", selectedAuto);
+                        telemetry.update();
                         sleep(0);
                     }
+            telemetry.addLine("TURRET READY");
+            telemetry.addData("Selection", "Complete");
+            telemetry.addData("Alliance", selectedAlliance.toString());
+            telemetry.addData("Auto", selectedAuto);
+            telemetry.update();
         });
     }
 
@@ -110,8 +119,7 @@ public class Auto_Main_ extends NextFTCOpMode {
         MecanumDrivetrainClass.robotPose = Robot.drivetrain.follower.getPose();
 
         telemetry.addLine();
-        telemetry.addData("FarStart", paths.farStart);
-        telemetry.addData("FarShoot", paths.noTurretFarShoot);
+        telemetry.addData("Mirror -90", Math.toDegrees(paths.autoMirror(new Pose(0,0,-90)).getHeading()));
         telemetry.update();
     }
 
@@ -161,7 +169,7 @@ public class Auto_Main_ extends NextFTCOpMode {
                     Commands.shootBalls(),
                     Commands.setFlywheelState(Turret.flywheelState.ON),
                     Commands.setIntakeMode(Intake.intakeMode.INTAKING),
-                    Commands.runPath(paths.farShoot_noTurret_to_farPreload, true, 1),
+                    Commands.runPath(paths.farShoot_to_farPreload, true, 1),
                     Commands.runPath(paths.farPreload_to_farShoot, true, 1),
                     Commands.shootBalls(),
                     Commands.runPath(paths.farShoot_to_farLeave, true, 1)
@@ -285,28 +293,24 @@ public class Auto_Main_ extends NextFTCOpMode {
     }
 
     private class test_Auto extends Auto{
-        public Pose startPose = paths.farStart;
-        public boolean turretEnabled = false;
-
         @Override
         public Pose getStartPose(){
-            return startPose;
+            return paths.farStart;
         }
         @Override
         public boolean getTurretEnabled(){
-            return turretEnabled;
+            return true;
         }
 
         @Override
         public void runAuto(){
             double tempSpeed = 1;
             new SequentialGroup(
-                    Commands.runPath(paths.farStart_to_farPreload,true,tempSpeed),
-                    Commands.runPath(paths.farPreload_to_farShoot,true,tempSpeed),
-                    Commands.runPath(paths.farShoot_to_midPreload, true, tempSpeed),
-                    Commands.runPath(paths.midPreload_to_midShoot, true, tempSpeed),
-                    Commands.runPath(paths.midShoot_to_nearPreload, true, tempSpeed),
-                    Commands.runPath(paths.nearPreload_to_nearShoot, true, tempSpeed)
+                    Commands.runPath(paths.farStart_to_midShoot,true, tempSpeed),
+                    Commands.runPath(paths.midShoot_to_openGateIntake,true, tempSpeed),
+                    new WaitUntil(() -> gamepad1.b),
+                    Commands.runPath(paths.openGateIntake_to_farShoot,true, tempSpeed),
+                    Commands.runPath(paths.farShoot_to_openGateIntake,true, tempSpeed)
             ).schedule();
         }
 
@@ -314,6 +318,4 @@ public class Auto_Main_ extends NextFTCOpMode {
         @Override
         public String toString(){return "Test Auto";}
     }
-
-
 }

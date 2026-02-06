@@ -210,8 +210,8 @@ public class Turret {
             rotation.setAngle(Math.max(0, calcLocalizer()+blueOffset)%360, -Math.toDegrees(Robot.drivetrain.follower.getAngularVelocity()));
         }
         // Set the hood angle
-        Pose goalPose = new Pose(0-posOffset,144+posOffset,0);
-        if (LoadHardwareClass.selectedAlliance == LoadHardwareClass.Alliance.RED) {goalPose = new Pose(144+posOffset, 144+posOffset, 0);}
+        //Pose goalPose = new Pose(0-posOffset,144+posOffset,0);
+        //if (LoadHardwareClass.selectedAlliance == LoadHardwareClass.Alliance.RED) {goalPose = new Pose(144+posOffset, 144+posOffset, 0);}
         //setHood(hoodLUT.get(Robot.drivetrain.follower.getPose().distanceFrom(goalPose)));
     }
 
@@ -318,9 +318,6 @@ public class Turret {
                 zeroed = true;
             }
         }
-        opMode.telemetry.addLine("ZEROING TURRET");
-        opMode.telemetry.addData("Turret Power", rotation.getPower());
-        opMode.telemetry.update();
         return !zeroed;
     }
 

@@ -117,10 +117,10 @@ public class Teleop_Main_ extends LinearOpMode {
             if (MecanumDrivetrainClass.robotPose == null){
                 startPoses pose = prompter.get("startPose");
                 if (pose.equals(startPoses.FAR)) {
-                    startPose = Paths.autoMirror(Paths.farStart, selectedAlliance);
+                    startPose = Paths.autoMirror(Paths.farStart);
                     telemetry.addData("Start Pose", "Far Start Pose");
                 } else if (pose.equals(startPoses.NEAR)) {
-                    startPose = Paths.autoMirror(Paths.nearStart, selectedAlliance);
+                    startPose = Paths.autoMirror(Paths.nearStart);
                     telemetry.addData("Start Pose", "Near Start Pose");
                 }
             }else{
@@ -140,7 +140,7 @@ public class Teleop_Main_ extends LinearOpMode {
         // Initialize all hardware of the robot
         Robot.init(startPose);
         runtime.reset();
-        Paths.buildPaths(selectedAlliance, Robot.drivetrain.follower);
+        Paths.buildPaths(Robot.drivetrain.follower);
         Robot.drivetrain.startTeleOpDrive();
 
         // run until the end of the match (driver presses STOP)
