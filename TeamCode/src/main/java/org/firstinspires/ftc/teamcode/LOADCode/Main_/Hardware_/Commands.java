@@ -10,6 +10,7 @@ import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Turret
 
 import dev.nextftc.core.commands.Command;
 import dev.nextftc.core.commands.delays.WaitUntil;
+import dev.nextftc.core.commands.groups.ParallelRaceGroup;
 import dev.nextftc.core.commands.groups.SequentialGroup;
 import dev.nextftc.core.commands.utility.InstantCommand;
 import dev.nextftc.core.commands.utility.LambdaCommand;
@@ -26,11 +27,15 @@ public class Commands {
     // Delay timer for shooting sequence
     private static final TimerEx shootingTimerHalfSec = new TimerEx(0.5);
     private static final TimerEx shootingTimer2sec = new TimerEx(2);
-    private static Command resetShootingTimer1sec() {
-        return new LambdaCommand("resetShootingTimer1.5sec").setStart(shootingTimerHalfSec::restart);
+    private static final TimerEx shootingTimer5sec = new TimerEx(5);
+    private static Command resetShootingTimerHalfsec() {
+        return new LambdaCommand("resetShootingTimer0.5sec").setStart(shootingTimerHalfSec::restart);
     }
     private static Command resetShootingTimer2sec() {
         return new LambdaCommand("resetShootingTimer2sec").setStart(shootingTimer2sec::restart);
+    }
+    private static Command resetShootingTimer5sec() {
+        return new LambdaCommand("resetShootingTimer5sec").setStart(shootingTimer2sec::restart);
     }
 
     public Command runPath(PathChain path, boolean holdEnd, double maxPower) {
@@ -71,6 +76,18 @@ public class Commands {
         );
     }
 
+    public Command waitForArtifacts(){
+        return new SequentialGroup(
+                setIntakeMode(Intake.intakeMode.INTAKING),
+                resetShootingTimer5sec(),
+                new WaitUntil(() -> Robot.intake.getTopSensorState() || Robot.intake.getBottomSensorState()),
+                new ParallelRaceGroup(
+                        new WaitUntil(() -> Robot.intake.getTopSensorState() && Robot.intake.getBottomSensorState()),
+                        new WaitUntil(shootingTimer5sec::isDone)
+                )
+        );
+    }
+
     public Command shootBalls(){
         return new SequentialGroup(
                 // Ensure the flywheel is up to speed, if not, spin up first
@@ -85,7 +102,7 @@ public class Commands {
                 // Shoot the last ball
                 setIntakeMode(Intake.intakeMode.SHOOTING),
                 setTransferState(Intake.transferState.UP),
-                resetShootingTimer1sec(),
+                resetShootingTimerHalfsec(),
                 new WaitUntil(shootingTimerHalfSec::isDone),
 
                 // Reset the systems
