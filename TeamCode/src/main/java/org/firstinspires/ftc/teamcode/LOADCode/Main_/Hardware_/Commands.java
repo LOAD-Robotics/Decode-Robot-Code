@@ -108,8 +108,7 @@ public class Commands {
                 // Reset the systems
                 setIntakeMode(Intake.intakeMode.OFF),
                 setGateState(Turret.gatestate.CLOSED),
-                setTransferState(Intake.transferState.DOWN),
-                setFlywheelState(Turret.flywheelState.OFF)
+                setTransferState(Intake.transferState.DOWN)
         );
     }
 

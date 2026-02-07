@@ -65,7 +65,6 @@ public class Teleop_Main_ extends LinearOpMode {
     private final TelemetryManager panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
 
     public int shootingState = 0;
-    public boolean turretOn = true;
     public TimerEx stateTimer = new TimerEx(1);
     public double hoodOffset = 0;
     public Pose holdPoint = new Pose(72, 72, 90);
@@ -116,11 +115,11 @@ public class Teleop_Main_ extends LinearOpMode {
             telemetry.addData("Alliance", selectedAlliance);
             if (MecanumDrivetrainClass.robotPose == null){
                 startPoses pose = prompter.get("startPose");
-                if (pose.equals(startPoses.FAR)) {
-                    startPose = Paths.autoMirror(Paths.farStart);
+                if (pose == startPoses.FAR) {
+                    startPose = Paths.farStart;
                     telemetry.addData("Start Pose", "Far Start Pose");
-                } else if (pose.equals(startPoses.NEAR)) {
-                    startPose = Paths.autoMirror(Paths.nearStart);
+                } else if (pose == startPoses.NEAR) {
+                    startPose = Paths.nearStart;
                     telemetry.addData("Start Pose", "Near Start Pose");
                 }
             }else{
@@ -138,7 +137,11 @@ public class Teleop_Main_ extends LinearOpMode {
         // Wait for the game to start (driver presses START)
         waitForStart();
         // Initialize all hardware of the robot
-        Robot.init(startPose);
+        if (selectedAlliance == LoadHardwareClass.Alliance.BLUE){
+            Robot.init(startPose.mirror());
+        }else{
+            Robot.init(startPose);
+        }
         runtime.reset();
         Paths.buildPaths(Robot.drivetrain.follower);
         Robot.drivetrain.startTeleOpDrive();
@@ -163,9 +166,7 @@ public class Teleop_Main_ extends LinearOpMode {
             telemetry.addData("SpeedMult", Robot.drivetrain.speedMultiplier);
             telemetry.addLine();
             //positional telemetry
-            telemetry.addData("X Position", Robot.drivetrain.follower.getPose().getX());
-            telemetry.addData("Y Position", Robot.drivetrain.follower.getPose().getY());
-            telemetry.addData("Heading", Math.toDegrees(Robot.drivetrain.follower.getPose().getHeading()));
+            telemetry.addData("Robot Position [X, Y, H]", "[" + Robot.drivetrain.follower.getPose().getX() + ", " + Robot.drivetrain.follower.getPose().getY() + ", " + Robot.drivetrain.follower.getPose().getHeading() + "]");
             telemetry.addData("Distance From Goal", Robot.drivetrain.distanceFromGoal());
 
             telemetry.addLine();
@@ -175,7 +176,8 @@ public class Teleop_Main_ extends LinearOpMode {
             telemetry.addData("Turret Target Angle", Robot.turret.rotation.target);
             telemetry.addData("Turret Actual Angle", Robot.turret.rotation.getAngleAbsolute());
             telemetry.addData("Turret Hood Angle", Robot.turret.getHood());
-            telemetry.addData("Turret Offset", hoodOffset);
+            telemetry.addData("Turret Hood Offset", hoodOffset);
+            telemetry.addData("Turret Target [X, Y]", "[" + Robot.turret.calcGoalPose().getX() + ", " + Robot.turret.calcGoalPose().getY() + "]");
 
             telemetry.addLine();
             panelsTelemetry.addData("Flywheel Target Speed", Robot.turret.flywheel.target);
@@ -337,12 +339,7 @@ public class Teleop_Main_ extends LinearOpMode {
      * </ul>
      */
     public void Gamepad2() {
-
-        // Turret Aimbot
-        if (gamepad2.aWasPressed()){
-            turretOn = !turretOn;
-        }
-        Robot.turret.updateAimbot(turretOn, true, hoodOffset);
+        Robot.turret.updateAimbot(true, true, hoodOffset);
 
         double dylanStickDeadzones = 0.2;
 

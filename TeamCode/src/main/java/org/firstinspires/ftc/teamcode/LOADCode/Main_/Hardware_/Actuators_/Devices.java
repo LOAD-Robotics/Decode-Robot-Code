@@ -14,7 +14,6 @@ import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.LoadHardwareClass;
 import org.firstinspires.ftc.teamcode.Prism.Color;
 import org.firstinspires.ftc.teamcode.Prism.GoBildaPrismDriver;
 import org.firstinspires.ftc.teamcode.Prism.PrismAnimations;
@@ -358,7 +357,6 @@ public class Devices {
         public void init(@NonNull OpMode opmode, String prismDeviceName, Integer stripLength){
             prism = opmode.hardwareMap.get(GoBildaPrismDriver.class,prismDeviceName);
             prism.setStripLength(stripLength);
-
         }
 
         public void setColor(Color color){

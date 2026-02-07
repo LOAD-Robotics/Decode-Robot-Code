@@ -23,8 +23,8 @@ public class Pedro_Paths {
     public Pose nearPreload = new Pose(124.000, 83.500, Math.toRadians(0));
     public Pose midPreload = new Pose(130.000, 59.500, Math.toRadians(0));
     public Pose farPreload = new Pose(130.000, 35.500, Math.toRadians(0));
-    public Pose hpPreload = new Pose(136, 8, -90);
-    public Pose rampIntake = new Pose(133, 55, 65);
+    public Pose hpPreload = new Pose(135, 8, -90);
+    public Pose rampIntake = new Pose(135, 44, 80);
     public Pose hpIntake = null;
     // Shooting Poses
     public Pose nearShoot = new Pose(115, 120, Math.toRadians(-35));
@@ -77,10 +77,12 @@ public class Pedro_Paths {
      * <hr></br>
      * <h4>Human Player Preload Pose</h4>
      */
+    public PathChain hpPreload_to_nearShoot, hpPreload_to_midShoot, hpPreload_to_farShoot;
     /**
      * <hr></br>
      * <h4>Ramp Intake Pose</h4>
      */
+    public PathChain rampIntake_to_nearShoot, rampIntake_to_midShoot, rampIntake_to_farShoot;
     /**
      * <hr></br>
      * <h4>Human Player Random Intake Pose</h4>
@@ -101,6 +103,7 @@ public class Pedro_Paths {
     public PathChain midShoot_to_hpPreload, midShoot_to_hpIntake;
     public PathChain midShoot_to_nearLeave, midShoot_to_midLeave;
     public PathChain midShoot_to_openGateIntake, midShoot_to_openGateBasic;
+    public PathChain midShoot_to_rampIntake;
     /**
      * <hr></br>
      * <h4>Far Shooting Pose</h4>
@@ -109,6 +112,7 @@ public class Pedro_Paths {
     public PathChain farShoot_to_hpPreload, farShoot_to_hpIntake;
     public PathChain farShoot_to_midLeave, farShoot_to_farLeave;
     public PathChain farShoot_to_openGateIntake, farShoot_to_openGateBasic;
+    public PathChain farShoot_to_rampIntake;
     /**
      * <hr></br>
      * <h4>Open Gate Basic Pose (No Intake)</h4>
@@ -453,6 +457,7 @@ public class Pedro_Paths {
                         farShoot
                 ))
                 .setLinearHeadingInterpolation(openGateBasic.getHeading(), farShoot.getHeading())
+                .setVelocityConstraint(10)
                 .build();
         openGateBasic_to_midShoot = follower.pathBuilder()
                 .addPath(new BezierCurve(
@@ -481,6 +486,72 @@ public class Pedro_Paths {
                 .setLinearHeadingInterpolation(midPreload.getHeading(), openGateBasicReversed.getHeading())
                 .build();
     }
+    public void buildShootingsToHPPreload(){
+        farShoot_to_hpPreload = follower.pathBuilder()
+                .addPath(new BezierCurve(
+                    farShoot,
+                    autoMirror(new Pose(136, 30)),
+                    hpPreload
+                ))
+                .setLinearHeadingInterpolation(farShoot.getHeading(), hpPreload.getHeading())
+                .build();
+        midShoot_to_hpPreload = follower.pathBuilder()
+                .addPath(new BezierCurve(
+                        midShoot,
+                        autoMirror(new Pose(87, 28)),
+                        autoMirror(new Pose(138, 42)),
+                        hpPreload
+                ))
+                .setLinearHeadingInterpolation(midShoot.getHeading(), hpPreload.getHeading())
+                .build();
+    }
+    public void buildShootingsToRampIntake(){
+        midShoot_to_rampIntake = follower.pathBuilder()
+                .addPath(new BezierCurve(
+                        midShoot,
+                        autoMirror(new Pose(85, 40)),
+                        autoMirror(new Pose(137, 2)),
+                        autoMirror(new Pose(135, 30, rampIntake.getHeading()))
+                ))
+                .setLinearHeadingInterpolation(midShoot.getHeading(), rampIntake.getHeading())
+                .addPath(new BezierLine(
+                        autoMirror(new Pose(135, 30, rampIntake.getHeading())),
+                        rampIntake
+                ))
+                .setConstantHeadingInterpolation(rampIntake.getHeading())
+                .build();
+        farShoot_to_rampIntake = follower.pathBuilder()
+                .addPath(new BezierCurve(
+                        farShoot,
+                        autoMirror(new Pose(137, 2)),
+                        autoMirror(new Pose(135, 30, rampIntake.getHeading()))
+                ))
+                .setLinearHeadingInterpolation(farShoot.getHeading(), rampIntake.getHeading())
+                .addPath(new BezierLine(
+                        autoMirror(new Pose(135, 30, rampIntake.getHeading())),
+                        rampIntake
+                ))
+                .setConstantHeadingInterpolation(rampIntake.getHeading())
+                .build();
+    }
+    public void buildHPPreloadToShootings(){
+        hpPreload_to_farShoot = follower.pathBuilder()
+                .addPath(new BezierLine(
+                        hpPreload,
+                        farShoot
+                ))
+                .setLinearHeadingInterpolation(hpPreload.getHeading(), farShoot.getHeading())
+                .build();
+    }
+    public void buildRampIntakeToShootings(){
+        rampIntake_to_farShoot = follower.pathBuilder()
+                .addPath(new BezierLine(
+                        rampIntake,
+                        farShoot
+                ))
+                .setLinearHeadingInterpolation(rampIntake.getHeading(), farShoot.getHeading())
+                .build();
+    }
 
 
     /**
@@ -492,22 +563,26 @@ public class Pedro_Paths {
 
         nearStart = autoMirror(nearStart);
         farStart = autoMirror(farStart);
+
         nearPreload = autoMirror(nearPreload);
         midPreload = autoMirror(midPreload);
         farPreload = autoMirror(farPreload);
+        hpPreload = autoMirror(hpPreload);
+
         nearShoot = autoMirror(nearShoot);
         midShoot = autoMirror(midShoot);
         farShoot = autoMirror(farShoot);
         noTurretMidShoot = autoMirror(noTurretMidShoot);
         noTurretFarShoot = autoMirror(noTurretFarShoot);
+
         nearLeave = autoMirror(nearLeave);
         midLeave = autoMirror(midLeave);
         farLeave = autoMirror(farLeave);
+
         openGateBasic = autoMirror(openGateBasic);
         openGateBasicReversed = autoMirror(openGateBasicReversed);
         openGateIntakeGate = autoMirror(openGateIntakeGate);
         openGateIntakeRamp = autoMirror(openGateIntakeRamp);
-
 
         /// All paths are for the RED side of the field. they will be mirrored if necessary.
         // Paths going from each start position to each of the shooting positions.
@@ -531,5 +606,9 @@ public class Pedro_Paths {
         buildOpenGateIntakeToShootings();
         buildOpenGateBasicToShootings();
         buildPreloadsToOpenGateBasic();
+        buildShootingsToHPPreload();
+        buildShootingsToRampIntake();
+        buildRampIntakeToShootings();
+        buildHPPreloadToShootings();
     }
 }

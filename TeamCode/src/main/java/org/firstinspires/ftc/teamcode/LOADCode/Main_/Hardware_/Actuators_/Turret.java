@@ -220,7 +220,7 @@ public class Turret {
      */
     public void setGateState(gatestate state){
         if (state == gatestate.CLOSED){
-            gate.setAngle(0.48);
+            gate.setAngle(0.47);
         }else if (state == gatestate.OPEN){
             gate.setAngle(0.5);
         }
@@ -263,13 +263,27 @@ public class Turret {
      * Currently uses Pinpoint Odometry and trigonometry to get the angle.
      */
     public double calcLocalizer (){
-        Pose goalPose = new Pose(4,140,0);
-        if (LoadHardwareClass.selectedAlliance == LoadHardwareClass.Alliance.RED) {goalPose = new Pose(140, 140, 0);}
+        Pose goalPose = calcGoalPose();
 
         return (Math.toDegrees(Math.atan2(
                 goalPose.getY()-Robot.drivetrain.follower.getPose().getY(),
                 goalPose.getX()-Robot.drivetrain.follower.getPose().getX())
         ) - Math.toDegrees(Robot.drivetrain.follower.getPose().getHeading()) + 90)%360;
+    }
+    public Pose calcGoalPose(){
+        robotZone.setPosition(Robot.drivetrain.follower.getPose().getX(), Robot.drivetrain.follower.getPose().getY());
+        robotZone.setRotation(Robot.drivetrain.follower.getPose().getHeading());
+
+        Pose nearGoalPose = new Pose(8,140,0);
+        if (LoadHardwareClass.selectedAlliance == LoadHardwareClass.Alliance.RED) {nearGoalPose = new Pose(140, 140, 0);}
+        Pose farGoalPose = new Pose(16,140,0);
+        if (LoadHardwareClass.selectedAlliance == LoadHardwareClass.Alliance.RED) {farGoalPose = new Pose(136, 140, 0);}
+
+        if(robotZone.isInside(LoadHardwareClass.FarLaunchZone)){
+            return farGoalPose;
+        }else{
+            return nearGoalPose;
+        }
     }
 
     /**
