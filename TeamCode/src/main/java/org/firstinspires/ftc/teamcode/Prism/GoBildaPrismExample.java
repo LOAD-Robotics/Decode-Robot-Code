@@ -20,17 +20,13 @@
  *   SOFTWARE.
  */
 
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.Prism;
 
 
 import static org.firstinspires.ftc.teamcode.Prism.GoBildaPrismDriver.LayerHeight;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-
-import org.firstinspires.ftc.teamcode.Prism.Color;
-import org.firstinspires.ftc.teamcode.Prism.GoBildaPrismDriver;
-import org.firstinspires.ftc.teamcode.Prism.PrismAnimations;
 
 import java.util.concurrent.TimeUnit;
 

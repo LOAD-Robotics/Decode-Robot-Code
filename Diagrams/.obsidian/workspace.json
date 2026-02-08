@@ -11,10 +11,17 @@
             "id": "d3b4cee07f48b93b",
             "type": "leaf",
             "state": {
-              "type": "empty",
-              "state": {},
-              "icon": "lucide-file",
-              "title": "New tab"
+              "type": "canvas",
+              "state": {
+                "file": "File Structure.canvas",
+                "viewState": {
+                  "x": -670,
+                  "y": 70,
+                  "zoom": -0.2612571403908114
+                }
+              },
+              "icon": "lucide-layout-dashboard",
+              "title": "File Structure"
             }
           }
         ]
@@ -177,5 +184,8 @@
     }
   },
   "active": "d3b4cee07f48b93b",
-  "lastOpenFiles": []
+  "lastOpenFiles": [
+    "File Structure.png",
+    "File Structure Light.png"
+  ]
 }
