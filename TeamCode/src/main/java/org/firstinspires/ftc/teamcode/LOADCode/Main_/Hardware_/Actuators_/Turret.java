@@ -23,7 +23,7 @@ public class Turret {
     private final Devices.DcMotorExClass flywheel2 = new Devices.DcMotorExClass();
     private final Devices.ServoClass hood = new Devices.ServoClass();
     private final Devices.ServoClass gate = new Devices.ServoClass();
-    public final Devices.REVHallEffectSensorClass hall = new Devices.REVHallEffectSensorClass(); // Offset 20 degrees from directly forwards
+    public final Devices.REVHallEffectSensorClass hall = new Devices.REVHallEffectSensorClass();
 
     // Turret PID coefficients
     public static PIDCoefficients turretCoefficients = new PIDCoefficients(0.07, 0.00000000001, 0.003); // 223RPM Motor

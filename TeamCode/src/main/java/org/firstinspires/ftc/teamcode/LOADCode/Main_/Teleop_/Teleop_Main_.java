@@ -182,6 +182,7 @@ public class Teleop_Main_ extends LinearOpMode {
             telemetry.addData("Turret Hood Angle", Robot.turret.getHood());
             telemetry.addData("Turret Hood Offset", hoodOffset);
             telemetry.addData("Turret Target [X, Y]", "[" + Robot.turret.calcGoalPose().getX() + ", " + Robot.turret.calcGoalPose().getY() + "]");
+            telemetry.addData("Hall Effect Triggered", Robot.turret.hall.getTriggered());
 
             telemetry.addLine();
             panelsTelemetry.addData("Flywheel Target Speed", Robot.turret.flywheel.target);

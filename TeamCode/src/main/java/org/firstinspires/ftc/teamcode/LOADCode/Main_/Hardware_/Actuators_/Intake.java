@@ -17,6 +17,7 @@ public class Intake {
     public final Devices.DualProximitySensorClass bottomSensor = new Devices.DualProximitySensorClass();
 
     public enum intakeMode {
+        AUTO_INTAKING,
         INTAKING,
         SHOOTING,
         NO_BELT,
@@ -62,12 +63,15 @@ public class Intake {
      *     <li><code>intakeMode.OFF</code></li>
      * </ul>
      */
-    public void setMode(intakeMode direction){
-        if (direction == intakeMode.INTAKING){
-            //if (!(getTopSensorState() && getBottomSensorState())){
+    public void setMode(intakeMode direction) {
+        if (direction == intakeMode.AUTO_INTAKING) {
+            if (!(getTopSensorState() && getBottomSensorState())) {
                 belt.setPower(1);
-            //}
+            }
             intake.setPower(1);
+        }else if (direction == intakeMode.INTAKING){
+            intake.setPower(1);
+            belt.setPower(1);
         }else if (direction == intakeMode.SHOOTING){
             intake.setPower(0);
             belt.setPower(1);
@@ -99,6 +103,8 @@ public class Intake {
             return intakeMode.INTAKING;
         }else if (intakePower == 0 && beltPower == 1){
             return intakeMode.SHOOTING;
+        }else if (intakePower == 1 && beltPower == 0) {
+            return intakeMode.NO_BELT;
         }else if (intakePower == -1 && beltPower == -1){
             return intakeMode.REVERSING;
         }else{
