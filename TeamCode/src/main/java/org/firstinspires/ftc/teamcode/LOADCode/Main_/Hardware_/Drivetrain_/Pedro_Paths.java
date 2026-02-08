@@ -24,7 +24,7 @@ public class Pedro_Paths {
     public Pose midPreload = new Pose(130.000, 59.500, Math.toRadians(0));
     public Pose farPreload = new Pose(130.000, 35.500, Math.toRadians(0));
     public Pose hpPreload = new Pose(135, 8, -90);
-    public Pose rampIntake = new Pose(135, 44, 80);
+    public Pose rampIntake = new Pose(135, 40, 80);
     public Pose hpIntake = null;
     // Shooting Poses
     public Pose nearShoot = new Pose(115, 120, Math.toRadians(-35));

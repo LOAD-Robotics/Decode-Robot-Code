@@ -25,9 +25,13 @@ public class Commands {
     }
 
     // Delay timer for shooting sequence
+    private static final TimerEx shootingTimerFifthSec = new TimerEx(0.2);
     private static final TimerEx shootingTimerHalfSec = new TimerEx(0.5);
     private static final TimerEx shootingTimer2sec = new TimerEx(2);
     private static final TimerEx shootingTimer5sec = new TimerEx(5);
+    private static Command resetShootingTimerFifthsec() {
+        return new LambdaCommand("resetShootingTimer0.2sec").setStart(shootingTimerFifthSec::restart);
+    }
     private static Command resetShootingTimerHalfsec() {
         return new LambdaCommand("resetShootingTimer0.5sec").setStart(shootingTimerHalfSec::restart);
     }
@@ -94,8 +98,10 @@ public class Commands {
                 setFlywheelState(Turret.flywheelState.ON),
 
                 // Shoot the first two balls
-                setIntakeMode(Intake.intakeMode.INTAKING),
                 setGateState(Turret.gatestate.OPEN),
+                resetShootingTimerFifthsec(),
+                new WaitUntil(shootingTimerFifthSec::isDone),
+                setIntakeMode(Intake.intakeMode.INTAKING),
                 resetShootingTimer2sec(),
                 new WaitUntil(() -> (Robot.intake.getTopSensorState() && !Robot.intake.getBottomSensorState() && shootingTimer2sec.isDone())),
 

@@ -67,6 +67,8 @@ public class Teleop_Main_ extends LinearOpMode {
     public int shootingState = 0;
     public TimerEx stateTimer = new TimerEx(1);
     public double hoodOffset = 0;
+    public double turretOffset = 0;
+    public boolean turretOn = true;
     public Pose holdPoint = new Pose(72, 72, 90);
     public Boolean holdJustTriggered = false;
 
@@ -145,6 +147,7 @@ public class Teleop_Main_ extends LinearOpMode {
         runtime.reset();
         Paths.buildPaths(Robot.drivetrain.follower);
         Robot.drivetrain.startTeleOpDrive();
+        Robot.intake.setTransfer(transferState.DOWN);
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
@@ -162,6 +165,7 @@ public class Teleop_Main_ extends LinearOpMode {
             double flywheelPercentage = (int) Math.round(Robot.turret.getFlywheelRPM()/Robot.turret.getFlywheelCurrentMaxSpeed() *100);
             telemetry.addData("Flywheel Percentage", flywheelPercentage+"%");
             panelsTelemetry.addData("Flywheel Percentage", flywheelPercentage+"%");
+            telemetry.addData("ALLIANCE", selectedAlliance);
 
             telemetry.addData("SpeedMult", Robot.drivetrain.speedMultiplier);
             telemetry.addLine();
@@ -254,7 +258,7 @@ public class Teleop_Main_ extends LinearOpMode {
                 holdPoint = Robot.drivetrain.follower.getPose();
                 holdJustTriggered = true;
             }
-            Robot.drivetrain.follower.holdPoint(holdPoint);
+            //Robot.drivetrain.follower.holdPoint(holdPoint);
         } else if (gamepad1.left_trigger >= ariDeadZone) {
             if (holdJustTriggered){
                 Robot.drivetrain.follower.startTeleOpDrive();
@@ -339,7 +343,11 @@ public class Teleop_Main_ extends LinearOpMode {
      * </ul>
      */
     public void Gamepad2() {
-        Robot.turret.updateAimbot(true, true, hoodOffset);
+        if (gamepad2.aWasPressed()){
+            turretOn = !turretOn;
+        }
+        Robot.turret.updateAimbot(turretOn, true, hoodOffset);
+        Robot.turret.rotation.setOffsetDegrees(Robot.turret.rotation.getOffsetDegrees() + turretOffset);
 
         double dylanStickDeadzones = 0.2;
 
@@ -385,12 +393,20 @@ public class Teleop_Main_ extends LinearOpMode {
         }else if (gamepad2.dpadDownWasPressed()){
             hoodOffset -= 10;
         }
+        if (gamepad2.dpadLeftWasPressed()){
+            turretOffset += 2;
+        }else if (gamepad2.dpadLeftWasPressed()){
+            turretOffset -= 2;
+        }
 
 
         //Shoot (B Button Press)
         // Increment the shooting state
         if (gamepad2.bWasPressed() && shootingState < 1 && Robot.turret.getFlywheelRPM() > Robot.turret.getFlywheelCurrentMaxSpeed()-100) {
             shootingState++;
+        }
+        if (gamepad2.xWasPressed()){
+            shootingState = 3;
         }
         switch (shootingState) {
             case 0:

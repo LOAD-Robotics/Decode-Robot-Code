@@ -145,6 +145,12 @@ public class Devices {
         public void setOffsetDegrees(double degrees){
             setOffsetTicks(degrees * (ticksPerRotation/360));
         }
+        public double getOffsetTicks(){
+            return offset;
+        }
+        public double getOffsetDegrees(){
+            return offset/(ticksPerRotation/360);
+        }
         /**
          * Sets the runMode of the motor.
          * @param runMode The mode to set the motor to.

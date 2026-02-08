@@ -60,11 +60,11 @@ public class Auto_Main_ extends NextFTCOpMode {
                 ));
         prompter.prompt("auto",
                 new OptionPrompt<>("Select Auto",
+                        new MOE_365_FAR(),
                         new Near_12Ball(),
                         new Near_9Ball(),
                         new Far_9Ball(),
-                        new Far_6Ball(),
-                        new test_Auto()
+                        new Far_6Ball()
                 ));
         prompter.onComplete(() -> {
                     selectedAlliance = prompter.get("alliance");
@@ -270,17 +270,14 @@ public class Auto_Main_ extends NextFTCOpMode {
                     new InstantCommand(Commands.setFlywheelState(Turret.flywheelState.ON)),
                     Commands.runPath(paths.nearStart_to_midShoot, true, 1),
                     Commands.shootBalls(),
-                    Commands.setFlywheelState(Turret.flywheelState.ON),
                     Commands.setIntakeMode(Intake.intakeMode.INTAKING),
                     Commands.runPath(paths.midShoot_to_nearPreload, true, 1),
                     Commands.runPath(paths.nearPreload_to_midShoot, true, 1),
                     Commands.shootBalls(),
-                    Commands.setFlywheelState(Turret.flywheelState.ON),
                     Commands.setIntakeMode(Intake.intakeMode.INTAKING),
                     Commands.runPath(paths.midShoot_to_midPreload, true, 1),
                     Commands.runPath(paths.midPreload_to_midShoot, true, 1),
                     Commands.shootBalls(),
-                    Commands.setFlywheelState(Turret.flywheelState.ON),
                     Commands.setIntakeMode(Intake.intakeMode.INTAKING),
                     Commands.runPath(paths.midShoot_to_farPreload, true, 1),
                     Commands.runPath(paths.farPreload_to_midShoot, true, 1),
@@ -294,7 +291,7 @@ public class Auto_Main_ extends NextFTCOpMode {
         public String toString(){return "Near Zone 12 Ball";}
     }
 
-    private class test_Auto extends Auto{
+    private class MOE_365_FAR extends Auto{
         @Override
         public Pose getStartPose(){
             return paths.farStart;
@@ -306,7 +303,6 @@ public class Auto_Main_ extends NextFTCOpMode {
 
         @Override
         public void runAuto(){
-            double tempSpeed = 1;
             new SequentialGroup(
                     new ParallelRaceGroup(
                             new Delay(29),
@@ -321,6 +317,10 @@ public class Auto_Main_ extends NextFTCOpMode {
                                     Commands.setIntakeMode(Intake.intakeMode.INTAKING),
                                     Commands.runPath(paths.farShoot_to_rampIntake, true, 1),
                                     Commands.runPath(paths.rampIntake_to_farShoot, true, 1),
+                                    Commands.shootBalls(),
+                                    Commands.setIntakeMode(Intake.intakeMode.INTAKING),
+                                    Commands.runPath(paths.farShoot_to_hpPreload, true, 1),
+                                    Commands.runPath(paths.hpPreload_to_farShoot, true, 1),
                                     Commands.shootBalls(),
                                     Commands.setIntakeMode(Intake.intakeMode.INTAKING),
                                     Commands.runPath(paths.farShoot_to_hpPreload, true, 1),
@@ -344,6 +344,6 @@ public class Auto_Main_ extends NextFTCOpMode {
 
         @NonNull
         @Override
-        public String toString(){return "Test Auto";}
+        public String toString(){return "MOE 365 Far Zone Auto";}
     }
 }
