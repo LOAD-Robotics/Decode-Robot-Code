@@ -353,8 +353,14 @@ public class Devices {
         }
     }
 
-    public static class GoBildaPrismBarClass {
 
+    public enum StripState {
+        PROGRESS,
+        BLINK,
+        OFF
+    }
+    public static class GoBildaPrismBarClass  {
+        // Maximum length of 4 daisy chained strips is 36 (12 + 12 + 6 + 6)
         GoBildaPrismDriver prism;
         int maxStripLength;
 
@@ -362,25 +368,50 @@ public class Devices {
         PrismAnimations.Blink blinkAnim = new PrismAnimations.Blink(Color.BLUE);
         PrismAnimations.Solid blank = new PrismAnimations.Solid(Color.TRANSPARENT);
 
-        public void init(@NonNull OpMode opmode, String prismDeviceName, Integer stripLength){
-            prism = opmode.hardwareMap.get(GoBildaPrismDriver.class,prismDeviceName);
-            prism.setStripLength(stripLength);
-            maxStripLength = stripLength;
-        }
+        public void init(@NonNull OpMode opMode){
 
-        public void setColor(Color color){
-            solidColor.setPrimaryColor(color);
-        }
-
-        public void updateBarValue(int Percentage){
-            float floatPercentage = (float) Percentage / 100;
-            int endIndex = Math.round(maxStripLength * floatPercentage);
-            solidColor.setStartIndex(0);
-            solidColor.setStopIndex(endIndex);
-            blank.setStartIndex(endIndex+1);
-            blank.setStopIndex(maxStripLength);
-            prism.insertAndUpdateAnimation(GoBildaPrismDriver.LayerHeight.LAYER_0,blank);
-            prism.insertAndUpdateAnimation(GoBildaPrismDriver.LayerHeight.LAYER_1,solidColor);
         }
     }
+
+    /*
+    public enum StripState {
+    PROGRESS,
+    FULL_ALARM,
+    OFF
 }
+
+// Variables to track progress (0.0 to 1.0)
+double strip1Progress = 0.0;
+
+public void updateStrips(StripState state, double progress) {
+    switch (state) {
+        case PROGRESS:
+            // Strip 1: Short (6 LEDs, Starts at 0)
+            int s1End = 0 + (int)(6 * progress) - 1;
+            prism.setAnimation(0, PrismAnimation.SOLID_COLOR);
+            prism.setStartPoint(0, 0);
+            // Ensure end point is at least the start point to avoid errors
+            prism.setEndPoint(0, Math.max(0, s1End));
+            prism.setColor(0, Color.CYAN);
+            break;
+
+        case FULL_ALARM:
+            // Rapid blinking for the whole segment
+            prism.setAnimation(0, PrismAnimation.BLINKING);
+            prism.setStartPoint(0, 0);
+            prism.setEndPoint(0, 5);
+            prism.setSpeed(0, 255); // Max speed for "rapid" effect
+            prism.setColor(0, Color.RED);
+            break;
+
+        case OFF:
+            // Hide the layer or set to black
+            prism.setAnimation(0, PrismAnimation.OFF);
+            break;
+    }
+    // Only call this once at the end of your loop logic!
+    prism.update();
+}
+     */
+}
+
