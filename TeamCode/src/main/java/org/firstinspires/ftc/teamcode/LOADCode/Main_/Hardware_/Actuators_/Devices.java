@@ -356,17 +356,31 @@ public class Devices {
     public static class GoBildaPrismBarClass {
 
         GoBildaPrismDriver prism;
+        int maxStripLength;
 
         PrismAnimations.Solid solidColor = new PrismAnimations.Solid(Color.BLUE);
         PrismAnimations.Blink blinkAnim = new PrismAnimations.Blink(Color.BLUE);
+        PrismAnimations.Solid blank = new PrismAnimations.Solid(Color.TRANSPARENT);
 
         public void init(@NonNull OpMode opmode, String prismDeviceName, Integer stripLength){
             prism = opmode.hardwareMap.get(GoBildaPrismDriver.class,prismDeviceName);
             prism.setStripLength(stripLength);
+            maxStripLength = stripLength;
         }
 
         public void setColor(Color color){
+            solidColor.setPrimaryColor(color);
+        }
 
+        public void updateBarValue(int Percentage){
+            float floatPercentage = (float) Percentage / 100;
+            int endIndex = Math.round(maxStripLength * floatPercentage);
+            solidColor.setStartIndex(0);
+            solidColor.setStopIndex(endIndex);
+            blank.setStartIndex(endIndex+1);
+            blank.setStopIndex(maxStripLength);
+            prism.insertAndUpdateAnimation(GoBildaPrismDriver.LayerHeight.LAYER_0,blank);
+            prism.insertAndUpdateAnimation(GoBildaPrismDriver.LayerHeight.LAYER_1,solidColor);
         }
     }
 }
