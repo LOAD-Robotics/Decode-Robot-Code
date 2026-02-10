@@ -8,9 +8,12 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.skeletonarmy.marrow.zones.PolygonZone;
 
+import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.AprilTagVisionSystem;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.LoadHardwareClass;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Utils_;
 
+import dev.nextftc.control.ControlSystem;
+import dev.nextftc.control.KineticState;
 import dev.nextftc.control.feedback.PIDCoefficients;
 import dev.nextftc.control.feedforward.BasicFeedforwardParameters;
 
@@ -18,6 +21,7 @@ import dev.nextftc.control.feedforward.BasicFeedforwardParameters;
 public class Turret {
 
     // Hardware definitions
+    public final AprilTagVisionSystem vision = new AprilTagVisionSystem();
     public final Devices.DcMotorExClass rotation = new Devices.DcMotorExClass();
     public final Devices.DcMotorExClass flywheel = new Devices.DcMotorExClass();
     private final Devices.DcMotorExClass flywheel2 = new Devices.DcMotorExClass();
@@ -27,6 +31,7 @@ public class Turret {
 
     // Turret PID coefficients
     public static PIDCoefficients turretCoefficients = new PIDCoefficients(0.07, 0.00000000001, 0.003); // 223RPM Motor
+    public static PIDCoefficients cameraCoefficients = new PIDCoefficients(0, 0, 0);
 
     // Flywheel PID coefficients for various speeds
     //public static PIDCoefficients flywheelCoefficients = new PIDCoefficients(0.0002, 0, 0); // 4500 RPM
@@ -71,6 +76,10 @@ public class Turret {
      * Stores the zeroing state of the turret
      */
     public static boolean zeroed = false;
+    /**
+     * Controls which aiming system to use.
+     */
+    public boolean useCameraAim = false;
 
     // Stores important objects for later access
     OpMode opMode = null;
@@ -85,6 +94,9 @@ public class Turret {
         // Store important objects in their respective variables
         opMode = opmode;
         Robot = robot;
+
+        // Initialize AprilTag vision system
+        vision.initAprilTag(opmode);
 
         // Initialize hardware objects
         rotation.init(opmode, "turret", 751.8 * ((double) 131 / 36));
@@ -160,10 +172,6 @@ public class Turret {
         rotation.setOffsetDegrees(turretOffset);
     }
 
-    double redOffset = -2;
-    double blueOffset = 2;
-    double posOffset = 4;
-
     /**
      * Runs the aimbot program to control the turret rotation and hood angle. </br>
      * Must be called every loop to function properly.
@@ -171,6 +179,7 @@ public class Turret {
      *               Otherwise, sets the turret to face forwards.
      * @param hood If TRUE, enables the hood autoaim.
      *             Otherwise, sets the hood to the highest launch angle.
+     * @param hoodOffset a offset to apply to the hood angle in degrees of servo rotation.
      */
     public void updateAimbot(boolean turret, boolean hood, double hoodOffset){
 
@@ -178,41 +187,87 @@ public class Turret {
         robotZone.setRotation(Robot.drivetrain.follower.getPose().getHeading());
 
         if (turret){
-            // Set the turret rotation
-            if (LoadHardwareClass.selectedAlliance == LoadHardwareClass.Alliance.RED){
-                rotation.setAngle(Math.min(Math.max(0, calcLocalizer()+redOffset), 360));
-            }else{
-                rotation.setAngle(Math.min(Math.max(0, calcLocalizer()+blueOffset), 360));
-            }
+            updateRotationalAimbot();
         }else{
             rotation.setAngle(90);
         }
         if (hood){
-            // Set the hood angle
-            Pose goalPose = new Pose(0,144,0);
-            if (LoadHardwareClass.selectedAlliance == LoadHardwareClass.Alliance.RED) {goalPose = new Pose(144, 144, 0);}
-            if (robotZone.isInside(LoadHardwareClass.FarLaunchZone)){
-                setHood(hoodLUTfar.get(Robot.drivetrain.follower.getPose().distanceFrom(goalPose)));
-            }else{
-                setHood(hoodLUTnear.get(Robot.drivetrain.follower.getPose().distanceFrom(goalPose)));
-            }
-            setHood(getHood() + hoodOffset);
+            updateHoodAimbot(hoodOffset);
         }else{
             setHood(0);
         }
     }
-    // FIXME does not work currently
-    public void updateAimbotWithVelocity(){
-        // Set the turret rotation
-        if (LoadHardwareClass.selectedAlliance == LoadHardwareClass.Alliance.RED){
-            rotation.setAngle(Math.max(0, calcLocalizer()+redOffset)%360, -Math.toDegrees(Robot.drivetrain.follower.getAngularVelocity()));
-        }else{
-            rotation.setAngle(Math.max(0, calcLocalizer()+blueOffset)%360, -Math.toDegrees(Robot.drivetrain.follower.getAngularVelocity()));
+    private void updateRotationalAimbot(){
+        int targetID = 24;
+        if (LoadHardwareClass.selectedAlliance == LoadHardwareClass.Alliance.BLUE){
+            targetID = 20;
         }
+
+        if (!useCameraAim && vision.tagDetected(targetID) && Math.abs(rotation.target - rotation.getAngle()) < 10){
+            useCameraAim = true;
+        }
+        if (useCameraAim && !vision.tagDetected(targetID) || rotation.target > 360 || rotation.target < 0){
+            useCameraAim = false;
+        }
+
+        if (useCameraAim){
+            rotation.target = rotation.getAngleAbsolute();
+            ControlSystem pid = ControlSystem.builder()
+                    .posPid(cameraCoefficients)
+                    .build();
+            pid.setGoal(new KineticState(0));
+            rotation.setPower(pid.calculate(new KineticState(vision.getRBE(targetID).b)));
+        }else{
+            if (LoadHardwareClass.selectedAlliance == LoadHardwareClass.Alliance.RED){
+                rotation.setAngle(Math.min(Math.max(0, rotationalAimbotLocalizer()-2), 360));
+            }else{
+                rotation.setAngle(Math.min(Math.max(0, rotationalAimbotLocalizer()+2), 360));
+            }
+        }
+    }
+    private void updateHoodAimbot(double offset){
         // Set the hood angle
-        //Pose goalPose = new Pose(0-posOffset,144+posOffset,0);
-        //if (LoadHardwareClass.selectedAlliance == LoadHardwareClass.Alliance.RED) {goalPose = new Pose(144+posOffset, 144+posOffset, 0);}
-        //setHood(hoodLUT.get(Robot.drivetrain.follower.getPose().distanceFrom(goalPose)));
+        Pose goalPose = new Pose(0,144,0);
+        if (LoadHardwareClass.selectedAlliance == LoadHardwareClass.Alliance.RED) {goalPose = new Pose(144, 144, 0);}
+        if (robotZone.isInside(LoadHardwareClass.FarLaunchZone)){
+            setHood(hoodLUTfar.get(Robot.drivetrain.follower.getPose().distanceFrom(goalPose)));
+        }else{
+            setHood(hoodLUTnear.get(Robot.drivetrain.follower.getPose().distanceFrom(goalPose)));
+        }
+        setHood(getHood() + offset);
+    }
+
+    /**
+     * Calculates the target angle to rotate the turret to in order to aim at the correct goal. </br>
+     * Currently uses Pinpoint Odometry and trigonometry to get the angle.
+     */
+    public double rotationalAimbotLocalizer (){
+        Pose goalPose = calcGoalPose();
+
+        return (Math.toDegrees(Math.atan2(
+                goalPose.getY()-Robot.drivetrain.follower.getPose().getY(),
+                goalPose.getX()-Robot.drivetrain.follower.getPose().getX())
+        ) - Math.toDegrees(Robot.drivetrain.follower.getPose().getHeading()) + 90)%360;
+    }
+
+    /**
+     * Calculates the proper goal pose
+     * @return a pose of the rotational aimbot's target position.
+     */
+    public Pose calcGoalPose(){
+        robotZone.setPosition(Robot.drivetrain.follower.getPose().getX(), Robot.drivetrain.follower.getPose().getY());
+        robotZone.setRotation(Robot.drivetrain.follower.getPose().getHeading());
+
+        Pose nearGoalPose = new Pose(8,140,0);
+        if (LoadHardwareClass.selectedAlliance == LoadHardwareClass.Alliance.RED) {nearGoalPose = new Pose(140, 140, 0);}
+        Pose farGoalPose = new Pose(16,140,0);
+        if (LoadHardwareClass.selectedAlliance == LoadHardwareClass.Alliance.RED) {farGoalPose = new Pose(136, 140, 0);}
+
+        if(robotZone.isInside(LoadHardwareClass.FarLaunchZone)){
+            return farGoalPose;
+        }else{
+            return nearGoalPose;
+        }
     }
 
     /**
@@ -255,34 +310,6 @@ public class Turret {
             return gatestate.OPEN;
         } else {
             return gatestate.CLOSED;
-        }
-    }
-
-    /**
-     * Calculates the target angle to rotate the turret to in order to aim at the correct goal. </br>
-     * Currently uses Pinpoint Odometry and trigonometry to get the angle.
-     */
-    public double calcLocalizer (){
-        Pose goalPose = calcGoalPose();
-
-        return (Math.toDegrees(Math.atan2(
-                goalPose.getY()-Robot.drivetrain.follower.getPose().getY(),
-                goalPose.getX()-Robot.drivetrain.follower.getPose().getX())
-        ) - Math.toDegrees(Robot.drivetrain.follower.getPose().getHeading()) + 90)%360;
-    }
-    public Pose calcGoalPose(){
-        robotZone.setPosition(Robot.drivetrain.follower.getPose().getX(), Robot.drivetrain.follower.getPose().getY());
-        robotZone.setRotation(Robot.drivetrain.follower.getPose().getHeading());
-
-        Pose nearGoalPose = new Pose(8,140,0);
-        if (LoadHardwareClass.selectedAlliance == LoadHardwareClass.Alliance.RED) {nearGoalPose = new Pose(140, 140, 0);}
-        Pose farGoalPose = new Pose(16,140,0);
-        if (LoadHardwareClass.selectedAlliance == LoadHardwareClass.Alliance.RED) {farGoalPose = new Pose(136, 140, 0);}
-
-        if(robotZone.isInside(LoadHardwareClass.FarLaunchZone)){
-            return farGoalPose;
-        }else{
-            return nearGoalPose;
         }
     }
 

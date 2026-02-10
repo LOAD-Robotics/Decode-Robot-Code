@@ -37,11 +37,13 @@ import com.bylazar.telemetry.TelemetryManager;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.skeletonarmy.marrow.TimerEx;
 import com.skeletonarmy.marrow.prompts.OptionPrompt;
 import com.skeletonarmy.marrow.prompts.Prompter;
 
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Intake;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Intake.intakeMode;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Intake.transferState;
@@ -65,7 +67,7 @@ public class Teleop_Main_ extends LinearOpMode {
     private final TelemetryManager panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
 
     public int shootingState = 0;
-    public TimerEx stateTimer = new TimerEx(1);
+    public TimerEx stateTimer = new TimerEx();
     public double hoodOffset = 0;
     public double turretOffset = 0;
     public boolean turretOn = true;
@@ -168,10 +170,14 @@ public class Teleop_Main_ extends LinearOpMode {
             telemetry.addData("ALLIANCE", selectedAlliance);
 
             telemetry.addData("SpeedMult", Robot.drivetrain.speedMultiplier);
-            telemetry.addLine();
             //positional telemetry
             telemetry.addData("Robot Position [X, Y, H]", "[" + Robot.drivetrain.follower.getPose().getX() + ", " + Robot.drivetrain.follower.getPose().getY() + ", " + Robot.drivetrain.follower.getPose().getHeading() + "]");
             telemetry.addData("Distance From Goal", Robot.drivetrain.distanceFromGoal());
+            telemetry.addLine();
+            panelsTelemetry.addData("FL Wheel Current", hardwareMap.get(DcMotorEx.class, "FL").getCurrent(CurrentUnit.AMPS));
+            panelsTelemetry.addData("FR Wheel Current", hardwareMap.get(DcMotorEx.class, "FR").getCurrent(CurrentUnit.AMPS));
+            panelsTelemetry.addData("BL Wheel Current", hardwareMap.get(DcMotorEx.class, "BL").getCurrent(CurrentUnit.AMPS));
+            panelsTelemetry.addData("BR Wheel Current", hardwareMap.get(DcMotorEx.class, "BR").getCurrent(CurrentUnit.AMPS));
 
             telemetry.addLine();
             // Turret-related Telemetry
@@ -407,25 +413,33 @@ public class Teleop_Main_ extends LinearOpMode {
             shootingState++;
         }
         if (gamepad2.xWasPressed()){
-            shootingState = 3;
+            shootingState = 4;
         }
         switch (shootingState) {
             case 0:
                 telemetry.addData("Shooting State", "OFF");
                 return;
             case 1:
-                if (Robot.intake.getMode() == intakeMode.OFF){
+                if (Robot.turret.getGate() == gatestate.CLOSED){
                     stateTimer.restart();
-                    stateTimer.start();
                 }
-                Robot.intake.setMode(intakeMode.INTAKING);
                 Robot.turret.setGateState(gatestate.OPEN);
                 telemetry.addData("Shooting State", "STARTED");
-                if (stateTimer.isDone() && Robot.intake.getTopSensorState() && !Robot.intake.getBottomSensorState()){
+                if (stateTimer.getElapsed() > 0.2){
                     shootingState++;
                 }
                 return;
             case 2:
+                if (Robot.intake.getMode() == intakeMode.OFF){
+                    stateTimer.restart();
+                }
+                Robot.intake.setMode(intakeMode.INTAKING);
+                telemetry.addData("Shooting State", "STARTED");
+                if (stateTimer.getElapsed() > 1 && Robot.intake.getTopSensorState() && !Robot.intake.getBottomSensorState()){
+                    shootingState++;
+                }
+                return;
+            case 3:
                 if (Robot.intake.getMode() == intakeMode.INTAKING){
                     stateTimer.restart();
                     stateTimer.start();
@@ -437,7 +451,7 @@ public class Teleop_Main_ extends LinearOpMode {
                     shootingState++;
                 }
                 return;
-            case 3:
+            case 4:
                 Robot.turret.setFlywheelState(flywheelState.OFF);
                 Robot.turret.setGateState(gatestate.CLOSED);
                 Robot.intake.setMode(intakeMode.OFF);
