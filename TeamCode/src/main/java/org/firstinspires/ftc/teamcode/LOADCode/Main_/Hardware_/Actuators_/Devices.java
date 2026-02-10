@@ -259,7 +259,6 @@ public class Devices {
             setPower(velPID.calculate(currentKineticState));
         }
     }
-
     public static class ServoClass {
         private Servo servo;
 
@@ -289,7 +288,6 @@ public class Devices {
             return servo.getPosition();
         }
     }
-
     public static class REVColorSensorV3Class {
         private NormalizedColorSensor sensor;
 
@@ -313,7 +311,6 @@ public class Devices {
             return ((DistanceSensor) sensor).getDistance(units);
         }
     }
-
     public static class DualProximitySensorClass {
         private final REVColorSensorV3Class sensor1 = new REVColorSensorV3Class();
         private final REVColorSensorV3Class sensor2 = new REVColorSensorV3Class();
@@ -339,7 +336,6 @@ public class Devices {
             return new double[]{sensor1.getDistance(units), sensor2.getDistance(units)};
         }
     }
-
     public static class REVHallEffectSensorClass {
         private DigitalChannel sensor;
 
@@ -352,9 +348,7 @@ public class Devices {
             return !sensor.getState();
         }
     }
-
-
-    public enum StripState {
+public enum StripState {
         PROGRESS,
         BLINK,
         OFF
