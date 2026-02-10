@@ -8,7 +8,7 @@ This repository contains the public FTC SDK for the DECODE (2025-2026) competiti
 
 ## LOAD Charts & Diagrams
 ### Our Filestructure
-![File Structure Flowchart](Diagrams/File Structure.png)
+![File Structure Flowchart](Diagrams/File_Structure.png)
 ### Robot Control Scheme (Pre December 6th)
 ![Robot Gamepad 1 & 2 Control Charts](Diagrams/Robot_Controls.png)
 ### Robot Wiring Diagram
