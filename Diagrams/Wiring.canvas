@@ -2,17 +2,6 @@
 	"nodes":[
 		{"id":"85dd3f12ac72d900","type":"group","x":-360,"y":-440,"width":380,"height":260,"label":"Legend"},
 		{
-			"id":"c2eee2656a3ddfa1",
-			"type":"text",
-			"text":"Pinpoint Computer\nI2C Port 1",
-			"styleAttributes":{"textAlign":"center"},
-			"x":80,
-			"y":-260,
-			"width":160,
-			"height":60,
-			"color":"6"
-		},
-		{
 			"id":"e20a52ef21d57dcf",
 			"type":"text",
 			"text":"LED Controller\nI2C Port 2",
@@ -95,10 +84,32 @@
 			"text":"Hall Effect Sensor\nPort 0",
 			"styleAttributes":{"textAlign":"center"},
 			"x":80,
+			"y":-440,
+			"width":160,
+			"height":80,
+			"color":"1"
+		},
+		{
+			"id":"b7514b6ae54e27cf",
+			"type":"text",
+			"text":"Digital Devices",
+			"styleAttributes":{"textAlign":"center"},
+			"x":-340,
 			"y":-420,
 			"width":160,
 			"height":60,
 			"color":"1"
+		},
+		{
+			"id":"c2eee2656a3ddfa1",
+			"type":"text",
+			"text":"Pinpoint Computer\nI2C Port 1",
+			"styleAttributes":{"textAlign":"center"},
+			"x":80,
+			"y":-260,
+			"width":160,
+			"height":60,
+			"color":"6"
 		},
 		{
 			"id":"81a20594db9883e0",
@@ -189,6 +200,17 @@
 			"color":"2"
 		},
 		{
+			"id":"bfb02b2a92b84ad2",
+			"type":"text",
+			"text":"Belt Servo - Port 1",
+			"styleAttributes":{"textAlign":"center"},
+			"x":-300,
+			"y":-60,
+			"width":200,
+			"height":60,
+			"color":"4"
+		},
+		{
 			"id":"88b48890e8f34fc1",
 			"type":"text",
 			"text":"The Servo Power Injector ports correspond to the Control Hub Ports.\nChub P0 -> SPI P1, Chub P1 -> SPI P2, etc. The given ports are for the SPI, not the control hub.",
@@ -201,17 +223,6 @@
 			"y":-40,
 			"width":160,
 			"height":260
-		},
-		{
-			"id":"bfb02b2a92b84ad2",
-			"type":"text",
-			"text":"Belt Servo - Port 1",
-			"styleAttributes":{"textAlign":"center"},
-			"x":-300,
-			"y":-60,
-			"width":200,
-			"height":60,
-			"color":"4"
 		},
 		{
 			"id":"440a120e5375c485",
@@ -289,17 +300,6 @@
 			"width":200,
 			"height":60,
 			"color":"4"
-		},
-		{
-			"id":"b7514b6ae54e27cf",
-			"type":"text",
-			"text":"Digital Devices",
-			"styleAttributes":{"textAlign":"center"},
-			"x":-340,
-			"y":-420,
-			"width":160,
-			"height":60,
-			"color":"1"
 		}
 	],
 	"edges":[

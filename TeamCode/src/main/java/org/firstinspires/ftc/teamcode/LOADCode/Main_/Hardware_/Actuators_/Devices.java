@@ -18,6 +18,8 @@ import org.firstinspires.ftc.teamcode.Prism.Color;
 import org.firstinspires.ftc.teamcode.Prism.GoBildaPrismDriver;
 import org.firstinspires.ftc.teamcode.Prism.PrismAnimations;
 
+import java.util.ArrayList;
+
 import dev.nextftc.control.ControlSystem;
 import dev.nextftc.control.KineticState;
 import dev.nextftc.control.feedback.PIDCoefficients;
@@ -348,7 +350,7 @@ public class Devices {
             return !sensor.getState();
         }
     }
-public enum StripState {
+    public enum StripState {
         PROGRESS,
         BLINK,
         OFF
@@ -356,14 +358,22 @@ public enum StripState {
     public static class GoBildaPrismBarClass  {
         // Maximum length of 4 daisy chained strips is 36 (12 + 12 + 6 + 6)
         GoBildaPrismDriver prism;
-        int maxStripLength;
+        int maxStripLength = 0;
 
         PrismAnimations.Solid solidColor = new PrismAnimations.Solid(Color.BLUE);
         PrismAnimations.Blink blinkAnim = new PrismAnimations.Blink(Color.BLUE);
         PrismAnimations.Solid blank = new PrismAnimations.Solid(Color.TRANSPARENT);
 
-        public void init(@NonNull OpMode opMode){
+        public void init(@NonNull OpMode opMode, String name, ArrayList<Integer> stripLengths){
+            prism = opMode.hardwareMap.get(GoBildaPrismDriver.class, name);
+            for (int i = 0; i < stripLengths.size(); i++){
+                maxStripLength = maxStripLength + stripLengths.get(i);
+            }
+            prism.setStripLength(maxStripLength);
+        }
 
+        public void addAnimation(GoBildaPrismDriver.LayerHeight layer, PrismAnimations.AnimationBase animation){
+            prism.insertAnimation(layer, animation);
         }
     }
 
