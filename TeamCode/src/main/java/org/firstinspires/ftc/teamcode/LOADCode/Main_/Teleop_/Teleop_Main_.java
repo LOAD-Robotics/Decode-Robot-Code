@@ -44,7 +44,6 @@ import com.skeletonarmy.marrow.prompts.OptionPrompt;
 import com.skeletonarmy.marrow.prompts.Prompter;
 
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
-import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Devices;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Intake;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Intake.intakeMode;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Intake.transferState;
@@ -82,7 +81,6 @@ public class Teleop_Main_ extends LinearOpMode {
     // Create a new instance of Prompter for selecting the alliance
     Prompter prompter = null;
 
-    Devices.GoBildaPrismBarClass prismObject;
     enum startPoses {
         FAR,
         NEAR
@@ -120,7 +118,6 @@ public class Teleop_Main_ extends LinearOpMode {
             }
             telemetry.addData("Selection", "Complete");
             telemetry.addData("Alliance", selectedAlliance);
-            prismObject.init(this,selectedAlliance);
             if (MecanumDrivetrainClass.robotPose == null){
                 startPoses pose = prompter.get("startPose");
                 if (pose == startPoses.FAR) {
@@ -136,6 +133,8 @@ public class Teleop_Main_ extends LinearOpMode {
             }
             telemetry.update();
         });
+
+        Robot.turret.initVision(this);
 
         // Runs repeatedly while in init
         while (opModeInInit()) {
@@ -154,6 +153,7 @@ public class Teleop_Main_ extends LinearOpMode {
         Paths.buildPaths(Robot.drivetrain.follower);
         Robot.drivetrain.startTeleOpDrive();
         Robot.intake.setTransfer(transferState.DOWN);
+        Robot.lights.setAllianceDisplay(selectedAlliance);
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
@@ -161,6 +161,11 @@ public class Teleop_Main_ extends LinearOpMode {
                 while (!isStopRequested() && Robot.turret.zeroTurret()){
                     sleep(0);
                 }
+            }
+
+            int targetTagID = 24;
+            if (LoadHardwareClass.selectedAlliance == LoadHardwareClass.Alliance.BLUE){
+                targetTagID = 20;
             }
 
             Gamepad1();
@@ -185,6 +190,9 @@ public class Teleop_Main_ extends LinearOpMode {
 
             telemetry.addLine();
             // Turret-related Telemetry
+            telemetry.addData("Tag Detected", Robot.turret.vision.tagDetected(targetTagID));
+            telemetry.addData("Is using Camera PID", Robot.turret.useCameraAim);
+            telemetry.addData("Camera Error", Robot.turret.cameraTurretError);
             panelsTelemetry.addData("Turret Target Angle", Robot.turret.rotation.target);
             panelsTelemetry.addData("Turret Actual Angle", Robot.turret.rotation.getAngleAbsolute());
             telemetry.addData("Turret Target Angle", Robot.turret.rotation.target);
@@ -218,6 +226,8 @@ public class Teleop_Main_ extends LinearOpMode {
             telemetry.update();
             panelsTelemetry.update();
         }
+
+        Robot.lights.setStripRainbow();
     }
 
     /**

@@ -46,50 +46,6 @@
 			"color":"4"
 		},
 		{
-			"id":"440a120e5375c485",
-			"type":"text",
-			"text":"Front Left Drive Motor\nConfiguration Name: \"FL\"\nConfiguration Type: \"\"\nPort 0 - No Encoder",
-			"styleAttributes":{"textAlign":"center"},
-			"x":80,
-			"y":-80,
-			"width":320,
-			"height":140,
-			"color":"5"
-		},
-		{
-			"id":"76edd4abcf05a2a3",
-			"type":"text",
-			"text":"Back Left Drive Motor\nConfiguration Name: \"BL\"\nConfiguration Type: \"\"\nPort 1 - No Encoder",
-			"styleAttributes":{"textAlign":"center"},
-			"x":80,
-			"y":80,
-			"width":320,
-			"height":140,
-			"color":"5"
-		},
-		{
-			"id":"336d50b5d4cb968f",
-			"type":"text",
-			"text":"Flywheel Motor 1\nConfiguration Name: \"flywheel\"\nConfiguration Type: \"\"\nPort 2 - With Encoder",
-			"styleAttributes":{"textAlign":"center"},
-			"x":80,
-			"y":240,
-			"width":320,
-			"height":140,
-			"color":"5"
-		},
-		{
-			"id":"f8b39583a022e492",
-			"type":"text",
-			"text":"Flywheel Motor 2\nConfiguration Name: \"flywheel2\"\nConfiguration Type: \"\"\nPort 3 - No Encoder",
-			"styleAttributes":{"textAlign":"center"},
-			"x":80,
-			"y":400,
-			"width":320,
-			"height":140,
-			"color":"5"
-		},
-		{
 			"id":"f667221e45b8fc86",
 			"type":"text",
 			"text":"Intake Motor\nConfiguration Name: \"intake\"\nConfiguration Type: \"\"\nPort 0 - No Encoder",
@@ -112,17 +68,6 @@
 			"color":"5"
 		},
 		{
-			"id":"7a1b2108fa3bc30e",
-			"type":"text",
-			"text":"Hall Effect Sensor\nPort 0",
-			"styleAttributes":{"textAlign":"center"},
-			"x":80,
-			"y":-440,
-			"width":280,
-			"height":80,
-			"color":"1"
-		},
-		{
 			"id":"81a20594db9883e0",
 			"type":"text",
 			"text":"Control Hub",
@@ -134,20 +79,9 @@
 			"color":"2"
 		},
 		{
-			"id":"e20a52ef21d57dcf",
-			"type":"text",
-			"text":"LED Controller\nI2C Port 2",
-			"styleAttributes":{"textAlign":"center"},
-			"x":80,
-			"y":-340,
-			"width":280,
-			"height":60,
-			"color":"6"
-		},
-		{
 			"id":"c2eee2656a3ddfa1",
 			"type":"text",
-			"text":"Pinpoint Computer\nI2C Port 1",
+			"text":"Pinpoint Computer\nConfiguration Name: \"pinpoint\"\nI2C Port 1",
 			"styleAttributes":{"textAlign":"center"},
 			"x":80,
 			"y":-260,
@@ -180,7 +114,7 @@
 		{
 			"id":"c6d790ec667c829f",
 			"type":"text",
-			"text":"Turret Rotation Motor\nConfiguration Name: \"turret\"\nConfiguration Type: \"\"\nPort 3 - No Encoder",
+			"text":"Turret Rotation Motor\nConfiguration Name: \"turret\"\nConfiguration Type: \"\"\nPort 3 - With Encoder",
 			"styleAttributes":{"textAlign":"center"},
 			"x":520,
 			"y":400,
@@ -189,24 +123,13 @@
 			"color":"5"
 		},
 		{
-			"id":"d97803361edf47ba",
-			"type":"text",
-			"text":"Lower Color Sensors\nI2C Ports 2-3",
-			"styleAttributes":{"textAlign":"center"},
-			"x":520,
-			"y":-260,
-			"width":160,
-			"height":80,
-			"color":"6"
-		},
-		{
 			"id":"a0abe0901b65ac56",
 			"type":"text",
-			"text":"Upper Color Sensors\nI2C Ports 0-1",
+			"text":"Upper Color Sensors\nConfiguration Names: \"color1\", \"color2\"\nI2C Ports 0-1",
 			"styleAttributes":{"textAlign":"center"},
 			"x":520,
 			"y":-360,
-			"width":160,
+			"width":340,
 			"height":80,
 			"color":"6"
 		},
@@ -286,6 +209,83 @@
 			"width":160,
 			"height":60,
 			"color":"2"
+		},
+		{
+			"id":"76edd4abcf05a2a3",
+			"type":"text",
+			"text":"Back Left Drive Motor\nConfiguration Name: \"BL\"\nConfiguration Type: \"\"\nPort 3 - No Encoder",
+			"styleAttributes":{"textAlign":"center"},
+			"x":80,
+			"y":400,
+			"width":320,
+			"height":140,
+			"color":"5"
+		},
+		{
+			"id":"440a120e5375c485",
+			"type":"text",
+			"text":"Front Left Drive Motor\nConfiguration Name: \"FL\"\nConfiguration Type: \"\"\nPort 2 - No Encoder",
+			"styleAttributes":{"textAlign":"center"},
+			"x":80,
+			"y":240,
+			"width":320,
+			"height":140,
+			"color":"5"
+		},
+		{
+			"id":"336d50b5d4cb968f",
+			"type":"text",
+			"text":"Flywheel Motor 1\nConfiguration Name: \"flywheel\"\nConfiguration Type: \"\"\nPort 0 - With Encoder",
+			"styleAttributes":{"textAlign":"center"},
+			"x":80,
+			"y":-80,
+			"width":320,
+			"height":140,
+			"color":"5"
+		},
+		{
+			"id":"f8b39583a022e492",
+			"type":"text",
+			"text":"Flywheel Motor 2\nConfiguration Name: \"flywheel2\"\nConfiguration Type: \"\"\nPort 1 - No Encoder",
+			"styleAttributes":{"textAlign":"center"},
+			"x":80,
+			"y":80,
+			"width":320,
+			"height":140,
+			"color":"5"
+		},
+		{
+			"id":"e20a52ef21d57dcf",
+			"type":"text",
+			"text":"LED Controller\nConfiguration Name: \"prism\"\nI2C Port 2",
+			"styleAttributes":{"textAlign":"center"},
+			"x":80,
+			"y":-360,
+			"width":280,
+			"height":80,
+			"color":"6"
+		},
+		{
+			"id":"7a1b2108fa3bc30e",
+			"type":"text",
+			"text":"Hall Effect Sensor\nConfiguration Name: \"hall\"\nPort 0",
+			"styleAttributes":{"textAlign":"center"},
+			"x":80,
+			"y":-460,
+			"width":280,
+			"height":80,
+			"color":"1"
+		},
+		{
+			"id":"d97803361edf47ba",
+			"type":"text",
+			"text":"Lower Color Sensors\nConfiguration Names: \"color3\", \"color4\"\nI2C Ports 2-3",
+			"styleAttributes":{"textAlign":"center"},
+			"x":520,
+			"y":-260,
+			"width":340,
+			"height":80,
+			"color":"6"
 		}
 	],
 	"edges":[

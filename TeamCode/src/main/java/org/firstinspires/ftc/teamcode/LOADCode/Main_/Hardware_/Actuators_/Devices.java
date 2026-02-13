@@ -19,8 +19,6 @@ import org.firstinspires.ftc.teamcode.Prism.Color;
 import org.firstinspires.ftc.teamcode.Prism.GoBildaPrismDriver;
 import org.firstinspires.ftc.teamcode.Prism.PrismAnimations;
 
-import java.util.ArrayList;
-
 import dev.nextftc.control.ControlSystem;
 import dev.nextftc.control.KineticState;
 import dev.nextftc.control.feedback.PIDCoefficients;
@@ -361,19 +359,25 @@ public class Devices {
         // Scrimmage length of 2 daisy chained strips is 24 (12 + 12)
 
         GoBildaPrismDriver prism;
-        public void init(@NonNull OpMode opmode, LoadHardwareClass.Alliance alliance){
+        public void init(@NonNull OpMode opmode){
             prism = opmode.hardwareMap.get(GoBildaPrismDriver.class, "prism");
-            PrismAnimations.Solid solidAllianceColor;
-            if (alliance == LoadHardwareClass.Alliance.RED){
-                solidAllianceColor = new PrismAnimations.Solid(Color.RED);
-            } else {
-                solidAllianceColor = new PrismAnimations.Solid(Color.BLUE);
-            }
-            solidAllianceColor.setStartIndex(0);
-            solidAllianceColor.setStopIndex(24);
-            solidAllianceColor.setBrightness(100);
-            prism.insertAndUpdateAnimation(GoBildaPrismDriver.LayerHeight.LAYER_0,solidAllianceColor);
+        }
 
+        public void setStripSolidColor(Color color){
+            prism.insertAndUpdateAnimation(GoBildaPrismDriver.LayerHeight.LAYER_0, new PrismAnimations.Solid(color, 50));
+        }
+        public void setStripRainbow(){
+            PrismAnimations.AnimationBase color = new PrismAnimations.Rainbow();
+            color.setBrightness(50);
+            prism.insertAndUpdateAnimation(GoBildaPrismDriver.LayerHeight.LAYER_0, color);
+        }
+
+        public void setAllianceDisplay(LoadHardwareClass.Alliance alliance){
+            if (alliance == LoadHardwareClass.Alliance.RED){
+                setStripSolidColor(Color.RED);
+            }else if (alliance == LoadHardwareClass.Alliance.BLUE){
+                setStripSolidColor(Color.BLUE);
+            }
         }
     }
 }

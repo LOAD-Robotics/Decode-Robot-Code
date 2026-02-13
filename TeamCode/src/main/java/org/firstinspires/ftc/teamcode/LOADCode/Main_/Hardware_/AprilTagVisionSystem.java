@@ -51,10 +51,13 @@ public class AprilTagVisionSystem {
     private List<AprilTagDetection> detections;
     private OpMode opMode;
 
+    public boolean initialized = false;
+
     /**
      * Initialize the AprilTag processor.
      */
-    public void initAprilTag(OpMode opmode) {
+    public void init(OpMode opmode) {
+        initialized = true;
         opMode = opmode;
 
         // Create the AprilTag processor.
@@ -95,7 +98,7 @@ public class AprilTagVisionSystem {
         //builder.setCameraResolution(new Size(640, 480));
 
         // Enable the RC preview (LiveView).  Set "false" to omit camera monitoring.
-        //builder.enableLiveView(true);
+        builder.enableLiveView(true);
 
         // Set the stream format; MJPEG uses less bandwidth than default YUY2.
         //builder.setStreamFormat(VisionPortal.StreamFormat.YUY2);
@@ -126,9 +129,9 @@ public class AprilTagVisionSystem {
             AprilTagDetection detection = detections.get(i);
             if (detection.metadata != null) {
                 opMode.telemetry.addLine(String.format("\n==== (ID %d) %s", getID(i), getMetadata(i).name));
-                opMode.telemetry.addLine(getXYZ(i).toString());
+                opMode.telemetry.addLine(getXYZbyIndex(i).toString());
                 opMode.telemetry.addLine(getPRYbyIndex(i).toString());
-                opMode.telemetry.addLine(getRBE(i).toString());
+                opMode.telemetry.addLine(getRBEbyIndex(i).toString());
             } else {
                 opMode.telemetry.addLine(String.format("\n==== (ID %d) Unknown", getID(i)));
                 opMode.telemetry.addLine(String.format("Center %6.0f %6.0f   (pixels)", detection.center.x, detection.center.y));
@@ -146,12 +149,16 @@ public class AprilTagVisionSystem {
      * @return a boolean representing whether a tag is detected by the camera
      */
     public boolean tagDetected(){
+        updateAprilTagProcessor();
         return !detections.isEmpty();
     }
     public boolean tagDetected(int id){
-        for (int i = 0; i < detections.size(); i++){
-            if (detections.get(i).id == id){
-                return true;
+        updateAprilTagProcessor();
+        if (detections != null){
+            for (int i = 0; i < detections.size(); i++){
+                if (detections.get(i).id == id){
+                    return true;
+                }
             }
         }
         return false;
@@ -191,13 +198,18 @@ public class AprilTagVisionSystem {
     }
 
     public PoseRBE getRBEbyIndex(int detectionIndex){
-        updateAprilTagProcessor();
-        return new PoseRBE(detections.get(detectionIndex).ftcPose);
+        if (!detections.isEmpty()){
+            updateAprilTagProcessor();
+            return new PoseRBE(detections.get(detectionIndex).ftcPose);
+        }
+        return null;
     }
     public PoseRBE getRBE(int id){
-        for (int i = 0; i < detections.size(); i++){
-            if (detections.get(i).id == id){
-                return getRBEbyIndex(i);
+        if (!detections.isEmpty()){
+            for (int i = 0; i < detections.size(); i++){
+                if (detections.get(i).id == id){
+                    return getRBEbyIndex(i);
+                }
             }
         }
         return null;
@@ -212,6 +224,7 @@ public class AprilTagVisionSystem {
     }
 
     public int getID(int detectionIndex){
+        updateAprilTagProcessor();
         return detections.get(detectionIndex).id;
     }
     public int getID(){

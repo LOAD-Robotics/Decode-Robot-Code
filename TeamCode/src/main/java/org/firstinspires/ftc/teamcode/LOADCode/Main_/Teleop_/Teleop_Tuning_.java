@@ -37,9 +37,8 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Intake;
-import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Turret;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.LoadHardwareClass;
+import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.LoadPrismLights;
 
 @Configurable
 @TeleOp(name="Teleop_Tuning_", group="TeleOp")
@@ -64,14 +63,17 @@ public class Teleop_Tuning_ extends LinearOpMode {
 
         // Create a new instance of our Robot class
         LoadHardwareClass Robot = new LoadHardwareClass(this);
+        LoadPrismLights prism = new LoadPrismLights();
         // Initialize all hardware of the robot
         Robot.init(startPose);
 
-        while (opModeInInit() && Robot.turret.zeroTurret()){
-            sleep(0);
-        }
         telemetry.addData("Status", "Initialized");
         telemetry.update();
+
+        while (!isStopRequested() && Robot.turret.zeroTurret()){
+            sleep(0);
+        }
+        Robot.turret.setHood(0);
 
         // Wait for the game to start (driver presses START)
         waitForStart();
@@ -79,92 +81,32 @@ public class Teleop_Tuning_ extends LinearOpMode {
 
         // Begin TeleOp driving
         Robot.drivetrain.startTeleOpDrive();
-        Robot.turret.setGateState(Turret.gatestate.OPEN);
+
+        prism.init(this, "prism");
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
 
             // Pass the joystick positions to our mecanum drive controller
             Robot.drivetrain.pedroMecanumDrive(
-                    gamepad1.left_stick_y/2,
-                    gamepad1.left_stick_x/2,
-                    gamepad1.right_stick_x/2,
+                    gamepad1.left_stick_y,
+                    gamepad1.left_stick_x,
+                    gamepad1.right_stick_x,
                     true
             );
 
-            // Color sensor telemetry
-            telemetry.addLine("COLOR SENSOR DATA");
-            telemetry.addData("Color Sensor Threshold", Intake.proximitySensorThreshold);
-            telemetry.addData("Upper Sensor Array Triggered", Robot.intake.getTopSensorState());
-            telemetry.addData("Lower Sensor Array Triggered", Robot.intake.getBottomSensorState());
-
-            // Controls for turret rotation testing
-            if (gamepad1.x){
-                Robot.turret.rotation.setAngle(turretTurnAngle);
-                turretTurnAngle += turretTurnIncrement * turretTurnMultiplier;
-                if (turretTurnAngle > 360){
-                    turretTurnAngle = 360;
-                    turretTurnMultiplier *= -1;
-                }else if (turretTurnAngle < 0){
-                    turretTurnAngle = 0;
-                    turretTurnMultiplier *= -1;
-                }
-
-            }else if (gamepad1.b){
-                Robot.turret.updateAimbotWithVelocity();
-            }else if (gamepad1.a){
-                Robot.turret.rotation.setAngle(0);
-            }else{
-                Robot.turret.rotation.setAngle(90);
-            }
-            Robot.turret.updatePIDs();
-            telemetry.addLine();
-            telemetry.addLine("TURRET DATA");
-            telemetry.addData("Turret Target Angle", Robot.turret.rotation.target);
-            telemetry.addData("Turret Actual Angle", Robot.turret.rotation.getAngleAbsolute());
-            telemetry.addData("Hall Effect Detected", Robot.turret.hall.getTriggered());
-            panelsTelemetry.addData("Turret Target Angle", Robot.turret.rotation.target);
-            panelsTelemetry.addData("Turret Actual Angle", Robot.turret.rotation.getAngleAbsolute());
-
-
-            // Controls for hood testing
-//            if (gamepad1.dpad_up){
-//                Robot.turret.setHood(Robot.turret.getHood() + 2);
-//            }else if (gamepad1.dpad_down){
-//                Robot.turret.setHood(Robot.turret.getHood() - 2);
-//            }else if (gamepad1.dpadLeftWasPressed()){
-//                Robot.turret.setHood(hoodTargetPos);
-//            }
-            telemetry.addLine();
-            telemetry.addLine("HOOD DATA");
-            telemetry.addData("Hood Angle", Robot.turret.getHood());
-
-            // Controls for flywheel testing
-            if (gamepad1.backWasPressed()){
-                if (Robot.turret.flywheelMode == Turret.flywheelState.OFF){
-                    Robot.turret.setFlywheelState(Turret.flywheelState.ON);
-                }else{
-                    Robot.turret.setFlywheelState(Turret.flywheelState.OFF);
-                }
-            }
-            Robot.turret.updateFlywheel();
-            telemetry.addLine();
-            telemetry.addLine("FLYWHEEL DATA");
-            telemetry.addData("Flywheel Target Velocity", Robot.turret.flywheel.target);
-            telemetry.addData("Flywheel Actual Velocity", Robot.turret.getFlywheelRPM());
-            telemetry.addData("Flywheel Motor Power", Robot.turret.flywheel.getPower());
-            panelsTelemetry.addData("Flywheel Target Velocity", Robot.turret.flywheel.target);
-            panelsTelemetry.addData("Flywheel Actual Velocity", Robot.turret.getFlywheelRPM());
-            panelsTelemetry.addData("Flywheel Motor Power", Robot.turret.flywheel.getPower());
-
             if (gamepad1.aWasPressed()){
-                if (Robot.intake.getMode() == Intake.intakeMode.INTAKING){
-                    Robot.intake.setMode(Intake.intakeMode.OFF);
-                }else{
-                    Robot.intake.setMode(Intake.intakeMode.INTAKING);
-                }
+                prism.setStripsRainbow();
             }
-
+            if (gamepad1.bWasPressed()){
+                prism.setStripsRed();
+            }
+            if (gamepad1.xWasPressed()){
+                prism.setStripsBlue();
+            }
+            if (gamepad1.yWasPressed()){
+                prism.clearStrips();
+            }
             // System-related Telemetry
             telemetry.addLine();
             telemetry.addLine("SYSTEM DATA");

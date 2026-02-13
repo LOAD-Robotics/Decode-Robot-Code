@@ -80,6 +80,7 @@ public class Turret {
      * Controls which aiming system to use.
      */
     public boolean useCameraAim = false;
+    public double cameraTurretError = 0;
 
     // Stores important objects for later access
     OpMode opMode = null;
@@ -90,13 +91,19 @@ public class Turret {
     public Utils_.InterpLUT hoodLUTnear = new Utils_.InterpLUT();
     public Utils_.InterpLUT hoodLUTfar = new Utils_.InterpLUT();
 
+    public void initVision(OpMode opmode){
+        // Initialize AprilTag vision system
+        vision.init(opmode);
+    }
+
     public void init(OpMode opmode, LoadHardwareClass robot){
         // Store important objects in their respective variables
         opMode = opmode;
         Robot = robot;
 
-        // Initialize AprilTag vision system
-        vision.initAprilTag(opmode);
+        if (!vision.initialized){
+            vision.init(opmode);
+        }
 
         // Initialize hardware objects
         rotation.init(opmode, "turret", 751.8 * ((double) 131 / 36));
@@ -130,7 +137,6 @@ public class Turret {
         flywheel2.setPidCoefficients(actualFlywheelCoefficients);
         flywheel2.setFFCoefficients(actualFlywheelFFCoefficients);
 
-        // TODO Build hood InterpLUT for autoaim
         // Safety points for LUTs
         hoodLUTnear.add(0, 0);
         hoodLUTfar.add(0, 0);
@@ -216,7 +222,11 @@ public class Turret {
                     .posPid(cameraCoefficients)
                     .build();
             pid.setGoal(new KineticState(0));
-            rotation.setPower(pid.calculate(new KineticState(vision.getRBE(targetID).b)));
+            AprilTagVisionSystem.PoseRBE tagPose = vision.getRBE(targetID);
+            if (tagPose != null){
+                cameraTurretError = tagPose.b;
+                rotation.setPower(pid.calculate(new KineticState(tagPose.b)));
+            }
         }else{
             if (LoadHardwareClass.selectedAlliance == LoadHardwareClass.Alliance.RED){
                 rotation.setAngle(Math.min(Math.max(0, rotationalAimbotLocalizer()-2), 360));

@@ -23,8 +23,26 @@
               "icon": "lucide-layout-dashboard",
               "title": "File Structure"
             }
+          },
+          {
+            "id": "3c98fecc6f5ddbb9",
+            "type": "leaf",
+            "state": {
+              "type": "canvas",
+              "state": {
+                "file": "Robot Wiring.canvas",
+                "viewState": {
+                  "x": 210,
+                  "y": 40,
+                  "zoom": -0.39938423496735836
+                }
+              },
+              "icon": "lucide-layout-dashboard",
+              "title": "Robot Wiring"
+            }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -181,17 +199,17 @@
       "templates:Insert template": false,
       "command-palette:Open command palette": false,
       "bases:Create new base": false,
-      "theme-toggle:Toggle to light mode": false
+      "theme-toggle:Toggle to dark mode": false
     }
   },
-  "active": "d3b4cee07f48b93b",
+  "active": "3c98fecc6f5ddbb9",
   "lastOpenFiles": [
+    "File Structure.canvas",
     "File Structure Dark.png",
     "File Structure Light.png",
     "Robot Wiring Light.png",
     "Robot Wiring Dark.png",
     "Robot Wiring.canvas",
-    "File Structure.canvas",
     "File Structure_Light.png",
     "Robot_Wiring.png",
     "File Structure.png",
