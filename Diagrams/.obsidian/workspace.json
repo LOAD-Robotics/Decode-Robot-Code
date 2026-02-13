@@ -15,9 +15,9 @@
               "state": {
                 "file": "Wiring.canvas",
                 "viewState": {
-                  "x": 120,
-                  "y": -100,
-                  "zoom": 0
+                  "x": 243.69123732363846,
+                  "y": 77.64022070453633,
+                  "zoom": -0.4
                 }
               },
               "icon": "lucide-layout-dashboard",
@@ -186,9 +186,9 @@
   "active": "d3b4cee07f48b93b",
   "lastOpenFiles": [
     "Robot_Wiring.png",
+    "Wiring.canvas",
     "File Structure.png",
     "Robot_Controls.png",
-    "Wiring.canvas",
     "File Structure.canvas",
     "File Structure Light.png"
   ]
