@@ -1,0 +1,10 @@
+{
+	"id": "theme-toggle",
+	"name": "Theme toggle",
+	"version": "0.1.6",
+	"minAppVersion": "0.15.0",
+	"description": "Dark/light theme toggle via ribbon icon or command",
+	"author": "@gapmiss",
+	"authorUrl": "https://github.com/gapmiss",
+	"isDesktopOnly": false
+}
