@@ -44,6 +44,7 @@ import com.skeletonarmy.marrow.prompts.OptionPrompt;
 import com.skeletonarmy.marrow.prompts.Prompter;
 
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
+import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Devices;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Intake;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Intake.intakeMode;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Intake.transferState;
@@ -80,6 +81,8 @@ public class Teleop_Main_ extends LinearOpMode {
     Pedro_Paths Paths = new Pedro_Paths();
     // Create a new instance of Prompter for selecting the alliance
     Prompter prompter = null;
+
+    Devices.GoBildaPrismBarClass prismObject;
     enum startPoses {
         FAR,
         NEAR
@@ -117,6 +120,7 @@ public class Teleop_Main_ extends LinearOpMode {
             }
             telemetry.addData("Selection", "Complete");
             telemetry.addData("Alliance", selectedAlliance);
+            prismObject.init(this,selectedAlliance);
             if (MecanumDrivetrainClass.robotPose == null){
                 startPoses pose = prompter.get("startPose");
                 if (pose == startPoses.FAR) {

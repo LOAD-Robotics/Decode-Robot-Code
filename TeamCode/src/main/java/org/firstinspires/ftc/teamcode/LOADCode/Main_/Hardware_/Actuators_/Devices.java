@@ -14,6 +14,7 @@ import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.LoadHardwareClass;
 import org.firstinspires.ftc.teamcode.Prism.Color;
 import org.firstinspires.ftc.teamcode.Prism.GoBildaPrismDriver;
 import org.firstinspires.ftc.teamcode.Prism.PrismAnimations;
@@ -355,67 +356,25 @@ public class Devices {
         BLINK,
         OFF
     }
-    public static class GoBildaPrismBarClass  {
+    public static class GoBildaPrismBarClass {
         // Maximum length of 4 daisy chained strips is 36 (12 + 12 + 6 + 6)
+        // Scrimmage length of 2 daisy chained strips is 24 (12 + 12)
+
         GoBildaPrismDriver prism;
-        int maxStripLength = 0;
-
-        PrismAnimations.Solid solidColor = new PrismAnimations.Solid(Color.BLUE);
-        PrismAnimations.Blink blinkAnim = new PrismAnimations.Blink(Color.BLUE);
-        PrismAnimations.Solid blank = new PrismAnimations.Solid(Color.TRANSPARENT);
-
-        public void init(@NonNull OpMode opMode, String name, ArrayList<Integer> stripLengths){
-            prism = opMode.hardwareMap.get(GoBildaPrismDriver.class, name);
-            for (int i = 0; i < stripLengths.size(); i++){
-                maxStripLength = maxStripLength + stripLengths.get(i);
+        public void init(@NonNull OpMode opmode, LoadHardwareClass.Alliance alliance){
+            prism = opmode.hardwareMap.get(GoBildaPrismDriver.class, "prism");
+            PrismAnimations.Solid solidAllianceColor;
+            if (alliance == LoadHardwareClass.Alliance.RED){
+                solidAllianceColor = new PrismAnimations.Solid(Color.RED);
+            } else {
+                solidAllianceColor = new PrismAnimations.Solid(Color.BLUE);
             }
-            prism.setStripLength(maxStripLength);
-        }
+            solidAllianceColor.setStartIndex(0);
+            solidAllianceColor.setStopIndex(24);
+            solidAllianceColor.setBrightness(100);
+            prism.insertAndUpdateAnimation(GoBildaPrismDriver.LayerHeight.LAYER_0,solidAllianceColor);
 
-        public void addAnimation(GoBildaPrismDriver.LayerHeight layer, PrismAnimations.AnimationBase animation){
-            prism.insertAnimation(layer, animation);
         }
     }
-
-    /*
-    public enum StripState {
-    PROGRESS,
-    FULL_ALARM,
-    OFF
-}
-
-// Variables to track progress (0.0 to 1.0)
-double strip1Progress = 0.0;
-
-public void updateStrips(StripState state, double progress) {
-    switch (state) {
-        case PROGRESS:
-            // Strip 1: Short (6 LEDs, Starts at 0)
-            int s1End = 0 + (int)(6 * progress) - 1;
-            prism.setAnimation(0, PrismAnimation.SOLID_COLOR);
-            prism.setStartPoint(0, 0);
-            // Ensure end point is at least the start point to avoid errors
-            prism.setEndPoint(0, Math.max(0, s1End));
-            prism.setColor(0, Color.CYAN);
-            break;
-
-        case FULL_ALARM:
-            // Rapid blinking for the whole segment
-            prism.setAnimation(0, PrismAnimation.BLINKING);
-            prism.setStartPoint(0, 0);
-            prism.setEndPoint(0, 5);
-            prism.setSpeed(0, 255); // Max speed for "rapid" effect
-            prism.setColor(0, Color.RED);
-            break;
-
-        case OFF:
-            // Hide the layer or set to black
-            prism.setAnimation(0, PrismAnimation.OFF);
-            break;
-    }
-    // Only call this once at the end of your loop logic!
-    prism.update();
-}
-     */
 }
 
