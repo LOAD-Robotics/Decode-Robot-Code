@@ -359,17 +359,22 @@ public class Devices {
         // Scrimmage length of 2 daisy chained strips is 24 (12 + 12)
 
         GoBildaPrismDriver prism;
+        int stripBrightness;
         public void init(@NonNull OpMode opmode){
             prism = opmode.hardwareMap.get(GoBildaPrismDriver.class, "prism");
         }
 
         public void setStripSolidColor(Color color){
-            prism.insertAndUpdateAnimation(GoBildaPrismDriver.LayerHeight.LAYER_0, new PrismAnimations.Solid(color, 50));
+            prism.insertAndUpdateAnimation(GoBildaPrismDriver.LayerHeight.LAYER_0, new PrismAnimations.Solid(color, 100));
         }
         public void setStripRainbow(){
             PrismAnimations.AnimationBase color = new PrismAnimations.Rainbow();
-            color.setBrightness(50);
+            color.setBrightness(100);
             prism.insertAndUpdateAnimation(GoBildaPrismDriver.LayerHeight.LAYER_0, color);
+        }
+
+        public void setStripBrightness(int brightness){
+            stripBrightness = brightness;
         }
 
         public void setAllianceDisplay(LoadHardwareClass.Alliance alliance){
