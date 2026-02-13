@@ -354,7 +354,7 @@ public class Teleop_Main_ extends LinearOpMode {
             turretOn = !turretOn;
         }
         Robot.turret.updateAimbot(turretOn, true, hoodOffset);
-        Robot.turret.rotation.setOffsetDegrees(Robot.turret.rotation.getOffsetDegrees() + turretOffset);
+        Robot.turret.rotation.setOffsetDegrees(Turret.turretOffset + turretOffset);
 
         double dylanStickDeadzones = 0.2;
 
@@ -401,9 +401,9 @@ public class Teleop_Main_ extends LinearOpMode {
             hoodOffset -= 10;
         }
         if (gamepad2.dpadLeftWasPressed()){
-            turretOffset += 2;
+            turretOffset += 10;
         }else if (gamepad2.dpadLeftWasPressed()){
-            turretOffset -= 2;
+            turretOffset -= 10;
         }
 
 
