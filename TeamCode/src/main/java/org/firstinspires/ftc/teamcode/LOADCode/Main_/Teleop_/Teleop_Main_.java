@@ -54,6 +54,8 @@ import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Drivetrain_.Mecan
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Drivetrain_.Pedro_Paths;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.LoadHardwareClass;
 
+import java.util.concurrent.TimeUnit;
+
 
 // FIRST COMMENT FROM MY NEW COMPUTER =D
 // - ARI
@@ -67,7 +69,9 @@ public class Teleop_Main_ extends LinearOpMode {
     private final TelemetryManager panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
 
     public int shootingState = 0;
-    public TimerEx stateTimer = new TimerEx();
+    public TimerEx stateTimerFifthSec = new TimerEx(0.2);
+    public TimerEx stateTimerFullSec = new TimerEx(1);
+    public TimerEx stateTimerHalfSec = new TimerEx(0.5);
     public double hoodOffset = 0;
     public double turretOffset = 0;
     public boolean turretOn = true;
@@ -193,10 +197,12 @@ public class Teleop_Main_ extends LinearOpMode {
             telemetry.addData("Tag Detected", Robot.turret.vision.tagDetected(targetTagID));
             telemetry.addData("Is using Camera PID", Robot.turret.useCameraAim);
             telemetry.addData("Camera Error", Robot.turret.cameraTurretError);
+            panelsTelemetry.addData("Camera Turret Error", Robot.turret.cameraTurretError);
             panelsTelemetry.addData("Turret Target Angle", Robot.turret.rotation.target);
             panelsTelemetry.addData("Turret Actual Angle", Robot.turret.rotation.getAngleAbsolute());
             telemetry.addData("Turret Target Angle", Robot.turret.rotation.target);
             telemetry.addData("Turret Actual Angle", Robot.turret.rotation.getAngleAbsolute());
+            telemetry.addData("Turret Rotation Offset", turretOffset);
             telemetry.addData("Turret Hood Angle", Robot.turret.getHood());
             telemetry.addData("Turret Hood Offset", hoodOffset);
             telemetry.addData("Turret Target [X, Y]", "[" + Robot.turret.calcGoalPose().getX() + ", " + Robot.turret.calcGoalPose().getY() + "]");
@@ -213,6 +219,7 @@ public class Teleop_Main_ extends LinearOpMode {
             // Intake-related Telemetry
             telemetry.addLine();
             telemetry.addData("Intake Mode", Robot.intake.getMode());
+            telemetry.addData("Intake Current", Robot.intake.getCurrent());
 
             // Color Sensor Telemetry
             telemetry.addLine();
@@ -222,12 +229,14 @@ public class Teleop_Main_ extends LinearOpMode {
             // System-related Telemetry
             telemetry.addLine();
             telemetry.addData("Status", "Run Time: " + runtime);
-            telemetry.addData("Version: ", "12/12/25");
+            telemetry.addData("Version: ", "2/13/25");
             telemetry.update();
             panelsTelemetry.update();
-        }
 
-        Robot.lights.setStripRainbow();
+            if (runtime.time(TimeUnit.SECONDS) > 115){
+                Robot.lights.setStripRainbow();
+            }
+        }
     }
 
     /**
@@ -435,34 +444,36 @@ public class Teleop_Main_ extends LinearOpMode {
                 return;
             case 1:
                 if (Robot.turret.getGate() == gatestate.CLOSED){
-                    stateTimer.restart();
+                    stateTimerFifthSec.restart();
+                    stateTimerFifthSec.start();
                 }
                 Robot.turret.setGateState(gatestate.OPEN);
-                telemetry.addData("Shooting State", "STARTED");
-                if (stateTimer.getElapsed() > 0.2){
-                    shootingState++;
+                telemetry.addData("Shooting State", "GATE OPENING");
+                if (stateTimerFifthSec.isDone()){
+                    shootingState = 2;
                 }
                 return;
             case 2:
                 if (Robot.intake.getMode() == intakeMode.OFF){
-                    stateTimer.restart();
+                    stateTimerFullSec.restart();
+                    stateTimerFullSec.start();
                 }
                 Robot.intake.setMode(intakeMode.INTAKING);
-                telemetry.addData("Shooting State", "STARTED");
-                if (stateTimer.getElapsed() > 1 && Robot.intake.getTopSensorState() && !Robot.intake.getBottomSensorState()){
-                    shootingState++;
+                telemetry.addData("Shooting State", "SHOOTING 2");
+                if (stateTimerFullSec.isDone() && Robot.intake.getTopSensorState() && !Robot.intake.getBottomSensorState()){
+                    shootingState = 3;
                 }
                 return;
             case 3:
                 if (Robot.intake.getMode() == intakeMode.INTAKING){
-                    stateTimer.restart();
-                    stateTimer.start();
+                    stateTimerHalfSec.restart();
+                    stateTimerHalfSec.start();
                 }
                 Robot.intake.setMode(Intake.intakeMode.SHOOTING);
                 Robot.intake.setTransfer(transferState.UP);
-                telemetry.addData("Shooting State", "TRANSFERRED");
-                if (stateTimer.isDone()) {
-                    shootingState++;
+                telemetry.addData("Shooting State", "SHOOTING FINAL");
+                if (stateTimerHalfSec.isDone()) {
+                    shootingState = 4;
                 }
                 return;
             case 4:

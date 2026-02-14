@@ -80,6 +80,7 @@ public class Turret {
      * Controls which aiming system to use.
      */
     public boolean useCameraAim = false;
+    public static boolean aprilTagToggle = false;
     public double cameraTurretError = 0;
 
     // Stores important objects for later access
@@ -216,7 +217,8 @@ public class Turret {
             useCameraAim = false;
         }
 
-        if (useCameraAim){
+        if (useCameraAim && aprilTagToggle){
+            vision.updateAprilTagProcessor();
             rotation.target = rotation.getAngleAbsolute();
             ControlSystem pid = ControlSystem.builder()
                     .posPid(cameraCoefficients)
@@ -225,7 +227,7 @@ public class Turret {
             AprilTagVisionSystem.PoseRBE tagPose = vision.getRBE(targetID);
             if (tagPose != null){
                 cameraTurretError = tagPose.b;
-                rotation.setPower(pid.calculate(new KineticState(tagPose.b)));
+                rotation.setPower(-pid.calculate(new KineticState(tagPose.b)));
             }
         }else{
             if (LoadHardwareClass.selectedAlliance == LoadHardwareClass.Alliance.RED){
@@ -316,7 +318,7 @@ public class Turret {
      * </ul>
      */
     public gatestate getGate(){
-        if (gate.getAngle() == 0.47){
+        if (gate.getAngle() == 0.5){
             return gatestate.OPEN;
         } else {
             return gatestate.CLOSED;

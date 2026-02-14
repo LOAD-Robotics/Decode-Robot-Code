@@ -13,9 +13,11 @@ import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.LoadHardwareClass;
 import org.firstinspires.ftc.teamcode.Prism.Color;
+import org.firstinspires.ftc.teamcode.Prism.Direction;
 import org.firstinspires.ftc.teamcode.Prism.GoBildaPrismDriver;
 import org.firstinspires.ftc.teamcode.Prism.PrismAnimations;
 
@@ -259,6 +261,10 @@ public class Devices {
             velPID.setGoal(new KineticState(0, degreesPerSecond));
             setPower(velPID.calculate(currentKineticState));
         }
+
+        public double getCurrent(CurrentUnit units){
+            return motorObject.getCurrent(units);
+        }
     }
     public static class ServoClass {
         private Servo servo;
@@ -359,18 +365,27 @@ public class Devices {
         // Scrimmage length of 2 daisy chained strips is 24 (12 + 12)
 
         GoBildaPrismDriver prism;
-        int stripBrightness;
-        public void init(@NonNull OpMode opmode){
+        int stripBrightness = 25;
+        public void init(@NonNull OpMode opmode, int stripLength){
             prism = opmode.hardwareMap.get(GoBildaPrismDriver.class, "prism");
+            prism.setStripLength(stripLength);
         }
 
         public void setStripSolidColor(Color color){
-            prism.insertAndUpdateAnimation(GoBildaPrismDriver.LayerHeight.LAYER_0, new PrismAnimations.Solid(color, 100));
+            prism.insertAndUpdateAnimation(GoBildaPrismDriver.LayerHeight.LAYER_0, new PrismAnimations.Solid(color, stripBrightness));
         }
+
         public void setStripRainbow(){
-            PrismAnimations.AnimationBase color = new PrismAnimations.Rainbow();
-            color.setBrightness(100);
-            prism.insertAndUpdateAnimation(GoBildaPrismDriver.LayerHeight.LAYER_0, color);
+            PrismAnimations.AnimationBase colorA = new PrismAnimations.Rainbow(Direction.Backward);
+            colorA.setIndexes(0, 12);
+            PrismAnimations.AnimationBase colorB = new PrismAnimations.Rainbow(Direction.Forward);
+            colorB.setIndexes(13, 24);
+            prism.insertAndUpdateAnimation(GoBildaPrismDriver.LayerHeight.LAYER_1, colorA);
+            prism.insertAndUpdateAnimation(GoBildaPrismDriver.LayerHeight.LAYER_2, colorB);
+        }
+
+        public void clearStripAnimations(){
+            prism.clearAllAnimations();
         }
 
         public void setStripBrightness(int brightness){
@@ -378,6 +393,7 @@ public class Devices {
         }
 
         public void setAllianceDisplay(LoadHardwareClass.Alliance alliance){
+            clearStripAnimations();
             if (alliance == LoadHardwareClass.Alliance.RED){
                 setStripSolidColor(Color.RED);
             }else if (alliance == LoadHardwareClass.Alliance.BLUE){

@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 @Configurable
@@ -73,7 +74,7 @@ public class Intake {
             intake.setPower(1);
             belt.setPower(1);
         }else if (direction == intakeMode.SHOOTING){
-            intake.setPower(0);
+            intake.setPower(0); //TODO change this to 0 if using servo powered intake belt
             belt.setPower(1);
         }else if (direction == intakeMode.REVERSING){
             intake.setPower(-1);
@@ -85,6 +86,10 @@ public class Intake {
             intake.setPower(0);
             belt.setPower(0);
         }
+    }
+
+    public double getCurrent(){
+        return intake.getCurrent(CurrentUnit.AMPS);
     }
 
     /**

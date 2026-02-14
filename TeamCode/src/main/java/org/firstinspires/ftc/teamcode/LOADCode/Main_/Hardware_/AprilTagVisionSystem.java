@@ -199,7 +199,6 @@ public class AprilTagVisionSystem {
 
     public PoseRBE getRBEbyIndex(int detectionIndex){
         if (!detections.isEmpty()){
-            updateAprilTagProcessor();
             return new PoseRBE(detections.get(detectionIndex).ftcPose);
         }
         return null;
