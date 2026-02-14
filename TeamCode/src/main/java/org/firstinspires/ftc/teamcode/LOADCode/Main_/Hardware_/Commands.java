@@ -9,6 +9,7 @@ import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Intake
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Turret;
 
 import dev.nextftc.core.commands.Command;
+import dev.nextftc.core.commands.delays.Delay;
 import dev.nextftc.core.commands.delays.WaitUntil;
 import dev.nextftc.core.commands.groups.ParallelRaceGroup;
 import dev.nextftc.core.commands.groups.SequentialGroup;
@@ -115,6 +116,37 @@ public class Commands {
                 setIntakeMode(Intake.intakeMode.OFF),
                 setGateState(Turret.gatestate.CLOSED),
                 setTransferState(Intake.transferState.DOWN)
+        );
+    }
+
+    public Command shootTestBalls(){
+        return new ParallelRaceGroup(
+                new SequentialGroup(
+                        // Ensure the flywheel is up to speed, if not, spin up first
+                        setFlywheelState(Turret.flywheelState.ON),
+
+                        // Shoot the first two balls
+                        setGateState(Turret.gatestate.OPEN),
+                        resetShootingTimerFifthsec(),
+                        new WaitUntil(shootingTimerFifthSec::isDone),
+                        setIntakeMode(Intake.intakeMode.INTAKING),
+                        resetShootingTimer2sec(),
+                        new WaitUntil(() -> (Robot.intake.getTopSensorState() && !Robot.intake.getBottomSensorState() && shootingTimer2sec.isDone())),
+
+                        // Shoot the last ball
+                        setIntakeMode(Intake.intakeMode.SHOOTING),
+                        setTransferState(Intake.transferState.UP),
+                        resetShootingTimerHalfsec(),
+                        new WaitUntil(shootingTimerHalfSec::isDone),
+
+                        // Reset the systems
+                        setIntakeMode(Intake.intakeMode.OFF),
+                        setGateState(Turret.gatestate.CLOSED),
+                        setTransferState(Intake.transferState.DOWN)
+                ),
+                new SequentialGroup(
+                        new Delay(8)
+                )
         );
     }
 

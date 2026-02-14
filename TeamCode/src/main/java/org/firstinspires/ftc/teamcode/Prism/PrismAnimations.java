@@ -494,6 +494,10 @@ public class PrismAnimations {
             this();
             this.startHue = startHue;
         }
+        public Rainbow(Direction direction) {
+            this();
+            this.direction = direction;
+        }
         public Rainbow(float startHue, float stopHue){
             this(startHue);
             this.stopHue = stopHue;

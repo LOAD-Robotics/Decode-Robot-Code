@@ -13,8 +13,11 @@ import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.LoadHardwareClass;
 import org.firstinspires.ftc.teamcode.Prism.Color;
+import org.firstinspires.ftc.teamcode.Prism.Direction;
 import org.firstinspires.ftc.teamcode.Prism.GoBildaPrismDriver;
 import org.firstinspires.ftc.teamcode.Prism.PrismAnimations;
 
@@ -258,8 +261,11 @@ public class Devices {
             velPID.setGoal(new KineticState(0, degreesPerSecond));
             setPower(velPID.calculate(currentKineticState));
         }
-    }
 
+        public double getCurrent(CurrentUnit units){
+            return motorObject.getCurrent(units);
+        }
+    }
     public static class ServoClass {
         private Servo servo;
 
@@ -289,7 +295,6 @@ public class Devices {
             return servo.getPosition();
         }
     }
-
     public static class REVColorSensorV3Class {
         private NormalizedColorSensor sensor;
 
@@ -313,7 +318,6 @@ public class Devices {
             return ((DistanceSensor) sensor).getDistance(units);
         }
     }
-
     public static class DualProximitySensorClass {
         private final REVColorSensorV3Class sensor1 = new REVColorSensorV3Class();
         private final REVColorSensorV3Class sensor2 = new REVColorSensorV3Class();
@@ -339,7 +343,6 @@ public class Devices {
             return new double[]{sensor1.getDistance(units), sensor2.getDistance(units)};
         }
     }
-
     public static class REVHallEffectSensorClass {
         private DigitalChannel sensor;
 
@@ -352,21 +355,51 @@ public class Devices {
             return !sensor.getState();
         }
     }
-
+    public enum StripState {
+        PROGRESS,
+        BLINK,
+        OFF
+    }
     public static class GoBildaPrismBarClass {
+        // Maximum length of 4 daisy chained strips is 36 (12 + 12 + 6 + 6)
+        // Scrimmage length of 2 daisy chained strips is 24 (12 + 12)
 
         GoBildaPrismDriver prism;
-
-        PrismAnimations.Solid solidColor = new PrismAnimations.Solid(Color.BLUE);
-        PrismAnimations.Blink blinkAnim = new PrismAnimations.Blink(Color.BLUE);
-
-        public void init(@NonNull OpMode opmode, String prismDeviceName, Integer stripLength){
-            prism = opmode.hardwareMap.get(GoBildaPrismDriver.class,prismDeviceName);
+        int stripBrightness = 50;
+        public void init(@NonNull OpMode opmode, int stripLength){
+            prism = opmode.hardwareMap.get(GoBildaPrismDriver.class, "prism");
             prism.setStripLength(stripLength);
         }
 
-        public void setColor(Color color){
+        public void setStripSolidColor(Color color){
+            prism.insertAndUpdateAnimation(GoBildaPrismDriver.LayerHeight.LAYER_0, new PrismAnimations.Solid(color, stripBrightness));
+        }
 
+        public void setStripRainbow(){
+            PrismAnimations.AnimationBase colorA = new PrismAnimations.Rainbow(Direction.Backward);
+            colorA.setIndexes(0, 12);
+            PrismAnimations.AnimationBase colorB = new PrismAnimations.Rainbow(Direction.Forward);
+            colorB.setIndexes(13, 24);
+            prism.insertAndUpdateAnimation(GoBildaPrismDriver.LayerHeight.LAYER_1, colorA);
+            prism.insertAndUpdateAnimation(GoBildaPrismDriver.LayerHeight.LAYER_2, colorB);
+        }
+
+        public void clearStripAnimations(){
+            prism.clearAllAnimations();
+        }
+
+        public void setStripBrightness(int brightness){
+            stripBrightness = brightness;
+        }
+
+        public void setAllianceDisplay(LoadHardwareClass.Alliance alliance){
+            clearStripAnimations();
+            if (alliance == LoadHardwareClass.Alliance.RED){
+                setStripSolidColor(Color.RED);
+            }else if (alliance == LoadHardwareClass.Alliance.BLUE){
+                setStripSolidColor(Color.BLUE);
+            }
         }
     }
 }
+

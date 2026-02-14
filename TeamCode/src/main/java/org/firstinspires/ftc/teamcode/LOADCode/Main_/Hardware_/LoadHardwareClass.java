@@ -36,6 +36,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.skeletonarmy.marrow.zones.Point;
 import com.skeletonarmy.marrow.zones.PolygonZone;
 
+import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Devices;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Intake;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Turret;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Drivetrain_.MecanumDrivetrainClass;
@@ -54,6 +55,7 @@ public class LoadHardwareClass {
     public final MecanumDrivetrainClass drivetrain;
     public final Turret turret;
     public final Intake intake;
+    public final Devices.GoBildaPrismBarClass lights;
 
     // Declare various enums & other variables that are useful across files
     public static Alliance selectedAlliance = null;
@@ -96,6 +98,7 @@ public class LoadHardwareClass {
         this.drivetrain = new MecanumDrivetrainClass();
         this.turret     = new Turret();
         this.intake     = new Intake();
+        this.lights     = new Devices.GoBildaPrismBarClass();
     }
 
     /**
@@ -107,6 +110,7 @@ public class LoadHardwareClass {
         drivetrain.init(myOpMode, initialPose);
         turret.init(myOpMode, this);
         intake.init(myOpMode);
+        lights.init(myOpMode, 24);
 
         // Misc telemetry
         myOpMode.telemetry.addData(">", "Hardware Initialized");
@@ -122,6 +126,7 @@ public class LoadHardwareClass {
         drivetrain.init(myOpMode, initialPose, follower);
         turret.init(myOpMode, this);
         intake.init(myOpMode);
+        lights.init(myOpMode, 24);
 
         // Misc telemetry
         myOpMode.telemetry.addData(">", "Hardware Initialized");
