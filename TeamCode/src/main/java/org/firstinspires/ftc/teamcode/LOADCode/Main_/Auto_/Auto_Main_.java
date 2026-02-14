@@ -97,6 +97,7 @@ public class Auto_Main_ extends NextFTCOpMode {
 
     @Override
     public void onStartButtonPressed() {
+        Robot.lights.setAllianceDisplay(selectedAlliance);
         // Schedule the proper auto
         selectedAuto.runAuto();
         turretOn = selectedAuto.getTurretEnabled();
@@ -122,6 +123,7 @@ public class Auto_Main_ extends NextFTCOpMode {
 
     @Override
     public void onStop(){
+        Robot.lights.setStripRainbow();
         Robot.drivetrain.follower.holdPoint(Robot.drivetrain.follower.getPose());
         MecanumDrivetrainClass.robotPose = Robot.drivetrain.follower.getPose();
     }

@@ -365,7 +365,7 @@ public class Devices {
         // Scrimmage length of 2 daisy chained strips is 24 (12 + 12)
 
         GoBildaPrismDriver prism;
-        int stripBrightness = 25;
+        int stripBrightness = 50;
         public void init(@NonNull OpMode opmode, int stripLength){
             prism = opmode.hardwareMap.get(GoBildaPrismDriver.class, "prism");
             prism.setStripLength(stripLength);

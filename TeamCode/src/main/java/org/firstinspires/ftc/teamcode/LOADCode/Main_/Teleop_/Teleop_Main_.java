@@ -75,6 +75,7 @@ public class Teleop_Main_ extends LinearOpMode {
     public double hoodOffset = 0;
     public double turretOffset = 0;
     public boolean turretOn = true;
+    public boolean hoodOn = true;
     public Pose holdPoint = new Pose(72, 72, 90);
     public Boolean holdJustTriggered = false;
 
@@ -327,6 +328,10 @@ public class Teleop_Main_ extends LinearOpMode {
                 gamepad1.right_stick_x / turnMult,
                 true
         );
+
+        if (gamepad1.dpadDownWasPressed()){
+            hoodOn = !hoodOn;
+        }
     }
 
     /**
@@ -373,10 +378,10 @@ public class Teleop_Main_ extends LinearOpMode {
      * </ul>
      */
     public void Gamepad2() {
-        if (gamepad2.aWasPressed()){
+        if (gamepad1.yWasPressed()){
             turretOn = !turretOn;
         }
-        Robot.turret.updateAimbot(turretOn, true, hoodOffset);
+        Robot.turret.updateAimbot(turretOn, hoodOn, hoodOffset);
         Robot.turret.rotation.setOffsetDegrees(Turret.turretOffset + turretOffset);
 
         double dylanStickDeadzones = 0.2;
@@ -443,6 +448,7 @@ public class Teleop_Main_ extends LinearOpMode {
                 telemetry.addData("Shooting State", "OFF");
                 return;
             case 1:
+                Robot.turret.setFlywheelState(flywheelState.ON);
                 if (Robot.turret.getGate() == gatestate.CLOSED){
                     stateTimerFifthSec.restart();
                     stateTimerFifthSec.start();
@@ -477,7 +483,6 @@ public class Teleop_Main_ extends LinearOpMode {
                 }
                 return;
             case 4:
-                Robot.turret.setFlywheelState(flywheelState.OFF);
                 Robot.turret.setGateState(gatestate.CLOSED);
                 Robot.intake.setMode(intakeMode.OFF);
                 Robot.intake.setTransfer(transferState.DOWN);
