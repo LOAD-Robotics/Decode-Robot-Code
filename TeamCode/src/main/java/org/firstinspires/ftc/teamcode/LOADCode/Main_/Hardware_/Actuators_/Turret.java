@@ -37,13 +37,13 @@ public class Turret {
     //public static PIDCoefficients flywheelCoefficients = new PIDCoefficients(0.0002, 0, 0); // 4500 RPM
     public static PIDCoefficients flywheelCoefficients4200 = new PIDCoefficients(0.0004, 0, 0); // 4200 RPM
     public static PIDCoefficients flywheelCoefficients3500 = new PIDCoefficients(0.00025, 0, 0); // 3500 RPM
-    //public static PIDCoefficients flywheelCoefficients = new PIDCoefficients(0.00025, 0, 0); // 3000 RPM
+    public static PIDCoefficients flywheelCoefficients3000 = new PIDCoefficients(0.00025, 0, 0); // 3000 RPM
 
     // Flywheel FF coefficients for various speeds
     //public static BasicFeedforwardParameters flywheelFFCoefficients = new BasicFeedforwardParameters(0.000026,0,0); // 4500 RPM
-    public static BasicFeedforwardParameters flywheelFFCoefficients4200 = new BasicFeedforwardParameters(0.000032,0,0); // 4200 RPM
-    public static BasicFeedforwardParameters flywheelFFCoefficients3500 = new BasicFeedforwardParameters(0.000032,0,0); // 3500 RPM
-    //public static BasicFeedforwardParameters flywheelFFCoefficients = new BasicFeedforwardParameters(0.000031,0,0); // 3000 RPM
+    public static BasicFeedforwardParameters flywheelFFCoefficients4200 = new BasicFeedforwardParameters(0.0000328,0,0); // 4200 RPM
+    public static BasicFeedforwardParameters flywheelFFCoefficients3500 = new BasicFeedforwardParameters(0.0000323,0,0); // 3500 RPM
+    public static BasicFeedforwardParameters flywheelFFCoefficients3000 = new BasicFeedforwardParameters(0.000031,0,0); // 3000 RPM
 
     // Actual Flywheel Coefficients
     private PIDCoefficients actualFlywheelCoefficients = flywheelCoefficients3500;
@@ -64,6 +64,7 @@ public class Turret {
     public flywheelState flywheelMode = flywheelState.OFF;
     double targetRPM = 0;
     /** Controls the target speed of the flywheel when it is on.*/
+    public static double flywheelReallyNearSpeed = 3000;
     public static double flywheelNearSpeed = 3300;
     public static double flywheelFarSpeed = 4200;
     /** Controls the upper software limit of the hood.*/
@@ -287,7 +288,7 @@ public class Turret {
      */
     public void setGateState(gatestate state){
         if (state == gatestate.CLOSED){
-            gate.setAngle(0.47);
+            gate.setAngle(0.534);
         }else if (state == gatestate.OPEN){
             gate.setAngle(0.5);
         }
@@ -347,6 +348,9 @@ public class Turret {
     public double getFlywheelRPM(){
         return flywheel.getRPM();
     }
+    public boolean isFlywheelReady(){
+        return flywheel.getRPM() > getFlywheelCurrentMaxSpeed();
+    }
 
     /**
      * Sets the target state of the Flywheel. </br>
@@ -377,17 +381,24 @@ public class Turret {
     /**
      * Updates the flywheel PID. Must be called every loop.
      */
-    public void updateFlywheel(){
+    public void updateFlywheel() {
         robotZone.setPosition(Robot.drivetrain.follower.getPose().getX(), Robot.drivetrain.follower.getPose().getY());
         robotZone.setRotation(Robot.drivetrain.follower.getPose().getHeading());
+
+        Pose goalPose = new Pose(0,144,0);
+        if (LoadHardwareClass.selectedAlliance == LoadHardwareClass.Alliance.RED) {goalPose = new Pose(144, 144, 0);}
 
         opMode.telemetry.addData("In Far Zone", robotZone.isInside(LoadHardwareClass.FarLaunchZone));
         opMode.telemetry.addData("In Near Zone", robotZone.isInside(LoadHardwareClass.ReallyNearLaunchZoneRed));
 
-        if (robotZone.isInside(LoadHardwareClass.FarLaunchZone)){
+        if (robotZone.isInside(LoadHardwareClass.FarLaunchZone)) {
             targetRPM = flywheelFarSpeed;
             actualFlywheelCoefficients = flywheelCoefficients4200;
             actualFlywheelFFCoefficients = flywheelFFCoefficients4200;
+        }else if (Robot.drivetrain.distanceFromGoal() < 60){
+            targetRPM = flywheelReallyNearSpeed;
+            actualFlywheelCoefficients = flywheelCoefficients3000;
+            actualFlywheelFFCoefficients = flywheelFFCoefficients3000;
         }else{
             targetRPM = flywheelNearSpeed;
             actualFlywheelCoefficients = flywheelCoefficients3500;

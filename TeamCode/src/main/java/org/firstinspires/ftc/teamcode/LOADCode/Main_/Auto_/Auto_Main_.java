@@ -20,6 +20,7 @@ import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.LoadHardwareClass
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 import dev.nextftc.core.commands.delays.Delay;
+import dev.nextftc.core.commands.delays.WaitUntil;
 import dev.nextftc.core.commands.groups.ParallelRaceGroup;
 import dev.nextftc.core.commands.groups.SequentialGroup;
 import dev.nextftc.core.commands.utility.InstantCommand;
@@ -64,7 +65,8 @@ public class Auto_Main_ extends NextFTCOpMode {
                         new Near_12Ball(),
                         new Near_9Ball(),
                         new Far_9Ball(),
-                        new Far_6Ball()
+                        new Far_6Ball(),
+                        new test_auto()
                 ));
         prompter.onComplete(() -> {
                     selectedAlliance = prompter.get("alliance");
@@ -97,7 +99,7 @@ public class Auto_Main_ extends NextFTCOpMode {
 
     @Override
     public void onStartButtonPressed() {
-        Robot.lights.setAllianceDisplay(selectedAlliance);
+        Robot.lights.setSolidAllianceDisplay(selectedAlliance);
         // Schedule the proper auto
         selectedAuto.runAuto();
         turretOn = selectedAuto.getTurretEnabled();
@@ -113,11 +115,7 @@ public class Auto_Main_ extends NextFTCOpMode {
         telemetry.addData("Alliance", selectedAlliance);
         Robot.turret.updateAimbot(turretOn, true, 0);
         Robot.turret.updateFlywheel();
-
         MecanumDrivetrainClass.robotPose = Robot.drivetrain.follower.getPose();
-
-        telemetry.addLine();
-        telemetry.addData("Mirror -90", Math.toDegrees(paths.autoMirror(new Pose(0,0,-90)).getHeading()));
         telemetry.update();
     }
 
@@ -342,5 +340,40 @@ public class Auto_Main_ extends NextFTCOpMode {
         @NonNull
         @Override
         public String toString(){return "MOE 365 Far Zone Auto";}
+    }
+
+    private class test_auto extends Auto{
+
+        @Override
+        Pose getStartPose() {
+            return paths.farStart;
+        }
+
+        @Override
+        boolean getTurretEnabled() {
+            return false;
+        }
+
+        @Override
+        void runAuto() {
+            new SequentialGroup(
+                    Commands.setIntakeMode(Intake.intakeMode.INTAKING),
+                    Commands.runPath(paths.farStart_to_farShoot, true, 1),
+                    new WaitUntil(() -> gamepad2.bWasPressed()),
+                    Commands.runPath(paths.farShoot_to_rampIntake, true, 1),
+                    new WaitUntil(() -> gamepad2.bWasPressed()),
+                    Commands.runPath(paths.rampIntake_to_farShoot, true, 1),
+                    new WaitUntil(() -> gamepad2.bWasPressed()),
+                    Commands.runPath(paths.farShoot_to_hpPreload, true, 1),
+                    new WaitUntil(() -> gamepad2.bWasPressed()),
+                    Commands.runPath(paths.hpPreload_to_farShoot, true, 1)
+            ).schedule();
+        }
+
+        @NonNull
+        @Override
+        public String toString() {
+            return "Test Auto";
+        }
     }
 }

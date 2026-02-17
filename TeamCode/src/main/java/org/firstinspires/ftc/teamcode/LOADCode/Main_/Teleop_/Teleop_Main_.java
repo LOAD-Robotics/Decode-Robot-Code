@@ -66,6 +66,7 @@ public class Teleop_Main_ extends LinearOpMode {
 
     // Declare OpMode members.
     private final ElapsedTime runtime = new ElapsedTime();
+    private final ElapsedTime looptime = new ElapsedTime();
     private final TelemetryManager panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
 
     public int shootingState = 0;
@@ -78,6 +79,8 @@ public class Teleop_Main_ extends LinearOpMode {
     public boolean hoodOn = true;
     public Pose holdPoint = new Pose(72, 72, 90);
     public Boolean holdJustTriggered = false;
+
+    public int lightsState = 0;
 
     // Create a new instance of our Robot class
     LoadHardwareClass Robot = new LoadHardwareClass(this);
@@ -158,10 +161,11 @@ public class Teleop_Main_ extends LinearOpMode {
         Paths.buildPaths(Robot.drivetrain.follower);
         Robot.drivetrain.startTeleOpDrive();
         Robot.intake.setTransfer(transferState.DOWN);
-        Robot.lights.setAllianceDisplay(selectedAlliance);
+        Robot.lights.setSolidAllianceDisplay(selectedAlliance);
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
+            looptime.reset();
             if (!Turret.zeroed){
                 while (!isStopRequested() && Robot.turret.zeroTurret()){
                     sleep(0);
@@ -229,13 +233,23 @@ public class Teleop_Main_ extends LinearOpMode {
 
             // System-related Telemetry
             telemetry.addLine();
+            telemetry.addData("Loop Time", looptime);
             telemetry.addData("Status", "Run Time: " + runtime);
             telemetry.addData("Version: ", "2/13/25");
             telemetry.update();
             panelsTelemetry.update();
 
-            if (runtime.time(TimeUnit.SECONDS) > 115){
+            if (runtime.time(TimeUnit.SECONDS) > 115 || lightsState == 2){
                 Robot.lights.setStripRainbow();
+                lightsState = 2;
+            }else{
+                if (Robot.turret.isFlywheelReady() && lightsState == 0){
+                    Robot.lights.setBlinkingAllianceDisplay(selectedAlliance);
+                    lightsState = 1;
+                }else if (lightsState == 1){
+                    Robot.lights.setSolidAllianceDisplay(selectedAlliance);
+                    lightsState = 0;
+                }
             }
         }
     }

@@ -37,8 +37,10 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Intake;
+import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Turret;
+import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Drivetrain_.Pedro_Paths;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.LoadHardwareClass;
-import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.LoadPrismLights;
 
 @Configurable
 @TeleOp(name="Teleop_Tuning_", group="TeleOp")
@@ -49,11 +51,7 @@ public class Teleop_Tuning_ extends LinearOpMode {
     private ElapsedTime loopTimer = new ElapsedTime();
     private TelemetryManager panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
 
-    // Panels variables
-    public static double hoodTargetPos = 0;
-    public static int turretTurnIncrement = 2;
-    int turretTurnMultiplier = 1;
-    int turretTurnAngle = 0;
+    double initial = 0;
 
     // Contains the start Pose of our robot. This can be changed or saved from the autonomous period.
     private final Pose startPose = new Pose(88.5,7.8, Math.toRadians(90));
@@ -63,60 +61,61 @@ public class Teleop_Tuning_ extends LinearOpMode {
 
         // Create a new instance of our Robot class
         LoadHardwareClass Robot = new LoadHardwareClass(this);
-        LoadPrismLights prism = new LoadPrismLights();
+        Pedro_Paths paths = new Pedro_Paths();
         // Initialize all hardware of the robot
-        Robot.init(startPose);
+        Robot.init(paths.nearStart );
 
         telemetry.addData("Status", "Initialized");
         telemetry.update();
-
-        while (!isStopRequested() && Robot.turret.zeroTurret()){
-            sleep(0);
-        }
-        Robot.turret.setHood(0);
+        Robot.turret.setGateState(Turret.gatestate.CLOSED);
 
         // Wait for the game to start (driver presses START)
         waitForStart();
         runtime.reset();
 
-        // Begin TeleOp driving
-        Robot.drivetrain.startTeleOpDrive();
-
-        prism.init(this, "prism");
+        initial = Robot.turret.rotation.getAngleAbsolute();
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
 
-            // Pass the joystick positions to our mecanum drive controller
-            Robot.drivetrain.pedroMecanumDrive(
-                    gamepad1.left_stick_y,
-                    gamepad1.left_stick_x,
-                    gamepad1.right_stick_x,
-                    true
-            );
+            Robot.turret.rotation.setAngle(initial);
 
-            if (gamepad1.aWasPressed()){
-                prism.setStripsRainbow();
+            if (gamepad2.yWasPressed()) {
+                if (Robot.turret.flywheelMode == Turret.flywheelState.OFF) {
+                    Robot.turret.setFlywheelState(Turret.flywheelState.ON);
+                } else {
+                    Robot.turret.setFlywheelState(Turret.flywheelState.OFF);
+                }
             }
-            if (gamepad1.bWasPressed()){
-                prism.setStripsRed();
+            Robot.turret.updateFlywheel();
+
+            if (gamepad2.dpad_down){
+                Robot.intake.setMode(Intake.intakeMode.INTAKING);
+            }else{
+                Robot.intake.setMode(Intake.intakeMode.OFF);
             }
-            if (gamepad1.xWasPressed()){
-                prism.setStripsBlue();
+            if (gamepad1.x){
+                Robot.turret.setGateState(Turret.gatestate.CLOSED);
+            }else if (gamepad1.y){
+                Robot.turret.setGateState(Turret.gatestate.OPEN);
             }
-            if (gamepad1.yWasPressed()){
-                prism.clearStrips();
-            }
+
+            telemetry.addData("gate pos", Robot.turret.getGate());
+
+            panelsTelemetry.addData("Flywheel Speed", Robot.turret.getFlywheelRPM());
+            panelsTelemetry.addData("Flywheel Target", Robot.turret.getFlywheelCurrentMaxSpeed());
+
             // System-related Telemetry
             telemetry.addLine();
             telemetry.addLine("SYSTEM DATA");
             telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.addData("Loop Time", loopTimer.toString());
-            panelsTelemetry.addData("Loop Time", loopTimer.toString());
             telemetry.addData("Version: ", "12/26/25");
             telemetry.update();
             panelsTelemetry.update();
             loopTimer.reset();
+
+            Robot.turret.updatePIDs();
         }
     }
 }

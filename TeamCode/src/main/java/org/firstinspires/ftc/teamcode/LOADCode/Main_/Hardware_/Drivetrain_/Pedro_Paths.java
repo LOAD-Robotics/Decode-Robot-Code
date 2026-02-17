@@ -23,8 +23,8 @@ public class Pedro_Paths {
     public Pose nearPreload = new Pose(124.000, 83.500, Math.toRadians(0));
     public Pose midPreload = new Pose(130.000, 59.500, Math.toRadians(0));
     public Pose farPreload = new Pose(130.000, 35.500, Math.toRadians(0));
-    public Pose hpPreload = new Pose(135, 8, -90);
-    public Pose rampIntake = new Pose(135, 40, 80);
+    public Pose hpPreload = new Pose(136, 9, Math.toRadians(-90));
+    public Pose rampIntake = new Pose(135, 40, Math.toRadians(80));
     public Pose hpIntake = null;
     // Shooting Poses
     public Pose nearShoot = new Pose(115, 120, Math.toRadians(-35));
@@ -490,10 +490,15 @@ public class Pedro_Paths {
         farShoot_to_hpPreload = follower.pathBuilder()
                 .addPath(new BezierCurve(
                     farShoot,
-                    autoMirror(new Pose(136, 30)),
-                    hpPreload
+                    autoMirror(new Pose(120, 60)),
+                    autoMirror(new Pose(136, 20))
                 ))
                 .setLinearHeadingInterpolation(farShoot.getHeading(), hpPreload.getHeading())
+                .addPath(new BezierLine(
+                    autoMirror(new Pose(136, 20)),
+                    hpPreload
+                ))
+                .setConstantHeadingInterpolation(hpPreload.getHeading())
                 .build();
         midShoot_to_hpPreload = follower.pathBuilder()
                 .addPath(new BezierCurve(
@@ -511,11 +516,11 @@ public class Pedro_Paths {
                         midShoot,
                         autoMirror(new Pose(85, 40)),
                         autoMirror(new Pose(137, 2)),
-                        autoMirror(new Pose(135, 30, rampIntake.getHeading()))
+                        autoMirror(new Pose(135, 30))
                 ))
                 .setLinearHeadingInterpolation(midShoot.getHeading(), rampIntake.getHeading())
                 .addPath(new BezierLine(
-                        autoMirror(new Pose(135, 30, rampIntake.getHeading())),
+                        autoMirror(new Pose(135, 30)),
                         rampIntake
                 ))
                 .setConstantHeadingInterpolation(rampIntake.getHeading())
@@ -524,20 +529,21 @@ public class Pedro_Paths {
                 .addPath(new BezierCurve(
                         farShoot,
                         autoMirror(new Pose(137, 2)),
-                        autoMirror(new Pose(135, 30, rampIntake.getHeading()))
+                        autoMirror(new Pose(135, 30))
                 ))
-                .setLinearHeadingInterpolation(farShoot.getHeading(), rampIntake.getHeading())
+                .setLinearHeadingInterpolation(farShoot.getHeading(), rampIntake.getHeading()-Math.toRadians(10))
                 .addPath(new BezierLine(
-                        autoMirror(new Pose(135, 30, rampIntake.getHeading())),
+                        autoMirror(new Pose(135, 30)),
                         rampIntake
                 ))
-                .setConstantHeadingInterpolation(rampIntake.getHeading())
+                .setLinearHeadingInterpolation(rampIntake.getHeading()-Math.toRadians(10), rampIntake.getHeading())
                 .build();
     }
     public void buildHPPreloadToShootings(){
         hpPreload_to_farShoot = follower.pathBuilder()
-                .addPath(new BezierLine(
+                .addPath(new BezierCurve(
                         hpPreload,
+                        autoMirror(new Pose(110, 40)),
                         farShoot
                 ))
                 .setLinearHeadingInterpolation(hpPreload.getHeading(), farShoot.getHeading())
@@ -567,6 +573,7 @@ public class Pedro_Paths {
         nearPreload = autoMirror(nearPreload);
         midPreload = autoMirror(midPreload);
         farPreload = autoMirror(farPreload);
+        rampIntake = autoMirror(rampIntake);
         hpPreload = autoMirror(hpPreload);
 
         nearShoot = autoMirror(nearShoot);

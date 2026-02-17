@@ -17,7 +17,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.LoadHardwareClass;
 import org.firstinspires.ftc.teamcode.Prism.Color;
-import org.firstinspires.ftc.teamcode.Prism.Direction;
 import org.firstinspires.ftc.teamcode.Prism.GoBildaPrismDriver;
 import org.firstinspires.ftc.teamcode.Prism.PrismAnimations;
 
@@ -372,32 +371,41 @@ public class Devices {
         }
 
         public void setStripSolidColor(Color color){
+            clearStripAnimations();
             prism.insertAndUpdateAnimation(GoBildaPrismDriver.LayerHeight.LAYER_0, new PrismAnimations.Solid(color, stripBrightness));
         }
 
+        public void setStripBlinkingColor(Color color){
+            clearStripAnimations();
+            prism.insertAndUpdateAnimation(GoBildaPrismDriver.LayerHeight.LAYER_0, new PrismAnimations.Blink(color, new Color(0,0,0)));
+        }
+
         public void setStripRainbow(){
-            PrismAnimations.AnimationBase colorA = new PrismAnimations.Rainbow(Direction.Backward);
-            colorA.setIndexes(0, 12);
-            PrismAnimations.AnimationBase colorB = new PrismAnimations.Rainbow(Direction.Forward);
-            colorB.setIndexes(13, 24);
-            prism.insertAndUpdateAnimation(GoBildaPrismDriver.LayerHeight.LAYER_1, colorA);
-            prism.insertAndUpdateAnimation(GoBildaPrismDriver.LayerHeight.LAYER_2, colorB);
+            clearStripAnimations();
+            prism.insertAndUpdateAnimation(GoBildaPrismDriver.LayerHeight.LAYER_1, new PrismAnimations.Rainbow());
         }
 
         public void clearStripAnimations(){
             prism.clearAllAnimations();
+            prism.updateAllAnimations();
         }
 
         public void setStripBrightness(int brightness){
             stripBrightness = brightness;
         }
 
-        public void setAllianceDisplay(LoadHardwareClass.Alliance alliance){
-            clearStripAnimations();
+        public void setSolidAllianceDisplay(LoadHardwareClass.Alliance alliance){
             if (alliance == LoadHardwareClass.Alliance.RED){
                 setStripSolidColor(Color.RED);
             }else if (alliance == LoadHardwareClass.Alliance.BLUE){
                 setStripSolidColor(Color.BLUE);
+            }
+        }
+        public void setBlinkingAllianceDisplay(LoadHardwareClass.Alliance alliance){
+            if (alliance == LoadHardwareClass.Alliance.RED){
+                setStripBlinkingColor(Color.RED);
+            }else if (alliance == LoadHardwareClass.Alliance.BLUE){
+                setStripBlinkingColor(Color.BLUE);
             }
         }
     }
