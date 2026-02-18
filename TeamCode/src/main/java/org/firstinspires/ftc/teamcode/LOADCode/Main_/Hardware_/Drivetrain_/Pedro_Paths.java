@@ -28,7 +28,7 @@ public class Pedro_Paths {
     public Pose hpIntake = null;
     // Shooting Poses
     public Pose nearShoot = new Pose(115, 120, Math.toRadians(-35));
-    public Pose midShoot = new Pose(85, 85, Math.toRadians(-15));
+    public Pose midShoot = new Pose(88, 87, Math.toRadians(-15));
     public Pose farShoot = new Pose(85, 15, Math.toRadians(60));
     public Pose noTurretMidShoot = new Pose(85, 85, Math.toRadians(45));
     public Pose noTurretFarShoot = new Pose(85, 15, Math.toRadians(67.3));
@@ -39,8 +39,8 @@ public class Pedro_Paths {
     // Open Gate Pose
     public Pose openGateBasic = new Pose(127.5, 72, Math.toRadians(90));
     public Pose openGateBasicReversed = new Pose(127.5, 72, Math.toRadians(-90));
-    public Pose openGateIntakeGate = new Pose(131, 61.5, Math.toRadians(20));
-    public Pose openGateIntakeRamp = new Pose(133, 55, Math.toRadians(40));
+    public Pose openGateIntakeGate = new Pose(128.5, 62, Math.toRadians(20));
+    public Pose openGateIntakeRamp = new Pose(127, 55, Math.toRadians(40));
 
     /**
      * <h4>Define all path variables.</h4></br>
@@ -299,8 +299,7 @@ public class Pedro_Paths {
                         midShoot,
                         autoMirror(new Pose(75, 56)),
                         midPreload
-                ))
-                .setLinearHeadingInterpolation(midShoot.getHeading(), midPreload.getHeading())
+                )).setLinearHeadingInterpolation(midShoot.getHeading(), midPreload.getHeading())
                 .build();
         midShoot_to_farPreload = follower.pathBuilder()
                 .addPath(new BezierCurve(

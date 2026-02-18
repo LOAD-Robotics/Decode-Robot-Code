@@ -30,7 +30,7 @@ public class Turret {
     public final Devices.REVHallEffectSensorClass hall = new Devices.REVHallEffectSensorClass();
 
     // Turret PID coefficients
-    public static PIDCoefficients turretCoefficients = new PIDCoefficients(0.018, 0.00000000005, 0.0002); // 223RPM Motor
+    public static PIDCoefficients turretCoefficients = new PIDCoefficients(0.022, 0.0000000002, 0.0015); // 223RPM Motor
     public static PIDCoefficients cameraCoefficients = new PIDCoefficients(0, 0, 0);
 
     // Flywheel PID coefficients for various speeds
@@ -64,8 +64,9 @@ public class Turret {
     public flywheelState flywheelMode = flywheelState.OFF;
     double targetRPM = 0;
     /** Controls the target speed of the flywheel when it is on.*/
-    public static double flywheelReallyNearSpeed = 3000;
+    public static double flywheelReallyNearSpeed = 2800;
     public static double flywheelNearSpeed = 3300;
+    public static double flywheelFarNearSpeed = 3600;
     public static double flywheelFarSpeed = 4200;
     /** Controls the upper software limit of the hood.*/
     public static double upperHoodLimit = 260;
@@ -141,28 +142,31 @@ public class Turret {
 
         // Safety points for LUTs
         hoodLUTnear.add(0, 0);
-        hoodLUTfar.add(0, 0);
+        hoodLUTfar.add(0, 190);
 
         // --------------------------------------------------------
 
         // Near zone measurements
-        hoodLUTnear.add(53.5,108);
-        hoodLUTnear.add(71,168);
-        hoodLUTnear.add(77, 181);
+        hoodLUTnear.add(60, 0);
+        hoodLUTnear.add(68.5, 140.5);
+        hoodLUTnear.add(71, 182);
         hoodLUTnear.add(84.5, 175);
-        hoodLUTnear.add(88,185);
-        hoodLUTnear.add(94.5,185);
-        hoodLUTnear.add(96, 180);
+        hoodLUTnear.add(88, 145);
+        hoodLUTnear.add(90, 145);
+        hoodLUTnear.add(97.5, 200);
+        hoodLUTnear.add(102, 187);
+        hoodLUTnear.add(114, 165);
 
         // Far zone measurements
-        hoodLUTfar.add(103, 200);
-        hoodLUTfar.add(204, 200);
+        hoodLUTfar.add(139.5, 190);
+        hoodLUTfar.add(150, 190);
+        hoodLUTfar.add(160, 160);
 
         // --------------------------------------------------------
 
         // Safety points for LUTs
-        hoodLUTnear.add(300, 200);
-        hoodLUTfar.add(300, 200);
+        hoodLUTnear.add(300, 165);
+        hoodLUTfar.add(300, 160);
 
         // Generate Lookup Table & Initialize servo position
         hoodLUTnear.createLUT();
@@ -233,9 +237,9 @@ public class Turret {
             }
         }else{
             if (LoadHardwareClass.selectedAlliance == LoadHardwareClass.Alliance.RED){
-                rotation.setAngle(Math.min(Math.max(0, rotationalAimbotLocalizer()), 360));
+                rotation.setAngle(Math.min(Math.max(0, rotationalAimbotLocalizer()), 360), -Math.toDegrees(Robot.drivetrain.follower.getAngularVelocity()));
             }else{
-                rotation.setAngle(Math.min(Math.max(0, rotationalAimbotLocalizer()), 360));
+                rotation.setAngle(Math.min(Math.max(0, rotationalAimbotLocalizer()), 360), -Math.toDegrees(Robot.drivetrain.follower.getAngularVelocity()));
             }
         }
     }
@@ -406,6 +410,10 @@ public class Turret {
             targetRPM = flywheelReallyNearSpeed;
             actualFlywheelCoefficients = flywheelCoefficients3000;
             actualFlywheelFFCoefficients = flywheelFFCoefficients3000;
+        }else if (Robot.drivetrain.distanceFromGoal() > 90){
+            targetRPM = flywheelFarNearSpeed;
+            actualFlywheelCoefficients = flywheelCoefficients3500;
+            actualFlywheelFFCoefficients = flywheelFFCoefficients3500;
         }else{
             targetRPM = flywheelNearSpeed;
             actualFlywheelCoefficients = flywheelCoefficients3500;

@@ -126,7 +126,7 @@ public class LoadHardwareClass {
         drivetrain.init(myOpMode, initialPose, follower);
         turret.init(myOpMode, this);
         intake.init(myOpMode);
-        lights.init(myOpMode, 24);
+        lights.init(myOpMode, 36);
 
         // Misc telemetry
         myOpMode.telemetry.addData(">", "Hardware Initialized");

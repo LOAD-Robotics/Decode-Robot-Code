@@ -23,6 +23,7 @@ public class Intake {
         SHOOTING,
         NO_BELT,
         REVERSING,
+        REVERSE_NOBELT,
         OFF
     }
 
@@ -74,13 +75,16 @@ public class Intake {
             intake.setPower(1);
             belt.setPower(1);
         }else if (direction == intakeMode.SHOOTING){
-            intake.setPower(0); //TODO change this to 0 if using servo powered intake belt
+            intake.setPower(0);
             belt.setPower(1);
         }else if (direction == intakeMode.REVERSING){
             intake.setPower(-1);
             belt.setPower(-1);
         }else if (direction == intakeMode.NO_BELT){
             intake.setPower(1);
+            belt.setPower(0);
+        }else if (direction == intakeMode.REVERSE_NOBELT){
+            intake.setPower(-1);
             belt.setPower(0);
         }else{
             intake.setPower(0);
@@ -112,6 +116,8 @@ public class Intake {
             return intakeMode.NO_BELT;
         }else if (intakePower == -1 && beltPower == -1){
             return intakeMode.REVERSING;
+        }else if (intakePower == -1 && beltPower == 0){
+            return intakeMode.REVERSE_NOBELT;
         }else{
             return intakeMode.OFF;
         }
