@@ -30,7 +30,7 @@ public class Turret {
     public final Devices.REVHallEffectSensorClass hall = new Devices.REVHallEffectSensorClass();
 
     // Turret PID coefficients
-    public static PIDCoefficients turretCoefficients = new PIDCoefficients(0.07, 0.00000000001, 0.003); // 223RPM Motor
+    public static PIDCoefficients turretCoefficients = new PIDCoefficients(0.018, 0.00000000005, 0.0002); // 223RPM Motor
     public static PIDCoefficients cameraCoefficients = new PIDCoefficients(0, 0, 0);
 
     // Flywheel PID coefficients for various speeds
@@ -149,6 +149,7 @@ public class Turret {
         hoodLUTnear.add(53.5,108);
         hoodLUTnear.add(71,168);
         hoodLUTnear.add(77, 181);
+        hoodLUTnear.add(84.5, 175);
         hoodLUTnear.add(88,185);
         hoodLUTnear.add(94.5,185);
         hoodLUTnear.add(96, 180);
@@ -232,9 +233,9 @@ public class Turret {
             }
         }else{
             if (LoadHardwareClass.selectedAlliance == LoadHardwareClass.Alliance.RED){
-                rotation.setAngle(Math.min(Math.max(0, rotationalAimbotLocalizer()-2), 360));
+                rotation.setAngle(Math.min(Math.max(0, rotationalAimbotLocalizer()), 360));
             }else{
-                rotation.setAngle(Math.min(Math.max(0, rotationalAimbotLocalizer()+2), 360));
+                rotation.setAngle(Math.min(Math.max(0, rotationalAimbotLocalizer()), 360));
             }
         }
     }
@@ -263,6 +264,9 @@ public class Turret {
         ) - Math.toDegrees(Robot.drivetrain.follower.getPose().getHeading()) + 90)%360;
     }
 
+    public static Pose rotationalNearGoalPose = new Pose(8, 136);
+    public static Pose rotationalFarGoalPose = new Pose(8, 136);
+
     /**
      * Calculates the proper goal pose
      * @return a pose of the rotational aimbot's target position.
@@ -271,15 +275,18 @@ public class Turret {
         robotZone.setPosition(Robot.drivetrain.follower.getPose().getX(), Robot.drivetrain.follower.getPose().getY());
         robotZone.setRotation(Robot.drivetrain.follower.getPose().getHeading());
 
-        Pose nearGoalPose = new Pose(8,136,0);
-        if (LoadHardwareClass.selectedAlliance == LoadHardwareClass.Alliance.RED) {nearGoalPose = new Pose(136, 136, 0);}
-        Pose farGoalPose = new Pose(16,140,0);
-        if (LoadHardwareClass.selectedAlliance == LoadHardwareClass.Alliance.RED) {farGoalPose = new Pose(136, 140, 0);}
+        Pose farPose = rotationalFarGoalPose;
+        Pose nearPose = rotationalNearGoalPose;
+
+        if (LoadHardwareClass.selectedAlliance == LoadHardwareClass.Alliance.RED) {
+            nearPose = nearPose.mirror();
+            farPose = farPose.mirror();
+        }
 
         if(robotZone.isInside(LoadHardwareClass.FarLaunchZone)){
-            return farGoalPose;
+            return farPose;
         }else{
-            return nearGoalPose;
+            return nearPose;
         }
     }
 
@@ -349,7 +356,7 @@ public class Turret {
         return flywheel.getRPM();
     }
     public boolean isFlywheelReady(){
-        return flywheel.getRPM() > getFlywheelCurrentMaxSpeed();
+        return flywheel.getRPM() > getFlywheelCurrentMaxSpeed()-150;
     }
 
     /**

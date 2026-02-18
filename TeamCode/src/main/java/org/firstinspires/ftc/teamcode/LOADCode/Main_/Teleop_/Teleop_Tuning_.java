@@ -51,6 +51,8 @@ public class Teleop_Tuning_ extends LinearOpMode {
     private ElapsedTime loopTimer = new ElapsedTime();
     private TelemetryManager panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
 
+    public static double hoodOffset = 0;
+
     double initial = 0;
 
     // Contains the start Pose of our robot. This can be changed or saved from the autonomous period.
@@ -63,23 +65,31 @@ public class Teleop_Tuning_ extends LinearOpMode {
         LoadHardwareClass Robot = new LoadHardwareClass(this);
         Pedro_Paths paths = new Pedro_Paths();
         // Initialize all hardware of the robot
-        Robot.init(paths.nearStart );
+        Robot.init(startPose);
 
         telemetry.addData("Status", "Initialized");
         telemetry.update();
         Robot.turret.setGateState(Turret.gatestate.CLOSED);
 
+        if (!Turret.zeroed){
+            while (!isStopRequested() && Robot.turret.zeroTurret()){
+                sleep(0);
+            }
+        }
+
         // Wait for the game to start (driver presses START)
         waitForStart();
         runtime.reset();
-
-        initial = Robot.turret.rotation.getAngleAbsolute();
+        Robot.drivetrain.startTeleOpDrive();
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
-
-            Robot.turret.rotation.setAngle(initial);
-
+            Robot.drivetrain.pedroMecanumDrive(
+                    gamepad1.left_stick_y,
+                    gamepad1.left_stick_x,
+                    gamepad1.right_stick_x,
+                    true
+            );
             if (gamepad2.yWasPressed()) {
                 if (Robot.turret.flywheelMode == Turret.flywheelState.OFF) {
                     Robot.turret.setFlywheelState(Turret.flywheelState.ON);
@@ -89,21 +99,19 @@ public class Teleop_Tuning_ extends LinearOpMode {
             }
             Robot.turret.updateFlywheel();
 
-            if (gamepad2.dpad_down){
+            if (Math.abs(gamepad2.left_stick_y) < 0.1){
                 Robot.intake.setMode(Intake.intakeMode.INTAKING);
             }else{
                 Robot.intake.setMode(Intake.intakeMode.OFF);
             }
-            if (gamepad1.x){
-                Robot.turret.setGateState(Turret.gatestate.CLOSED);
-            }else if (gamepad1.y){
-                Robot.turret.setGateState(Turret.gatestate.OPEN);
-            }
+            if (gamepad2.dpadUpWasPressed()) hoodOffset += 10;
+            if (gamepad2.dpadDownWasPressed()) hoodOffset -= 10;
+            Robot.turret.updateAimbot(false, true, hoodOffset);
 
-            telemetry.addData("gate pos", Robot.turret.getGate());
+            telemetry.addData("Aimbot Hood Angle", Robot.turret.getHood());
+            telemetry.addData("Hood Offset", hoodOffset);
+            telemetry.addData("Distance From Goal", Robot.drivetrain.distanceFromGoal());
 
-            panelsTelemetry.addData("Flywheel Speed", Robot.turret.getFlywheelRPM());
-            panelsTelemetry.addData("Flywheel Target", Robot.turret.getFlywheelCurrentMaxSpeed());
 
             // System-related Telemetry
             telemetry.addLine();
@@ -114,7 +122,6 @@ public class Teleop_Tuning_ extends LinearOpMode {
             telemetry.update();
             panelsTelemetry.update();
             loopTimer.reset();
-
             Robot.turret.updatePIDs();
         }
     }

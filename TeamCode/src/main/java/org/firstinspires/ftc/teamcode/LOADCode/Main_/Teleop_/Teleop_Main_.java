@@ -80,8 +80,6 @@ public class Teleop_Main_ extends LinearOpMode {
     public Pose holdPoint = new Pose(72, 72, 90);
     public Boolean holdJustTriggered = false;
 
-    public int lightsState = 0;
-
     // Create a new instance of our Robot class
     LoadHardwareClass Robot = new LoadHardwareClass(this);
     // Create a new Paths instance
@@ -93,6 +91,14 @@ public class Teleop_Main_ extends LinearOpMode {
         FAR,
         NEAR
     }
+
+    enum lightsState {
+        SOLID,
+        BLINKING,
+        RAINBOW
+    }
+    private lightsState ledState = lightsState.SOLID;
+    private lightsState ledStateOld = lightsState.RAINBOW;
 
     // Contains the start Pose of our robot. This can be changed or saved from the autonomous period.
     private Pose startPose = Paths.farStart;
@@ -152,7 +158,7 @@ public class Teleop_Main_ extends LinearOpMode {
         // Wait for the game to start (driver presses START)
         waitForStart();
         // Initialize all hardware of the robot
-        if (selectedAlliance == LoadHardwareClass.Alliance.BLUE){
+        if (selectedAlliance == LoadHardwareClass.Alliance.BLUE && MecanumDrivetrainClass.robotPose == null){
             Robot.init(startPose.mirror());
         }else{
             Robot.init(startPose);
@@ -239,18 +245,27 @@ public class Teleop_Main_ extends LinearOpMode {
             telemetry.update();
             panelsTelemetry.update();
 
-            if (runtime.time(TimeUnit.SECONDS) > 115 || lightsState == 2){
-                Robot.lights.setStripRainbow();
-                lightsState = 2;
+            if (runtime.time(TimeUnit.SECONDS) > 115){
+                ledState = lightsState.RAINBOW;
+            }else if (Robot.turret.isFlywheelReady()){
+                ledState = lightsState.BLINKING;
             }else{
-                if (Robot.turret.isFlywheelReady() && lightsState == 0){
-                    Robot.lights.setBlinkingAllianceDisplay(selectedAlliance);
-                    lightsState = 1;
-                }else if (lightsState == 1){
-                    Robot.lights.setSolidAllianceDisplay(selectedAlliance);
-                    lightsState = 0;
-                }
+                ledState = lightsState.SOLID;
             }
+            if (ledState != ledStateOld){
+                switch (ledState){
+                    case SOLID:
+                        Robot.lights.setSolidAllianceDisplay(selectedAlliance);
+                        break;
+                    case BLINKING:
+                        Robot.lights.setBlinkingAllianceDisplay(selectedAlliance);
+                        break;
+                    case RAINBOW:
+                        Robot.lights.setStripRainbow();
+                }
+                ledStateOld = ledState;
+            }
+            telemetry.addData("lightsState", ledState);
         }
     }
 
@@ -345,6 +360,12 @@ public class Teleop_Main_ extends LinearOpMode {
 
         if (gamepad1.dpadDownWasPressed()){
             hoodOn = !hoodOn;
+        }
+
+        if (gamepad1.dpadLeftWasPressed()){
+            selectedAlliance = LoadHardwareClass.Alliance.BLUE;
+        }else if (gamepad1.dpadRightWasPressed()){
+            selectedAlliance = LoadHardwareClass.Alliance.RED;
         }
     }
 
