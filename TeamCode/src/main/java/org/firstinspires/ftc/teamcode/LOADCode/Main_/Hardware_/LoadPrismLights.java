@@ -11,7 +11,7 @@ public class LoadPrismLights {
 
     public void init(OpMode opMode, String name){
         prism = opMode.hardwareMap.get(GoBildaPrismDriver.class, name);
-        prism.setStripLength(24);
+        prism.setStripLength(36);
     }
 
     public void setStripsRainbow(){
