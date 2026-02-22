@@ -39,7 +39,7 @@ public class Pedro_Paths {
     // Open Gate Pose
     public Pose openGateBasic = new Pose(127.5, 72, Math.toRadians(90));
     public Pose openGateBasicReversed = new Pose(127.5, 72, Math.toRadians(-90));
-    public Pose openGateIntakeGate = new Pose(128.5, 62, Math.toRadians(20));
+    public Pose openGateIntakeGate = new Pose(128, 62, Math.toRadians(20));
     public Pose openGateIntakeRamp = new Pose(127, 55, Math.toRadians(40));
 
     /**

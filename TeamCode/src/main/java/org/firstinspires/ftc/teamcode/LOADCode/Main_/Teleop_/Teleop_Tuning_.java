@@ -70,6 +70,7 @@ public class Teleop_Tuning_ extends LinearOpMode {
         telemetry.addData("Status", "Initialized");
         telemetry.update();
         Robot.turret.setGateState(Turret.gatestate.CLOSED);
+        Robot.lights.setStripRainbow();
 
         if (!Turret.zeroed){
             while (!isStopRequested() && Robot.turret.zeroTurret()){
