@@ -63,15 +63,14 @@ public class Auto_Main_ extends NextFTCOpMode {
                 ));
         prompter.prompt("auto",
                 new OptionPrompt<>("Select Auto",
+                        new testAuto(),
                         new MOE_365_FAR(),
                         new Near_15Ball(),
                         new Near_15Ball2(),
                         new Near_12Ball(),
                         new Near_9Ball(),
-                        new Far_9Ball(),
-                        new Far_6Ball(),
-                        new Far_3Ball()
-                        //new test()
+                        new Far_12Ball(),
+                        new Far_9Ball()
                 ));
         prompter.onComplete(() -> {
                     selectedAlliance = prompter.get("alliance");
@@ -168,14 +167,13 @@ public class Auto_Main_ extends NextFTCOpMode {
         @Override
         public void runAuto(){
             new SequentialGroup(
+                    new InstantCommand(Commands.setFlywheelState(Turret.flywheelState.ON)),
                     Commands.runPath(paths.farStart_to_farShoot, true, 1),
                     Commands.shootBalls(),
-                    Commands.setFlywheelState(Turret.flywheelState.ON),
                     Commands.setIntakeMode(Intake.intakeMode.INTAKING),
                     Commands.runPath(paths.farShoot_to_farPreload, true, 1),
                     Commands.runPath(paths.farPreload_to_farShoot, true, 1),
                     Commands.shootBalls(),
-                    Commands.setFlywheelState(Turret.flywheelState.ON),
                     Commands.setIntakeMode(Intake.intakeMode.INTAKING),
                     Commands.runPath(paths.farShoot_to_hpPreload, true, 1),
                     Commands.runPath(paths.hpPreload_to_farShoot, true, 1),
@@ -188,7 +186,7 @@ public class Auto_Main_ extends NextFTCOpMode {
         @Override
         public String toString(){return "Far 9 Ball";}
     }
-    private class Far_6Ball extends Auto{
+    private class Far_12Ball extends Auto{
         @Override
         public Pose getStartPose(){
             return paths.farStart;
@@ -201,12 +199,23 @@ public class Auto_Main_ extends NextFTCOpMode {
         @Override
         public void runAuto(){
             new SequentialGroup(
+                    new InstantCommand(Commands.setFlywheelState(Turret.flywheelState.ON)),
                     Commands.runPath(paths.farStart_to_farShoot, true, 1),
                     Commands.shootBalls(),
-                    Commands.setFlywheelState(Turret.flywheelState.ON),
+                    Commands.setIntakeMode(Intake.intakeMode.INTAKING),
+                    Commands.runPath(paths.farShoot_to_midPreload, true, 1),
+                    Commands.runPath(paths.midPreload_to_farShoot, true, 1),
+                    new WaitUntil(() -> gamepad1.bWasPressed()),
+                    Commands.shootBalls(),
+                    Commands.setIntakeMode(Intake.intakeMode.INTAKING),
+                    Commands.runPath(paths.farShoot_to_hpPreload, true, 1),
+                    Commands.runPath(paths.hpPreload_to_farShoot, true, 1),
+                    new WaitUntil(() -> gamepad1.bWasPressed()),
+                    Commands.shootBalls(),
                     Commands.setIntakeMode(Intake.intakeMode.INTAKING),
                     Commands.runPath(paths.farShoot_to_farPreload, true, 1),
                     Commands.runPath(paths.farPreload_to_farShoot, true, 1),
+                    new WaitUntil(() -> gamepad1.bWasPressed()),
                     Commands.shootBalls(),
                     Commands.runPath(paths.farShoot_to_farLeave, true, 1)
             ).schedule();
@@ -214,38 +223,9 @@ public class Auto_Main_ extends NextFTCOpMode {
 
         @NonNull
         @Override
-        public String toString(){return "Far 6 Ball";}
+        public String toString(){return "Far 12 Ball";}
     }
-    private class Far_3Ball extends Auto{
 
-        @Override
-        Pose getStartPose() {
-            return paths.farStart;
-        }
-
-        @Override
-        boolean getTurretEnabled() {
-            return true;
-        }
-
-        @Override
-        void runAuto() {
-            new SequentialGroup(
-                    Commands.setFlywheelState(Turret.flywheelState.ON),
-                    Commands.runPath(paths.farStart_to_farShoot, true, 1),
-                    Commands.shootBalls(),
-                    new WaitUntil(() -> timer25Sec.isDone()),
-                    Commands.setIntakeMode(Intake.intakeMode.INTAKING),
-                    Commands.runPath(paths.farShoot_to_hpPreload, true, 1)
-            ).schedule();
-        }
-
-        @NonNull
-        @Override
-        public String toString() {
-            return "Far 3 Ball + HP Intake";
-        }
-    }
     private class Near_9Ball extends Auto{
         @Override
         public Pose getStartPose(){
@@ -464,5 +444,34 @@ public class Auto_Main_ extends NextFTCOpMode {
         @NonNull
         @Override
         public String toString(){return "MOE 365 Far";}
+    }
+
+    private class testAuto extends Auto{
+
+        @Override
+        Pose getStartPose() {
+            return paths.farStart;
+        }
+
+        @Override
+        boolean getTurretEnabled() {
+            return false;
+        }
+
+        @Override
+        void runAuto() {
+            new SequentialGroup(
+                    Commands.setIntakeMode(Intake.intakeMode.INTAKING),
+                    Commands.setFlywheelState(Turret.flywheelState.ON),
+                    new WaitUntil(() -> gamepad1.bWasPressed()),
+                    Commands.shootBalls()
+            ).schedule();
+        }
+
+        @NonNull
+        @Override
+        public String toString() {
+            return "Test Auto";
+        }
     }
 }

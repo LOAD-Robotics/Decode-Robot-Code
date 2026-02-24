@@ -35,15 +35,15 @@ public class Turret {
 
     // Flywheel PID coefficients for various speeds
     //public static PIDCoefficients flywheelCoefficients = new PIDCoefficients(0.0002, 0, 0); // 4500 RPM
-    public static PIDCoefficients flywheelCoefficients4200 = new PIDCoefficients(0.0004, 0, 0); // 4200 RPM
-    public static PIDCoefficients flywheelCoefficients3500 = new PIDCoefficients(0.00025, 0, 0); // 3500 RPM
-    public static PIDCoefficients flywheelCoefficients3000 = new PIDCoefficients(0.00025, 0, 0); // 3000 RPM
+    public static PIDCoefficients flywheelCoefficients4200 = new PIDCoefficients(0.0007, 0, 0); // 4200 RPM
+    public static PIDCoefficients flywheelCoefficients3500 = new PIDCoefficients(0.0003, 0, 0); // 3500 RPM
+    public static PIDCoefficients flywheelCoefficients3000 = new PIDCoefficients(0.0002, 0, 0); // 3000 RPM
 
     // Flywheel FF coefficients for various speeds
     //public static BasicFeedforwardParameters flywheelFFCoefficients = new BasicFeedforwardParameters(0.000026,0,0); // 4500 RPM
-    public static BasicFeedforwardParameters flywheelFFCoefficients4200 = new BasicFeedforwardParameters(0.0000328,0,0); // 4200 RPM
-    public static BasicFeedforwardParameters flywheelFFCoefficients3500 = new BasicFeedforwardParameters(0.0000323,0,0); // 3500 RPM
-    public static BasicFeedforwardParameters flywheelFFCoefficients3000 = new BasicFeedforwardParameters(0.000031,0,0); // 3000 RPM
+    public static BasicFeedforwardParameters flywheelFFCoefficients4200 = new BasicFeedforwardParameters(0.000035,0,0); // 4200 RPM
+    public static BasicFeedforwardParameters flywheelFFCoefficients3500 = new BasicFeedforwardParameters(0.000034,0,0); // 3500 RPM
+    public static BasicFeedforwardParameters flywheelFFCoefficients3000 = new BasicFeedforwardParameters(0.00003365,0,0); // 3000 RPM
 
     // Actual Flywheel Coefficients
     private PIDCoefficients actualFlywheelCoefficients = flywheelCoefficients3500;
@@ -123,8 +123,8 @@ public class Turret {
 
         // Flywheel Motor Settings
         flywheel2.setDirection(DcMotorSimple.Direction.REVERSE);
-        flywheel.setRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        flywheel2.setRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        flywheel.setRunMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        flywheel2.setRunMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         flywheel.setZeroPowerBehaviour(DcMotor.ZeroPowerBehavior.FLOAT);
         flywheel2.setZeroPowerBehaviour(DcMotor.ZeroPowerBehavior.FLOAT);
 

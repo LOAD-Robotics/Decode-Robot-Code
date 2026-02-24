@@ -10,6 +10,10 @@ import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Turret
 
 import dev.nextftc.core.commands.Command;
 import dev.nextftc.core.commands.delays.Delay;
+import dev.nextftc.core.commands.delays.WaitUntil;
+import dev.nextftc.core.commands.groups.ParallelGroup;
+import dev.nextftc.core.commands.groups.ParallelRaceGroup;
+import dev.nextftc.core.commands.groups.SequentialGroup;
 import dev.nextftc.core.commands.utility.InstantCommand;
 import dev.nextftc.core.commands.utility.LambdaCommand;
 import dev.nextftc.extensions.pedro.FollowPath;
@@ -83,62 +87,47 @@ public class Commands {
         );
     }
 
+    public Command waitForTurret(double errorThreshold){
+        return new WaitUntil(() -> Robot.turret.rotation.getAngleAbsolute() < Robot.turret.rotation.target+ errorThreshold || Robot.turret.rotation.getAngleAbsolute() > Robot.turret.rotation.target- errorThreshold);
+    }
+
     /**
-     * Waits until both proximity sensors are activated at the same time or until 2 seconds have passed
+     * Waits until both proximity sensors are activated at the same time or until 0.7 seconds have passed
      */
     public Command waitForArtifacts(){
-        return new Delay(0.7);
+        return new ParallelRaceGroup(
+                new Delay(0.7),
+                new WaitUntil(() -> (Robot.intake.getTopSensorState()))
+        );
     }
 
     public Command shootBalls(){
-        return new LambdaCommand()
-                .setStart(() -> {
-                    shootingState = 1;
-                    isDoneShooting = false;
-                    shootingTimer5sec.restart();
-                })
-                .setUpdate(() -> {
-                    switch (shootingState) {
-                        case 1:
-                            Robot.turret.setFlywheelState(Turret.flywheelState.ON);
-                            if (Robot.turret.isFlywheelReady()){
-                                shootingState++;
-                                shootingTimerFifthSec.restart();
-                            }
-                        case 2:
-                            Robot.turret.setGateState(Turret.gatestate.OPEN);
-                            if (shootingTimerFifthSec.isDone()){
-                                shootingState++;
-                                shootingTimerHalfSec.restart();
-                            }
-                            return;
-                        case 3:
-                            Robot.intake.setMode(Intake.intakeMode.INTAKING);
-                            if (shootingTimerHalfSec.isDone() && Robot.intake.getTopSensorState() && !Robot.intake.getBottomSensorState()){
-                                shootingState++;
-                                shootingTimerHalfSec.restart();
-                                return;
-                            }
-                            if (shootingTimer5sec.isDone()){
-                                shootingState = 5;
-                            }
-                            return;
-                        case 4:
-                            Robot.intake.setMode(Intake.intakeMode.SHOOTING);
-                            Robot.intake.setTransfer(Intake.transferState.UP);
-                            if (shootingTimerHalfSec.isDone()) {
-                                shootingState++;
-                            }
-                            return;
-                        case 5:
-                            Robot.turret.setGateState(Turret.gatestate.CLOSED);
-                            Robot.intake.setMode(Intake.intakeMode.OFF);
-                            Robot.intake.setTransfer(Intake.transferState.DOWN);
-                            isDoneShooting = true;
-                    }
-                })
-                .setIsDone(() -> isDoneShooting)
-                .setInterruptible(true);
-    }
+        return new SequentialGroup(
+                setFlywheelState(Turret.flywheelState.ON),
+                new ParallelRaceGroup(
+                        new SequentialGroup(
+                                // Shoot the first two balls
+                                waitForTurret(5),
+                                setGateState(Turret.gatestate.OPEN),
+                                new Delay(0.3),
+                                setIntakeMode(Intake.intakeMode.INTAKING),
+                                new ParallelGroup(
+                                        new Delay(1),
+                                        new WaitUntil(() -> (Robot.intake.getTopSensorState() && !Robot.intake.getBottomSensorState()))
+                                ),
 
+                                // Shoot the last ball
+                                setIntakeMode(Intake.intakeMode.SHOOTING),
+                                setTransferState(Intake.transferState.UP),
+                                new Delay(0.5)
+                        ),
+                        new Delay(5)
+                ),
+                new ParallelGroup(
+                        setIntakeMode(Intake.intakeMode.OFF),
+                        setGateState(Turret.gatestate.CLOSED),
+                        setTransferState(Intake.transferState.DOWN)
+                )
+        );
+    }
 }
