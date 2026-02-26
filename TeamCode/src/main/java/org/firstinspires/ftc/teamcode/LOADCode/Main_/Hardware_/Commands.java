@@ -109,10 +109,10 @@ public class Commands {
                                 // Shoot the first two balls
                                 waitForTurret(5),
                                 setGateState(Turret.gatestate.OPEN),
-                                new Delay(0.3),
+                                new Delay(0.2),
                                 setIntakeMode(Intake.intakeMode.INTAKING),
                                 new ParallelGroup(
-                                        new Delay(1),
+                                        new Delay(0.5),
                                         new WaitUntil(() -> (Robot.intake.getTopSensorState() && !Robot.intake.getBottomSensorState()))
                                 ),
 
