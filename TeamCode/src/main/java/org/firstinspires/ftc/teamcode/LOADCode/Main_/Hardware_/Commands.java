@@ -2,11 +2,13 @@ package org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_;
 
 import androidx.annotation.NonNull;
 
+import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.paths.PathChain;
 import com.skeletonarmy.marrow.TimerEx;
 
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Intake;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Turret;
+import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Drivetrain_.Pedro_Paths;
 
 import dev.nextftc.core.commands.Command;
 import dev.nextftc.core.commands.delays.Delay;
@@ -22,6 +24,7 @@ public class Commands {
 
     // Robot Object for command access
     public LoadHardwareClass Robot;
+    public Pedro_Paths paths = new Pedro_Paths();
     public Commands(@NonNull LoadHardwareClass robot){
         Robot = robot;
     }
@@ -52,7 +55,13 @@ public class Commands {
     }
 
     public Command runPath(PathChain path, boolean holdEnd, double maxPower) {
-        return new FollowPath(path, holdEnd, maxPower);
+        return new ParallelRaceGroup(
+                new FollowPath(path, holdEnd, maxPower),
+                new SequentialGroup(
+                        new Delay(1),
+                        new WaitUntil(() -> Robot.drivetrain.follower.getVelocity().getMagnitude() < 0.2)
+                )
+        );
     }
 
     public Command setFlywheelState(Turret.flywheelState state) {
@@ -87,8 +96,11 @@ public class Commands {
         );
     }
 
-    public Command waitForTurret(double errorThreshold){
-        return new WaitUntil(() -> Robot.turret.rotation.getAngleAbsolute() < Robot.turret.rotation.target+ errorThreshold || Robot.turret.rotation.getAngleAbsolute() > Robot.turret.rotation.target- errorThreshold);
+    public Command waitForTurret(double posErrorThreshold, double velErrorThreshold){
+        return new ParallelGroup(
+                new WaitUntil(() -> Robot.turret.rotation.getAngleAbsolute() < Robot.turret.rotation.target + posErrorThreshold || Robot.turret.rotation.getAngleAbsolute() > Robot.turret.rotation.target - posErrorThreshold),
+                new WaitUntil(() -> Robot.turret.rotation.getDegreesPerSecond() < velErrorThreshold)
+        );
     }
 
     /**
@@ -101,18 +113,37 @@ public class Commands {
         );
     }
 
+    public Command leaveLineSafetyCommand(Command mainAuto, double duration){
+        return new SequentialGroup(
+                new ParallelRaceGroup(
+                        mainAuto,
+                        new Delay(duration)
+                ),
+                runPath(
+                        Robot.drivetrain.follower.pathBuilder().addPath(
+                                new BezierLine(
+                                        Robot.drivetrain.follower.getPose(),
+                                        paths.farLeave
+                                )
+                        ).setLinearHeadingInterpolation(
+                                Robot.drivetrain.follower.getPose().getHeading(),
+                                paths.farLeave.getHeading()
+                        ).build(), true, 1)
+        );
+    }
+
     public Command shootBalls(){
         return new SequentialGroup(
                 setFlywheelState(Turret.flywheelState.ON),
                 new ParallelRaceGroup(
                         new SequentialGroup(
                                 // Shoot the first two balls
-                                waitForTurret(5),
+                                waitForTurret(2, 4),
                                 setGateState(Turret.gatestate.OPEN),
-                                new Delay(0.2),
+                                new Delay(0.3),
                                 setIntakeMode(Intake.intakeMode.INTAKING),
                                 new ParallelGroup(
-                                        new Delay(0.5),
+                                        new Delay(0.7),
                                         new WaitUntil(() -> (Robot.intake.getTopSensorState() && !Robot.intake.getBottomSensorState()))
                                 ),
 
@@ -121,7 +152,7 @@ public class Commands {
                                 setTransferState(Intake.transferState.UP),
                                 new Delay(0.5)
                         ),
-                        new Delay(5)
+                        new Delay(3)
                 ),
                 new ParallelGroup(
                         setIntakeMode(Intake.intakeMode.OFF),

@@ -268,8 +268,10 @@ public class Turret {
         ) - Math.toDegrees(Robot.drivetrain.follower.getPose().getHeading()) + 90)%360;
     }
 
-    public static Pose rotationalNearGoalPose = new Pose(8, 136);
-    public static Pose rotationalFarGoalPose = new Pose(8, 136);
+    public static Pose rotationalNearGoalPoseBlue = new Pose(8, 136);
+    public static Pose rotationalFarGoalPoseBlue = new Pose(6, 136);
+    public static Pose rotationalNearGoalPoseRed = new Pose(136, 136);
+    public static Pose rotationalFarGoalPoseRed = new Pose(138, 136);
 
     /**
      * Calculates the proper goal pose
@@ -279,12 +281,14 @@ public class Turret {
         robotZone.setPosition(Robot.drivetrain.follower.getPose().getX(), Robot.drivetrain.follower.getPose().getY());
         robotZone.setRotation(Robot.drivetrain.follower.getPose().getHeading());
 
-        Pose farPose = rotationalFarGoalPose;
-        Pose nearPose = rotationalNearGoalPose;
-
-        if (LoadHardwareClass.selectedAlliance == LoadHardwareClass.Alliance.RED) {
-            nearPose = nearPose.mirror();
-            farPose = farPose.mirror();
+        Pose farPose;
+        Pose nearPose;
+        if (LoadHardwareClass.selectedAlliance == LoadHardwareClass.Alliance.RED){
+            farPose = rotationalFarGoalPoseRed;
+            nearPose = rotationalNearGoalPoseRed;
+        }else{
+            farPose = rotationalFarGoalPoseBlue;
+            nearPose = rotationalNearGoalPoseBlue;
         }
 
         if(robotZone.isInside(LoadHardwareClass.FarLaunchZone)){

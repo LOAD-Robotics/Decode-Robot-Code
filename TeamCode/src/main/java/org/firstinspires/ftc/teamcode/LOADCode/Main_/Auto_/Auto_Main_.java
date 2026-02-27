@@ -118,7 +118,7 @@ public class Auto_Main_ extends NextFTCOpMode {
     public void onUpdate() {
         telemetry.addData("Running Auto", selectedAuto.toString());
         telemetry.addData("Alliance", selectedAlliance);
-        Robot.turret.updateAimbot(turretOn, true, 0);
+        Robot.turret.updateAimbot(turretOn, true, selectedAuto.getHoodOffset());
         Robot.turret.updateFlywheel();
         MecanumDrivetrainClass.robotPose = Robot.drivetrain.follower.getPose();
         telemetry.update();
@@ -142,6 +142,11 @@ public class Auto_Main_ extends NextFTCOpMode {
         abstract Pose getStartPose();
 
         /**
+         * @return The offset of the hood for this auto
+         */
+        abstract double getHoodOffset();
+
+        /**
          * @return A boolean indicating whether the turret is enabled.
          */
         abstract boolean getTurretEnabled();
@@ -159,6 +164,12 @@ public class Auto_Main_ extends NextFTCOpMode {
         public Pose getStartPose(){
             return paths.farStart;
         }
+
+        @Override
+        double getHoodOffset() {
+            return 10;
+        }
+
         @Override
         public boolean getTurretEnabled(){
             return true;
@@ -195,6 +206,10 @@ public class Auto_Main_ extends NextFTCOpMode {
         public boolean getTurretEnabled(){
             return true;
         }
+        @Override
+        double getHoodOffset() {
+            return 10;
+        }
 
         @Override
         public void runAuto(){
@@ -205,17 +220,14 @@ public class Auto_Main_ extends NextFTCOpMode {
                     Commands.setIntakeMode(Intake.intakeMode.INTAKING),
                     Commands.runPath(paths.farShoot_to_midPreload, true, 1),
                     Commands.runPath(paths.midPreload_to_farShoot, true, 1),
-                    new WaitUntil(() -> gamepad1.bWasPressed()),
-                    Commands.shootBalls(),
-                    Commands.setIntakeMode(Intake.intakeMode.INTAKING),
-                    Commands.runPath(paths.farShoot_to_hpPreload, true, 1),
-                    Commands.runPath(paths.hpPreload_to_farShoot, true, 1),
-                    new WaitUntil(() -> gamepad1.bWasPressed()),
                     Commands.shootBalls(),
                     Commands.setIntakeMode(Intake.intakeMode.INTAKING),
                     Commands.runPath(paths.farShoot_to_farPreload, true, 1),
                     Commands.runPath(paths.farPreload_to_farShoot, true, 1),
-                    new WaitUntil(() -> gamepad1.bWasPressed()),
+                    Commands.shootBalls(),
+                    Commands.setIntakeMode(Intake.intakeMode.INTAKING),
+                    Commands.runPath(paths.farShoot_to_hpPreload, true, 1),
+                    Commands.runPath(paths.hpPreload_to_farShoot, true, 1),
                     Commands.shootBalls(),
                     Commands.runPath(paths.farShoot_to_farLeave, true, 1)
             ).schedule();
@@ -235,11 +247,14 @@ public class Auto_Main_ extends NextFTCOpMode {
         public boolean getTurretEnabled(){
             return true;
         }
+        @Override
+        double getHoodOffset() {
+            return -25;
+        }
 
         @Override
         public void runAuto(){
             new SequentialGroup(
-                    Commands.setIntakeMode(Intake.intakeMode.INTAKING),
                     new InstantCommand(Commands.setFlywheelState(Turret.flywheelState.ON)),
                     Commands.runPath(paths.nearStart_to_midShoot, true, 1),
                     Commands.shootBalls(),
@@ -270,11 +285,14 @@ public class Auto_Main_ extends NextFTCOpMode {
         public boolean getTurretEnabled(){
             return true;
         }
+        @Override
+        double getHoodOffset() {
+            return -25;
+        }
 
         @Override
         public void runAuto(){
             new SequentialGroup(
-                    Commands.setIntakeMode(Intake.intakeMode.INTAKING),
                     new InstantCommand(Commands.setFlywheelState(Turret.flywheelState.ON)),
                     Commands.runPath(paths.nearStart_to_midShoot, true, 1),
                     Commands.shootBalls(),
@@ -299,21 +317,23 @@ public class Auto_Main_ extends NextFTCOpMode {
         public String toString(){return "Near 12 Ball";}
     }
     private class Near_15Ball extends Auto{
-
         @Override
         Pose getStartPose() {
             return paths.nearStart;
         }
-
         @Override
         boolean getTurretEnabled() {
             return true;
+        }
+        @Override
+        double getHoodOffset() {
+            return -25;
         }
 
         @Override
         void runAuto() {
             new SequentialGroup(
-                    Commands.setFlywheelState(Turret.flywheelState.ON),
+                    new InstantCommand(Commands.setFlywheelState(Turret.flywheelState.ON)),
                     Commands.runPath(paths.nearStart_to_midShoot, true, 1),
                     Commands.shootBalls(),
                     Commands.setIntakeMode(Intake.intakeMode.INTAKING),
@@ -345,21 +365,23 @@ public class Auto_Main_ extends NextFTCOpMode {
         }
     }
     private class Near_15Ball2 extends Auto{
-
         @Override
         Pose getStartPose() {
             return paths.nearStart;
         }
-
         @Override
         boolean getTurretEnabled() {
             return true;
+        }
+        @Override
+        double getHoodOffset() {
+            return -25;
         }
 
         @Override
         void runAuto() {
             new SequentialGroup(
-                    Commands.setFlywheelState(Turret.flywheelState.ON),
+                    new InstantCommand(Commands.setFlywheelState(Turret.flywheelState.ON)),
                     Commands.runPath(paths.nearStart_to_midShoot, true, 1),
                     Commands.shootBalls(),
                     Commands.setIntakeMode(Intake.intakeMode.INTAKING),
@@ -398,6 +420,10 @@ public class Auto_Main_ extends NextFTCOpMode {
         @Override
         public boolean getTurretEnabled(){
             return true;
+        }
+        @Override
+        double getHoodOffset() {
+            return -25;
         }
 
         @Override
@@ -447,15 +473,17 @@ public class Auto_Main_ extends NextFTCOpMode {
     }
 
     private class testAuto extends Auto{
-
         @Override
         Pose getStartPose() {
             return paths.farStart;
         }
-
         @Override
         boolean getTurretEnabled() {
             return false;
+        }
+        @Override
+        double getHoodOffset() {
+            return -25;
         }
 
         @Override
