@@ -19,5 +19,13 @@ import dev.nextftc.control.feedforward.BasicFeedforwardParameters;
 
 
 public class Lift {
+    private final Devices.CRServoClass Lift1 = new Devices.CRServoClass();
+    private final Devices.CRServoClass Lift2 = new Devices.CRServoClass();
 
+
+    public void init(OpMode opMode){
+        Lift1.init(opMode, "Lift1");
+        Lift2.init(opMode, "Lift2");
+
+    };
 }

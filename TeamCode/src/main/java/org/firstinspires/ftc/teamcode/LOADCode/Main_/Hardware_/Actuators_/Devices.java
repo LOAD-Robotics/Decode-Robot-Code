@@ -28,11 +28,18 @@ public class Devices {
     public static class CRServoClass {
         // CR for Continuous Rotation
         private CRServo servo;
+        private DcMotorSimple.Direction servoDirection;
 
         public void init(@NonNull OpMode opmode, String servoName) {
             servo = opmode.hardwareMap.get(CRServo.class, servoName);
         }
 
+        /**
+         * @return The power the servo has been set to.
+         */
+        public double getPower() {
+            return servo.getPower();
+        }
         /**
          * @param power The power to set the servo to. Must be a value between -1 and 1.
          */
@@ -41,17 +48,17 @@ public class Devices {
         }
 
         /**
+         * @return servoDirection : The direction the servo is currently set to.
+         */
+        public DcMotorSimple.Direction getDirection(){
+            return servoDirection;
+        }
+        /**
          * @param direction The direction to set the servo to.
          */
         public void setDirection(DcMotorSimple.Direction direction) {
             servo.setDirection(direction);
-        }
-
-        /**
-         * @return The power the servo has been set to.
-         */
-        public double getPower() {
-            return servo.getPower();
+            servoDirection = direction;
         }
     }
 
