@@ -2,83 +2,6 @@
 	"nodes":[
 		{"id":"85dd3f12ac72d900","type":"group","x":-440,"y":-440,"width":380,"height":260,"label":"Legend"},
 		{
-			"id":"bfb02b2a92b84ad2",
-			"type":"text",
-			"text":"Belt Servo\nConfiguration Name: \"belt\"\nConfiguration Type: CRServo\nPort 0 on Control Hub\nPort 1 on Servo Power Injector",
-			"styleAttributes":{"textAlign":"center"},
-			"x":-300,
-			"y":-80,
-			"width":280,
-			"height":140,
-			"color":"4"
-		},
-		{
-			"id":"41c5560b3c8edc13",
-			"type":"text",
-			"text":"Hood Servo\nConfiguration Name: \"hood\"\nConfiguration Type: Servo\nPort 1 on Control Hub\nPort 2 on Servo Power Injector",
-			"styleAttributes":{"textAlign":"center"},
-			"x":-300,
-			"y":80,
-			"width":280,
-			"height":139,
-			"color":"4"
-		},
-		{
-			"id":"b2918b70ae0b4303",
-			"type":"text",
-			"text":"Gate Servo\nConfiguration Name: \"gate\"\nConfiguration Type: Servo\nPort 2 on Control Hub\nPort 3 on Servo Power Injector",
-			"styleAttributes":{"textAlign":"center"},
-			"x":-300,
-			"y":240,
-			"width":280,
-			"height":140,
-			"color":"4"
-		},
-		{
-			"id":"8c94376760075734",
-			"type":"text",
-			"text":"Transfer Servo\nConfiguration Name: \"transfer\"\nConfiguration Type: Servo\nPort 3 on Control Hub\nPort 4 on Servo Power Injector",
-			"styleAttributes":{"textAlign":"center"},
-			"x":-300,
-			"y":400,
-			"width":280,
-			"height":139,
-			"color":"4"
-		},
-		{
-			"id":"f667221e45b8fc86",
-			"type":"text",
-			"text":"Intake Motor\nConfiguration Name: \"intake\"\nConfiguration Type: \"\"\nPort 0 - No Encoder",
-			"styleAttributes":{"textAlign":"center"},
-			"x":520,
-			"y":-80,
-			"width":320,
-			"height":140,
-			"color":"5"
-		},
-		{
-			"id":"0075a4079a1a472d",
-			"type":"text",
-			"text":"Front Right Drive Motor\nConfiguration Name: \"FR\"\nConfiguration Type: \"\"\nPort 1 - No Encoder",
-			"styleAttributes":{"textAlign":"center"},
-			"x":520,
-			"y":80,
-			"width":320,
-			"height":140,
-			"color":"5"
-		},
-		{
-			"id":"81a20594db9883e0",
-			"type":"text",
-			"text":"Control Hub",
-			"styleAttributes":{"textAlign":"center"},
-			"x":-80,
-			"y":-160,
-			"width":260,
-			"height":60,
-			"color":"2"
-		},
-		{
 			"id":"c2eee2656a3ddfa1",
 			"type":"text",
 			"text":"Pinpoint Computer\nConfiguration Name: \"pinpoint\"\nI2C Port 1",
@@ -88,39 +11,6 @@
 			"width":280,
 			"height":80,
 			"color":"6"
-		},
-		{
-			"id":"d9c005396002882a",
-			"type":"text",
-			"text":"Expansion Hub",
-			"styleAttributes":{"textAlign":"center"},
-			"x":360,
-			"y":-160,
-			"width":260,
-			"height":60,
-			"color":"2"
-		},
-		{
-			"id":"5587942ea5903dbe",
-			"type":"text",
-			"text":"Back Right Drive Motor\nConfiguration Name: \"BR\"\nConfiguration Type: \"\"\nPort 2 - No Encoder",
-			"styleAttributes":{"textAlign":"center"},
-			"x":520,
-			"y":240,
-			"width":320,
-			"height":140,
-			"color":"5"
-		},
-		{
-			"id":"c6d790ec667c829f",
-			"type":"text",
-			"text":"Turret Rotation Motor\nConfiguration Name: \"turret\"\nConfiguration Type: \"\"\nPort 3 - With Encoder",
-			"styleAttributes":{"textAlign":"center"},
-			"x":520,
-			"y":400,
-			"width":320,
-			"height":140,
-			"color":"5"
 		},
 		{
 			"id":"a0abe0901b65ac56",
@@ -211,6 +101,149 @@
 			"color":"2"
 		},
 		{
+			"id":"bfb02b2a92b84ad2",
+			"type":"text",
+			"text":"Belt Servo\nConfiguration Name: \"belt\"\nConfiguration Type: CRServo\nPort 0 on Control Hub\nPort 1 on Servo Power Injector",
+			"styleAttributes":{"textAlign":"center"},
+			"x":-300,
+			"y":-80,
+			"width":280,
+			"height":140,
+			"color":"4"
+		},
+		{
+			"id":"41c5560b3c8edc13",
+			"type":"text",
+			"text":"Hood Servo\nConfiguration Name: \"hood\"\nConfiguration Type: Servo\nPort 1 on Control Hub\nPort 2 on Servo Power Injector",
+			"styleAttributes":{"textAlign":"center"},
+			"x":-300,
+			"y":80,
+			"width":280,
+			"height":139,
+			"color":"4"
+		},
+		{
+			"id":"b2918b70ae0b4303",
+			"type":"text",
+			"text":"Gate Servo\nConfiguration Name: \"gate\"\nConfiguration Type: Servo\nPort 2 on Control Hub\nPort 3 on Servo Power Injector",
+			"styleAttributes":{"textAlign":"center"},
+			"x":-300,
+			"y":240,
+			"width":280,
+			"height":140,
+			"color":"4"
+		},
+		{
+			"id":"8c94376760075734",
+			"type":"text",
+			"text":"Transfer Servo\nConfiguration Name: \"transfer\"\nConfiguration Type: Servo\nPort 3 on Control Hub\nPort 4 on Servo Power Injector",
+			"styleAttributes":{"textAlign":"center"},
+			"x":-300,
+			"y":400,
+			"width":280,
+			"height":139,
+			"color":"4"
+		},
+		{
+			"id":"f667221e45b8fc86",
+			"type":"text",
+			"text":"Intake Motor\nConfiguration Name: \"intake\"\nConfiguration Type: \"\"\nPort 0 - No Encoder",
+			"styleAttributes":{"textAlign":"center"},
+			"x":520,
+			"y":-80,
+			"width":320,
+			"height":140,
+			"color":"5"
+		},
+		{
+			"id":"81a20594db9883e0",
+			"type":"text",
+			"text":"Control Hub",
+			"styleAttributes":{"textAlign":"center"},
+			"x":-80,
+			"y":-160,
+			"width":260,
+			"height":60,
+			"color":"2"
+		},
+		{
+			"id":"d9c005396002882a",
+			"type":"text",
+			"text":"Expansion Hub",
+			"styleAttributes":{"textAlign":"center"},
+			"x":360,
+			"y":-160,
+			"width":260,
+			"height":60,
+			"color":"2"
+		},
+		{
+			"id":"e20a52ef21d57dcf",
+			"type":"text",
+			"text":"LED Controller\nConfiguration Name: \"prism\"\nI2C Port 2",
+			"styleAttributes":{"textAlign":"center"},
+			"x":80,
+			"y":-360,
+			"width":280,
+			"height":80,
+			"color":"6"
+		},
+		{
+			"id":"7a1b2108fa3bc30e",
+			"type":"text",
+			"text":"Hall Effect Sensor\nConfiguration Name: \"hall\"\nPort 0",
+			"styleAttributes":{"textAlign":"center"},
+			"x":80,
+			"y":-460,
+			"width":280,
+			"height":80,
+			"color":"1"
+		},
+		{
+			"id":"d97803361edf47ba",
+			"type":"text",
+			"text":"Lower Color Sensors\nConfiguration Names: \"color3\", \"color4\"\nI2C Ports 2-3",
+			"styleAttributes":{"textAlign":"center"},
+			"x":520,
+			"y":-260,
+			"width":340,
+			"height":80,
+			"color":"6"
+		},
+		{
+			"id":"0075a4079a1a472d",
+			"type":"text",
+			"text":"Front Right Drive Motor\nConfiguration Name: \"FR\"\nConfiguration Type: \"\"\nPort 1 - No Encoder",
+			"styleAttributes":{"textAlign":"center"},
+			"x":520,
+			"y":80,
+			"width":320,
+			"height":140,
+			"color":"5"
+		},
+		{
+			"id":"5587942ea5903dbe",
+			"type":"text",
+			"text":"Back Right Drive Motor\nConfiguration Name: \"BR\"\nConfiguration Type: \"\"\nPort 2 - No Encoder",
+			"styleAttributes":{"textAlign":"center"},
+			"x":520,
+			"y":240,
+			"width":320,
+			"height":140,
+			"color":"5"
+		},
+		{
+			"id":"c6d790ec667c829f",
+			"type":"text",
+			"text":"Turret Rotation Motor\nConfiguration Name: \"turret\"\nConfiguration Type: \"\"\nPort 3 - With Encoder",
+			"styleAttributes":{"textAlign":"center"},
+			"x":520,
+			"y":400,
+			"width":320,
+			"height":140,
+			"color":"5"
+		},
+		{
 			"id":"76edd4abcf05a2a3",
 			"type":"text",
 			"text":"Back Left Drive Motor\nConfiguration Name: \"BL\"\nConfiguration Type: \"\"\nPort 3 - No Encoder",
@@ -255,37 +288,26 @@
 			"color":"5"
 		},
 		{
-			"id":"e20a52ef21d57dcf",
+			"id":"c8decba00b0187c8",
 			"type":"text",
-			"text":"LED Controller\nConfiguration Name: \"prism\"\nI2C Port 2",
+			"text":"Transfer Servo\nConfiguration Name: \"lift1\"\nConfiguration Type: CRServo\nPort 4 on Control Hub\nPort 5 on Servo Power Injector",
 			"styleAttributes":{"textAlign":"center"},
-			"x":80,
-			"y":-360,
+			"x":-680,
+			"y":-80,
 			"width":280,
-			"height":80,
-			"color":"6"
+			"height":139,
+			"color":"4"
 		},
 		{
-			"id":"7a1b2108fa3bc30e",
+			"id":"c0d0b8f7da631d38",
 			"type":"text",
-			"text":"Hall Effect Sensor\nConfiguration Name: \"hall\"\nPort 0",
+			"text":"Transfer Servo\nConfiguration Name: \"lift2\"\nConfiguration Type: CRServo\nPort 5 on Control Hub\nPort 6 on Servo Power Injector",
 			"styleAttributes":{"textAlign":"center"},
-			"x":80,
-			"y":-460,
+			"x":-680,
+			"y":80,
 			"width":280,
-			"height":80,
-			"color":"1"
-		},
-		{
-			"id":"d97803361edf47ba",
-			"type":"text",
-			"text":"Lower Color Sensors\nConfiguration Names: \"color3\", \"color4\"\nI2C Ports 2-3",
-			"styleAttributes":{"textAlign":"center"},
-			"x":520,
-			"y":-260,
-			"width":340,
-			"height":80,
-			"color":"6"
+			"height":139,
+			"color":"4"
 		}
 	],
 	"edges":[
@@ -462,6 +484,24 @@
 			"fromSide":"top",
 			"toNode":"a0abe0901b65ac56",
 			"toSide":"left"
+		},
+		{
+			"id":"70ce2e1e16c0baf5",
+			"styleAttributes":{"pathfindingMethod":"square"},
+			"toFloating":false,
+			"fromNode":"86792695c78b2d59",
+			"fromSide":"bottom",
+			"toNode":"c8decba00b0187c8",
+			"toSide":"right"
+		},
+		{
+			"id":"f6b9a05985a97924",
+			"styleAttributes":{"pathfindingMethod":"square"},
+			"toFloating":false,
+			"fromNode":"86792695c78b2d59",
+			"fromSide":"bottom",
+			"toNode":"c0d0b8f7da631d38",
+			"toSide":"right"
 		}
 	],
 	"metadata":{

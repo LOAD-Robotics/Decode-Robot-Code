@@ -2,6 +2,8 @@ package org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_;
 
 import androidx.annotation.NonNull;
 
+import com.qualcomm.hardware.limelightvision.LLResult;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -409,6 +411,27 @@ public class Devices {
             }else if (alliance == LoadHardwareClass.Alliance.BLUE){
                 setDisplayedArtboard(blinkingBLUE);
             }
+        }
+    }
+
+    public static class Limelight3AClass {
+        public Limelight3A device;
+        public LLResult result = null;
+
+        public void init(@NonNull OpMode opMode){
+            device = opMode.hardwareMap.get(Limelight3A.class, "limelight");
+            device.start();
+        }
+
+        public void updateResult(){
+            result = device.getLatestResult();
+        }
+
+        public void setPipeline(int pipelineIndex){
+            device.pipelineSwitch(pipelineIndex);
+        }
+        public int getPipeline(){
+            return device.getStatus().getPipelineIndex();
         }
     }
 }

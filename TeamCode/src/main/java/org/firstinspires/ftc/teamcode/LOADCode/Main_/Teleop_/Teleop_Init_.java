@@ -43,8 +43,8 @@ import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Drivetrain_.Pedro
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.LoadHardwareClass;
 
 @Configurable
-@TeleOp(name="Teleop_Tuning_", group="TeleOp")
-public class Teleop_Tuning_ extends LinearOpMode {
+@TeleOp(name="Teleop_Init_", group="TeleOp")
+public class Teleop_Init_ extends LinearOpMode {
 
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
