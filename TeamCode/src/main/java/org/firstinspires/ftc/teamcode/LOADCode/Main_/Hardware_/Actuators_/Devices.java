@@ -26,6 +26,7 @@ import dev.nextftc.control.feedforward.BasicFeedforwardParameters;
 public class Devices {
 
     public static class CRServoClass {
+        // CR for Continuous Rotation
         private CRServo servo;
 
         public void init(@NonNull OpMode opmode, String servoName) {
