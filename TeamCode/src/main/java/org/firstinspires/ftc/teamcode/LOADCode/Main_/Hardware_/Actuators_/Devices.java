@@ -417,9 +417,11 @@ public class Devices {
     public static class Limelight3AClass {
         public Limelight3A device;
         public LLResult result = null;
+        public boolean initialized = false;
 
         public void init(@NonNull OpMode opMode){
             device = opMode.hardwareMap.get(Limelight3A.class, "limelight");
+            initialized = true;
             device.start();
         }
 

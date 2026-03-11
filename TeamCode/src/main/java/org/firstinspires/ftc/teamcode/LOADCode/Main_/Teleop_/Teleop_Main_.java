@@ -200,10 +200,6 @@ public class Teleop_Main_ extends LinearOpMode {
 
             telemetry.addLine();
             // Turret-related Telemetry
-            telemetry.addData("Tag Detected", Robot.turret.vision.tagDetected(targetTagID));
-            telemetry.addData("Is using Camera PID", Robot.turret.useCameraAim);
-            telemetry.addData("Camera Error", Robot.turret.cameraTurretError);
-            panelsTelemetry.addData("Camera Turret Error", Robot.turret.cameraTurretError);
             panelsTelemetry.addData("Turret Target Angle", Robot.turret.rotation.target);
             panelsTelemetry.addData("Turret Actual Angle", Robot.turret.rotation.getAngleAbsolute());
             telemetry.addData("Turret Target Angle", Robot.turret.rotation.target);

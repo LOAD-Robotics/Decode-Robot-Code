@@ -8,12 +8,9 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.skeletonarmy.marrow.zones.PolygonZone;
 
-import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.AprilTagVisionSystem;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.LoadHardwareClass;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Utils_;
 
-import dev.nextftc.control.ControlSystem;
-import dev.nextftc.control.KineticState;
 import dev.nextftc.control.feedback.PIDCoefficients;
 import dev.nextftc.control.feedforward.BasicFeedforwardParameters;
 
@@ -21,7 +18,7 @@ import dev.nextftc.control.feedforward.BasicFeedforwardParameters;
 public class Turret {
 
     // Hardware definitions
-    public final AprilTagVisionSystem vision = new AprilTagVisionSystem();
+    public final Devices.Limelight3AClass vision = new Devices.Limelight3AClass();
     public final Devices.DcMotorExClass rotation = new Devices.DcMotorExClass();
     public final Devices.DcMotorExClass flywheel = new Devices.DcMotorExClass();
     private final Devices.DcMotorExClass flywheel2 = new Devices.DcMotorExClass();
@@ -210,39 +207,15 @@ public class Turret {
             setHood(0);
         }
     }
+
     private void updateRotationalAimbot(){
-        int targetID = 24;
-        if (LoadHardwareClass.selectedAlliance == LoadHardwareClass.Alliance.BLUE){
-            targetID = 20;
-        }
-
-        if (!useCameraAim && vision.tagDetected(targetID) && Math.abs(rotation.target - rotation.getAngle()) < 10){
-            useCameraAim = true;
-        }
-        if (useCameraAim && !vision.tagDetected(targetID) || rotation.target > 360 || rotation.target < 0){
-            useCameraAim = false;
-        }
-
-        if (useCameraAim && aprilTagToggle){
-            vision.updateAprilTagProcessor();
-            rotation.target = rotation.getAngleAbsolute();
-            ControlSystem pid = ControlSystem.builder()
-                    .posPid(cameraCoefficients)
-                    .build();
-            pid.setGoal(new KineticState(0));
-            AprilTagVisionSystem.PoseRBE tagPose = vision.getRBE(targetID);
-            if (tagPose != null){
-                cameraTurretError = tagPose.b;
-                rotation.setPower(-pid.calculate(new KineticState(tagPose.b)));
-            }
+        if (LoadHardwareClass.selectedAlliance == LoadHardwareClass.Alliance.RED){
+            rotation.setAngle(Math.min(Math.max(0, rotationalAimbotLocalizer()), 360), -Math.toDegrees(Robot.drivetrain.follower.getAngularVelocity()));
         }else{
-            if (LoadHardwareClass.selectedAlliance == LoadHardwareClass.Alliance.RED){
-                rotation.setAngle(Math.min(Math.max(0, rotationalAimbotLocalizer()), 360), -Math.toDegrees(Robot.drivetrain.follower.getAngularVelocity()));
-            }else{
-                rotation.setAngle(Math.min(Math.max(0, rotationalAimbotLocalizer()), 360), -Math.toDegrees(Robot.drivetrain.follower.getAngularVelocity()));
-            }
+            rotation.setAngle(Math.min(Math.max(0, rotationalAimbotLocalizer()), 360), -Math.toDegrees(Robot.drivetrain.follower.getAngularVelocity()));
         }
     }
+
     private void updateHoodAimbot(double offset){
         // Set the hood angle
         Pose goalPose = new Pose(0,144,0);

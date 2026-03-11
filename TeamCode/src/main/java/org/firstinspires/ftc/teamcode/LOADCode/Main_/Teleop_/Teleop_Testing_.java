@@ -30,15 +30,22 @@
 package org.firstinspires.ftc.teamcode.LOADCode.Main_.Teleop_;
 
 import com.bylazar.configurables.annotations.Configurable;
+import com.bylazar.telemetry.JoinedTelemetry;
 import com.bylazar.telemetry.PanelsTelemetry;
-import com.bylazar.telemetry.TelemetryManager;
+import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Devices;
+import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Turret;
+import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.LoadHardwareClass;
 
 import java.util.concurrent.TimeUnit;
+
+import dev.nextftc.control.ControlSystem;
+import dev.nextftc.control.KineticState;
+import dev.nextftc.control.feedback.PIDCoefficients;
 
 @Configurable
 @TeleOp(name="Teleop_Testing_", group="TeleOp")
@@ -47,21 +54,67 @@ public class Teleop_Testing_ extends LinearOpMode {
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
     private ElapsedTime loopTimer = new ElapsedTime();
-    private TelemetryManager panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
+    private final JoinedTelemetry joinedTelemetry = new JoinedTelemetry(PanelsTelemetry.INSTANCE.getFtcTelemetry(), telemetry);
 
     public Devices.Limelight3AClass limelight = new Devices.Limelight3AClass();
+    public LoadHardwareClass Robot = new LoadHardwareClass(this);
+
+    public static PIDCoefficients cameraCoefficients = new PIDCoefficients(0, 0, 0);
+    private static PIDCoefficients oldCameraCoefficients = new PIDCoefficients(0, 0, 0);
+
+    public ControlSystem pid = ControlSystem.builder().posPid(cameraCoefficients).build();
 
     @Override
     public void runOpMode() {
 
         limelight.init(this);
+        Robot.init(new Pose(72, 72, 90));
+
+        if (!Turret.zeroed){
+            while (!isStopRequested() && Robot.turret.zeroTurret()){
+                sleep(0);
+            }
+        }
 
         // Wait for the game to start (driver presses START)
         waitForStart();
         runtime.reset();
 
+        Robot.drivetrain.startTeleOpDrive();
+
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
+            if (oldCameraCoefficients != cameraCoefficients){
+                oldCameraCoefficients = cameraCoefficients;
+                pid = ControlSystem.builder().posPid(cameraCoefficients).build();
+            }
+
+            Robot.drivetrain.pedroMecanumDrive(
+                    gamepad1.left_stick_y,
+                    gamepad1.left_stick_y,
+                    gamepad1.right_stick_x,
+                    true
+            );
+
+            limelight.updateResult();
+
+            pid.setGoal(new KineticState(0));
+
+            if (limelight.result != null && limelight.result.isValid()){
+                Robot.turret.rotation.setPower(
+                        pid.calculate(
+                                new KineticState(
+                                        limelight.result.getTx(),
+                                        Robot.turret.rotation.getDegreesPerSecond()
+                                )
+                        )
+                );
+            }else{
+                Robot.turret.rotation.setPower(0);
+            }
+
+            joinedTelemetry.addData("Turret Motor Power", Robot.turret.rotation.getPower());
+            joinedTelemetry.addData("Turret Error", limelight.result.getTx());
 
             if (gamepad1.bWasPressed()){
                 limelight.setPipeline(0);
@@ -70,21 +123,13 @@ public class Teleop_Testing_ extends LinearOpMode {
             }
 
             if (limelight.getPipeline() == 0){
-                telemetry.addData("Current Tag Target", "RED");
+                joinedTelemetry.addData("Current Tag Target", "RED");
             }else if (limelight.getPipeline() == 1){
-                telemetry.addData("Current Tag Target", "BLUE");
+                joinedTelemetry.addData("Current Tag Target", "BLUE");
             }
 
-            limelight.updateResult();
-
-            telemetry.addData("Tag Tx", limelight.result.getTx());
-            telemetry.addData("Tag Ty", limelight.result.getTy());
-            telemetry.addData("Tag Tl", limelight.result.getTa());
-
-            telemetry.addData("Loop Time", loopTimer.time(TimeUnit.MILLISECONDS));
-            panelsTelemetry.addData("Loop Time", loopTimer.time(TimeUnit.MILLISECONDS));
-            telemetry.update();
-            panelsTelemetry.update();
+            joinedTelemetry.addData("Loop Time", loopTimer.time(TimeUnit.MILLISECONDS));
+            joinedTelemetry.update();
             loopTimer.reset();
         }
     }
