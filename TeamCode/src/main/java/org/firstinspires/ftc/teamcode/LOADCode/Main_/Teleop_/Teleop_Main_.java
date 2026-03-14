@@ -35,6 +35,7 @@ import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
 import com.pedropathing.geometry.Pose;
+import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -52,6 +53,7 @@ import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Drivetrain_.Mecan
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Drivetrain_.Pedro_Paths;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.LoadHardwareClass;
 
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 
@@ -148,6 +150,12 @@ public class Teleop_Main_ extends LinearOpMode {
 
         Robot.turret.initVision(this);
 
+        List<LynxModule> allHubs = hardwareMap.getAll(LynxModule.class);
+
+        for (LynxModule module : allHubs) {
+            module.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
+        }
+
         // Runs repeatedly while in init
         while (opModeInInit()) {
             prompter.run();
@@ -176,10 +184,27 @@ public class Teleop_Main_ extends LinearOpMode {
                 }
             }
 
-            int targetTagID = 24;
-            if (LoadHardwareClass.selectedAlliance == LoadHardwareClass.Alliance.BLUE){
-                targetTagID = 20;
+            if (runtime.time(TimeUnit.SECONDS) > 115){
+                ledState = lightsState.RAINBOW;
+            }else if (Robot.turret.isFlywheelReady()){
+                ledState = lightsState.BLINKING;
+            }else{
+                ledState = lightsState.SOLID;
             }
+            if (ledState != ledStateOld){
+                switch (ledState){
+                    case SOLID:
+                        Robot.lights.setSolidAllianceDisplay(selectedAlliance);
+                        break;
+                    case BLINKING:
+                        Robot.lights.setBlinkingAllianceDisplay(selectedAlliance);
+                        break;
+                    case RAINBOW:
+                        Robot.lights.setStripRainbow();
+                }
+                ledStateOld = ledState;
+            }
+            telemetry.addData("lightsState", ledState);
 
             Gamepad1();
             Gamepad2();
@@ -218,16 +243,6 @@ public class Teleop_Main_ extends LinearOpMode {
             telemetry.addData("Flywheel Actual Speed", Robot.turret.getFlywheelRPM());
             telemetry.addData("Flywheel State", Robot.turret.getFlywheelRPM());
 
-            // Intake-related Telemetry
-            telemetry.addLine();
-            telemetry.addData("Intake Mode", Robot.intake.getMode());
-            telemetry.addData("Intake Current", Robot.intake.getCurrent());
-
-            // Color Sensor Telemetry
-            telemetry.addLine();
-            telemetry.addData("Upper Sensor", Robot.intake.getTopSensorState());
-            telemetry.addData("Lower Sensor", Robot.intake.getBottomSensorState());
-
             // System-related Telemetry
             telemetry.addLine();
             telemetry.addData("Loop Time", looptime);
@@ -236,27 +251,10 @@ public class Teleop_Main_ extends LinearOpMode {
             telemetry.update();
             panelsTelemetry.update();
 
-            if (runtime.time(TimeUnit.SECONDS) > 115){
-                ledState = lightsState.RAINBOW;
-            }else if (Robot.turret.isFlywheelReady()){
-                ledState = lightsState.BLINKING;
-            }else{
-                ledState = lightsState.SOLID;
+            // Important Step 4: If you are using MANUAL mode, you must clear the BulkCache once per control cycle
+            for (LynxModule module : allHubs) {
+                module.clearBulkCache();
             }
-            if (ledState != ledStateOld){
-                switch (ledState){
-                    case SOLID:
-                        Robot.lights.setSolidAllianceDisplay(selectedAlliance);
-                        break;
-                    case BLINKING:
-                        Robot.lights.setBlinkingAllianceDisplay(selectedAlliance);
-                        break;
-                    case RAINBOW:
-                        Robot.lights.setStripRainbow();
-                }
-                ledStateOld = ledState;
-            }
-            telemetry.addData("lightsState", ledState);
         }
 
         selectedAlliance = null;

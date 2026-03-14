@@ -329,6 +329,10 @@ public class Devices {
         private final REVColorSensorV3Class sensor1 = new REVColorSensorV3Class();
         private final REVColorSensorV3Class sensor2 = new REVColorSensorV3Class();
 
+        private boolean sensor1WasLastRead = false;
+        private boolean sensor1Triggered = false;
+        private boolean sensor2Triggered = false;
+
         public double threshold = 2;
         public DistanceUnit units = DistanceUnit.CM;
 
@@ -343,7 +347,14 @@ public class Devices {
         }
 
         public boolean objectDetected(){
-            return (sensor1.getDistance(units) < threshold || sensor2.getDistance(units) < threshold);
+            if (!sensor1WasLastRead){
+                sensor1WasLastRead = true;
+                sensor1Triggered = (sensor1.getDistance(units) < threshold);
+            } else {
+                sensor1WasLastRead = false;
+                sensor2Triggered = (sensor2.getDistance(units) < threshold);
+            }
+            return sensor1Triggered || sensor2Triggered;
         }
 
         public double[] getDistances(){

@@ -32,11 +32,13 @@ package org.firstinspires.ftc.teamcode.LOADCode.Main_.Teleop_;
 import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.JoinedTelemetry;
 import com.bylazar.telemetry.PanelsTelemetry;
+import com.bylazar.telemetry.TelemetryManager;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Devices;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Turret;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.LoadHardwareClass;
@@ -54,7 +56,9 @@ public class Teleop_Testing_ extends LinearOpMode {
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
     private ElapsedTime loopTimer = new ElapsedTime();
-    private final JoinedTelemetry joinedTelemetry = new JoinedTelemetry(PanelsTelemetry.INSTANCE.getFtcTelemetry(), telemetry);
+    private final TelemetryManager.TelemetryWrapper panelsTelemetry = PanelsTelemetry.INSTANCE.getFtcTelemetry();
+    private final Telemetry ftcTelemetry = super.telemetry;
+    private final JoinedTelemetry telemetry = new JoinedTelemetry(ftcTelemetry, panelsTelemetry);
 
     public Devices.Limelight3AClass limelight = new Devices.Limelight3AClass();
     public LoadHardwareClass Robot = new LoadHardwareClass(this);
@@ -98,7 +102,7 @@ public class Teleop_Testing_ extends LinearOpMode {
 
             limelight.updateResult();
 
-            pid.setGoal(new KineticState(0));
+            pid.setGoal(new KineticState(0, 0));
 
             if (limelight.result != null && limelight.result.isValid()){
                 Robot.turret.rotation.setPower(
@@ -113,8 +117,8 @@ public class Teleop_Testing_ extends LinearOpMode {
                 Robot.turret.rotation.setPower(0);
             }
 
-            joinedTelemetry.addData("Turret Motor Power", Robot.turret.rotation.getPower());
-            joinedTelemetry.addData("Turret Error", limelight.result.getTx());
+            telemetry.addData("Turret Motor Power", Robot.turret.rotation.getPower());
+            telemetry.addData("Turret Error", limelight.result.getTx());
 
             if (gamepad1.bWasPressed()){
                 limelight.setPipeline(0);
@@ -123,13 +127,13 @@ public class Teleop_Testing_ extends LinearOpMode {
             }
 
             if (limelight.getPipeline() == 0){
-                joinedTelemetry.addData("Current Tag Target", "RED");
+                telemetry.addData("Current Tag Target", "RED");
             }else if (limelight.getPipeline() == 1){
-                joinedTelemetry.addData("Current Tag Target", "BLUE");
+                telemetry.addData("Current Tag Target", "BLUE");
             }
 
-            joinedTelemetry.addData("Loop Time", loopTimer.time(TimeUnit.MILLISECONDS));
-            joinedTelemetry.update();
+            telemetry.addData("Loop Time", loopTimer.time(TimeUnit.MILLISECONDS));
+            telemetry.update();
             loopTimer.reset();
         }
     }
