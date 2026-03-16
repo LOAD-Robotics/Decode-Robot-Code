@@ -74,7 +74,7 @@ public class Teleop_Main_ extends LinearOpMode {
     public TimerEx stateTimerFullSec = new TimerEx(1);
     public TimerEx stateTimerHalfSec = new TimerEx(0.5);
     public double hoodOffset = 0;
-    public double turretOffset = 0;
+    public double turretOffsetStep = 5;
     public boolean turretOn = true;
     public boolean hoodOn = true;
     public Pose holdPoint = new Pose(72, 72, 90);
@@ -97,7 +97,7 @@ public class Teleop_Main_ extends LinearOpMode {
         BLINKING,
         RAINBOW
     }
-    private lightsState ledState = lightsState.SOLID;
+
     private lightsState ledStateOld = lightsState.RAINBOW;
 
     // Contains the start Pose of our robot. This can be changed or saved from the autonomous period.
@@ -184,12 +184,11 @@ public class Teleop_Main_ extends LinearOpMode {
                 }
             }
 
+            lightsState ledState = lightsState.SOLID;
             if (runtime.time(TimeUnit.SECONDS) > 115){
                 ledState = lightsState.RAINBOW;
             }else if (Robot.turret.isFlywheelReady()){
                 ledState = lightsState.BLINKING;
-            }else{
-                ledState = lightsState.SOLID;
             }
             if (ledState != ledStateOld){
                 switch (ledState){
@@ -229,7 +228,7 @@ public class Teleop_Main_ extends LinearOpMode {
             panelsTelemetry.addData("Turret Actual Angle", Robot.turret.rotation.getAngleAbsolute());
             telemetry.addData("Turret Target Angle", Robot.turret.rotation.target);
             telemetry.addData("Turret Actual Angle", Robot.turret.rotation.getAngleAbsolute());
-            telemetry.addData("Turret Rotation Offset", turretOffset);
+            telemetry.addData("Turret Rotation Offset", turretOffsetStep);
             telemetry.addData("Turret Hood Angle", Robot.turret.getHood());
             telemetry.addData("Turret Hood Offset", hoodOffset);
             telemetry.addData("Turret Target [X, Y]", "[" + Robot.turret.calcGoalPose().getX() + ", " + Robot.turret.calcGoalPose().getY() + "]");
@@ -408,7 +407,6 @@ public class Teleop_Main_ extends LinearOpMode {
      */
     public void Gamepad2() {
         Robot.turret.updateAimbot(turretOn, hoodOn, hoodOffset);
-        Robot.turret.rotation.setOffsetDegrees(Turret.turretOffset + turretOffset);
 
         double dylanStickDeadzones = 0.2;
 
@@ -455,9 +453,9 @@ public class Teleop_Main_ extends LinearOpMode {
             hoodOffset -= 10;
         }
         if (gamepad2.dpadLeftWasPressed()){
-            turretOffset += 10;
+            Turret.turretOffset += turretOffsetStep;
         }else if (gamepad2.dpadRightWasPressed()){
-            turretOffset -= 10;
+            Turret.turretOffset -= turretOffsetStep;
         }
 
 
