@@ -88,7 +88,7 @@ public class AprilTagVisionSystem {
         // Note: Decimation can be changed on-the-fly to adapt during a match.
         //aprilTag.setDecimation(3);
 
-        // Create the vision portal by using a builder.
+        // Create the limelight portal by using a builder.
         VisionPortal.Builder builder = new VisionPortal.Builder();
 
         // Set the camera (webcam vs. built-in RC phone camera).

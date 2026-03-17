@@ -35,7 +35,6 @@ import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
 import com.pedropathing.geometry.Pose;
-import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -53,7 +52,6 @@ import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Drivetrain_.Mecan
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Drivetrain_.Pedro_Paths;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.LoadHardwareClass;
 
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 
@@ -151,14 +149,6 @@ public class Teleop_Main_ extends LinearOpMode {
             telemetry.update();
         });
 
-        Robot.turret.initVision(this);
-
-        List<LynxModule> allHubs = hardwareMap.getAll(LynxModule.class);
-
-//        for (LynxModule module : allHubs) {
-//            module.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
-//        }
-
         // Runs repeatedly while in init
         while (opModeInInit()) {
             prompter.run();
@@ -247,16 +237,11 @@ public class Teleop_Main_ extends LinearOpMode {
 
             // System-related Telemetry
             telemetry.addLine();
-            telemetry.addData("Loop Time", looptime);
+            telemetry.addData("Loop Time (ms)", looptime.time(TimeUnit.MILLISECONDS));
             telemetry.addData("Status", "Run Time: " + runtime);
             telemetry.addData("Version: ", "2/13/25");
             telemetry.update();
             panelsTelemetry.update();
-
-//            // Important Step 4: If you are using MANUAL mode, you must clear the BulkCache once per control cycle
-//            for (LynxModule module : allHubs) {
-//                module.clearBulkCache();
-//            }
         }
 
         selectedAlliance = null;
