@@ -73,6 +73,9 @@ public class Teleop_Main_ extends LinearOpMode {
     public TimerEx stateTimerFifthSec = new TimerEx(0.2);
     public TimerEx stateTimerFullSec = new TimerEx(1);
     public TimerEx stateTimerHalfSec = new TimerEx(0.5);
+    public int manualFlywheelState = 0;
+    public boolean leftTrigOldState = false;
+    public boolean rightTrigOldState = false;
     public double hoodOffset = 0;
     public double turretOffsetStep = 5;
     public boolean turretOn = true;
@@ -152,9 +155,9 @@ public class Teleop_Main_ extends LinearOpMode {
 
         List<LynxModule> allHubs = hardwareMap.getAll(LynxModule.class);
 
-        for (LynxModule module : allHubs) {
-            module.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
-        }
+//        for (LynxModule module : allHubs) {
+//            module.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
+//        }
 
         // Runs repeatedly while in init
         while (opModeInInit()) {
@@ -250,10 +253,10 @@ public class Teleop_Main_ extends LinearOpMode {
             telemetry.update();
             panelsTelemetry.update();
 
-            // Important Step 4: If you are using MANUAL mode, you must clear the BulkCache once per control cycle
-            for (LynxModule module : allHubs) {
-                module.clearBulkCache();
-            }
+//            // Important Step 4: If you are using MANUAL mode, you must clear the BulkCache once per control cycle
+//            for (LynxModule module : allHubs) {
+//                module.clearBulkCache();
+//            }
         }
 
         selectedAlliance = null;
@@ -414,22 +417,24 @@ public class Teleop_Main_ extends LinearOpMode {
         if (shootingState == 0) {
             if (Math.abs(gamepad2.left_stick_y) >= dylanStickDeadzones &&
                     Math.abs(gamepad2.right_stick_y) >= dylanStickDeadzones) {
-                Robot.intake.setMode(intakeMode.INTAKING);
+                Robot.intake.setMode(intakeMode.INTAKE_ALL);
             }else if (Math.abs(gamepad2.left_stick_y) >= dylanStickDeadzones &&
                     Math.abs(gamepad2.right_stick_y) < dylanStickDeadzones) {
-                Robot.intake.setMode(intakeMode.NO_BELT);
+                Robot.intake.setMode(intakeMode.INTAKE_NOBELT);
             }else if (Math.abs(gamepad2.left_stick_y) < dylanStickDeadzones &&
                     Math.abs(gamepad2.right_stick_y) >= dylanStickDeadzones) {
-                Robot.intake.setMode(intakeMode.SHOOTING);
+                Robot.intake.setMode(intakeMode.INTAKE_NOINTAKE);
+            }else if (gamepad2.left_bumper){
+                Robot.intake.setMode(intakeMode.REVERSE_NOBELT);
             }else if (gamepad2.back){
-                Robot.intake.setMode(intakeMode.REVERSING);
+                Robot.intake.setMode(intakeMode.REVERSE_ALL);
             }else{ // OFF
                 Robot.intake.setMode(intakeMode.OFF);
             }
 
             /* TODO Uncomment once autobelt control is finished
             if (Math.abs(gamepad2.left_stick_y) >= dylanStickDeadzones) {
-                Robot.intake.setMode(intakeMode.INTAKING);
+                Robot.intake.setMode(intakeMode.INTAKE_ALL);
             }else{ // OFF
                 Robot.intake.setMode(intakeMode.OFF);
             }
@@ -444,7 +449,23 @@ public class Teleop_Main_ extends LinearOpMode {
                 }
             }
         }
-        Robot.turret.updateFlywheel();
+
+        if (gamepad2.left_trigger > 0.8 && !leftTrigOldState && manualFlywheelState >= 1){
+            leftTrigOldState = true;
+            manualFlywheelState--;
+        }else if (gamepad2.left_trigger < 0.2 && leftTrigOldState){
+            leftTrigOldState = false;
+        }
+        if (gamepad2.right_trigger > 0.8 && !leftTrigOldState){
+            leftTrigOldState = true;
+            manualFlywheelState++;
+        }else if (gamepad2.right_trigger < 0.2 && leftTrigOldState){
+            leftTrigOldState = false;
+        }
+        if (gamepad2.aWasPressed()){
+            manualFlywheelState = 0;
+        }
+        Robot.turret.updateFlywheel(manualFlywheelState);
 
         // Hood Controls
         if (gamepad2.dpadUpWasPressed()){
@@ -488,20 +509,20 @@ public class Teleop_Main_ extends LinearOpMode {
                     stateTimerHalfSec.restart();
                     stateTimerHalfSec.start();
                 }
-                Robot.intake.setMode(intakeMode.INTAKING);
-                telemetry.addData("Shooting State", "SHOOTING FIRST TWO");
+                Robot.intake.setMode(intakeMode.INTAKE_ALL);
+                telemetry.addData("Shooting State", "INTAKE_NOINTAKE FIRST TWO");
                 if (stateTimerHalfSec.isDone() && Robot.intake.getTopSensorState() && !Robot.intake.getBottomSensorState()){
                     shootingState = 3;
                 }
                 return;
             case 3:
-                if (Robot.intake.getMode() == intakeMode.INTAKING){
+                if (Robot.intake.getMode() == intakeMode.INTAKE_ALL){
                     stateTimerHalfSec.restart();
                     stateTimerHalfSec.start();
                 }
-                Robot.intake.setMode(Intake.intakeMode.SHOOTING);
+                Robot.intake.setMode(Intake.intakeMode.INTAKE_NOINTAKE);
                 Robot.intake.setTransfer(transferState.UP);
-                telemetry.addData("Shooting State", "SHOOTING FINAL");
+                telemetry.addData("Shooting State", "INTAKE_NOINTAKE FINAL");
                 if (stateTimerHalfSec.isDone()) {
                     shootingState = 4;
                 }

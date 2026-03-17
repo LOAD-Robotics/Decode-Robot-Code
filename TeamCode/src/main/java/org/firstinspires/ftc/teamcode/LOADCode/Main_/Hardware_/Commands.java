@@ -141,14 +141,14 @@ public class Commands {
                                 waitForTurret(2, 4),
                                 setGateState(Turret.gatestate.OPEN),
                                 new Delay(0.3),
-                                setIntakeMode(Intake.intakeMode.INTAKING),
+                                setIntakeMode(Intake.intakeMode.INTAKE_ALL),
                                 new ParallelGroup(
                                         new Delay(0.7),
                                         new WaitUntil(() -> (Robot.intake.getTopSensorState() && !Robot.intake.getBottomSensorState()))
                                 ),
 
                                 // Shoot the last ball
-                                setIntakeMode(Intake.intakeMode.SHOOTING),
+                                setIntakeMode(Intake.intakeMode.INTAKE_NOINTAKE),
                                 setTransferState(Intake.transferState.UP),
                                 new Delay(0.5)
                         ),

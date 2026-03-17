@@ -369,7 +369,7 @@ public class Turret {
     /**
      * Updates the flywheel PID. Must be called every loop.
      */
-    public void updateFlywheel() {
+    public void updateFlywheel(int mode) {
         robotZone.setPosition(Robot.drivetrain.follower.getPose().getX(), Robot.drivetrain.follower.getPose().getY());
         robotZone.setRotation(Robot.drivetrain.follower.getPose().getHeading());
 
@@ -379,22 +379,41 @@ public class Turret {
         opMode.telemetry.addData("In Far Zone", robotZone.isInside(LoadHardwareClass.FarLaunchZone));
         opMode.telemetry.addData("In Near Zone", robotZone.isInside(LoadHardwareClass.ReallyNearLaunchZoneRed));
 
-        if (robotZone.isInside(LoadHardwareClass.FarLaunchZone)) {
-            targetRPM = flywheelFarSpeed;
-            actualFlywheelCoefficients = flywheelCoefficients4200;
-            actualFlywheelFFCoefficients = flywheelFFCoefficients4200;
-        }else if (Robot.drivetrain.distanceFromGoal() < 60){
-            targetRPM = flywheelReallyNearSpeed;
-            actualFlywheelCoefficients = flywheelCoefficients3000;
-            actualFlywheelFFCoefficients = flywheelFFCoefficients3000;
-        }else if (Robot.drivetrain.distanceFromGoal() > 90){
-            targetRPM = flywheelFarNearSpeed;
-            actualFlywheelCoefficients = flywheelCoefficients3500;
-            actualFlywheelFFCoefficients = flywheelFFCoefficients3500;
-        }else{
-            targetRPM = flywheelNearSpeed;
-            actualFlywheelCoefficients = flywheelCoefficients3500;
-            actualFlywheelFFCoefficients = flywheelFFCoefficients3500;
+        switch (mode) {
+            case 0:
+                if (robotZone.isInside(LoadHardwareClass.FarLaunchZone)) {
+                    targetRPM = flywheelFarSpeed;
+                    actualFlywheelCoefficients = flywheelCoefficients4200;
+                    actualFlywheelFFCoefficients = flywheelFFCoefficients4200;
+                }else if (Robot.drivetrain.distanceFromGoal() < 60){
+                    targetRPM = flywheelReallyNearSpeed;
+                    actualFlywheelCoefficients = flywheelCoefficients3000;
+                    actualFlywheelFFCoefficients = flywheelFFCoefficients3000;
+                }else if (Robot.drivetrain.distanceFromGoal() > 90){
+                    targetRPM = flywheelFarNearSpeed;
+                    actualFlywheelCoefficients = flywheelCoefficients3500;
+                    actualFlywheelFFCoefficients = flywheelFFCoefficients3500;
+                }else {
+                    targetRPM = flywheelNearSpeed;
+                    actualFlywheelCoefficients = flywheelCoefficients3500;
+                    actualFlywheelFFCoefficients = flywheelFFCoefficients3500;
+                }
+            case 1:
+                targetRPM = flywheelReallyNearSpeed;
+                actualFlywheelCoefficients = flywheelCoefficients3000;
+                actualFlywheelFFCoefficients = flywheelFFCoefficients3000;
+            case 2:
+                targetRPM = flywheelNearSpeed;
+                actualFlywheelCoefficients = flywheelCoefficients3500;
+                actualFlywheelFFCoefficients = flywheelFFCoefficients3500;
+            case 3:
+                targetRPM = flywheelFarNearSpeed;
+                actualFlywheelCoefficients = flywheelCoefficients3500;
+                actualFlywheelFFCoefficients = flywheelFFCoefficients3500;
+            case 4:
+                targetRPM = flywheelFarSpeed;
+                actualFlywheelCoefficients = flywheelCoefficients4200;
+                actualFlywheelFFCoefficients = flywheelFFCoefficients4200;
         }
 
         if (flywheelMode == flywheelState.ON){

@@ -1,6 +1,31 @@
 {
 	"nodes":[
-		{"id":"85dd3f12ac72d900","type":"group","x":-440,"y":-440,"width":380,"height":260,"label":"Legend"},
+		{"id":"85dd3f12ac72d900","type":"group","x":-800,"y":360,"width":380,"height":260,"label":"Legend"},
+		{
+			"id":"86792695c78b2d59",
+			"type":"text",
+			"text":"Servo Power Injector",
+			"styleAttributes":{"textAlign":"center"},
+			"x":-440,
+			"y":-160,
+			"width":180,
+			"height":60,
+			"color":"2"
+		},
+		{
+			"id":"c8decba00b0187c8",
+			"type":"text",
+			"text":"Transfer Servo\nConfiguration Name: \"lift1\"\nConfiguration Type: CRServo\nPort 4 on Control Hub\nPort 5 on Servo Power Injector\n4th Wire -> Orange Analog Plug",
+			"styleAttributes":{
+				"textAlign":"center",
+				"border":null
+			},
+			"x":-680,
+			"y":-80,
+			"width":280,
+			"height":180,
+			"color":"4"
+		},
 		{
 			"id":"c2eee2656a3ddfa1",
 			"type":"text",
@@ -22,83 +47,6 @@
 			"width":340,
 			"height":80,
 			"color":"6"
-		},
-		{
-			"id":"e3fdefe17fe2310d",
-			"type":"text",
-			"text":"Analog Devices",
-			"styleAttributes":{"textAlign":"center"},
-			"x":-240,
-			"y":-420,
-			"width":160,
-			"height":60,
-			"color":"3"
-		},
-		{
-			"id":"48faa728dd92705d",
-			"type":"text",
-			"text":"Motors",
-			"styleAttributes":{"textAlign":"center"},
-			"x":-240,
-			"y":-340,
-			"width":160,
-			"height":60,
-			"color":"5"
-		},
-		{
-			"id":"2cad408dc2aae848",
-			"type":"text",
-			"text":"I2C Devices",
-			"styleAttributes":{"textAlign":"center"},
-			"x":-240,
-			"y":-260,
-			"width":160,
-			"height":60,
-			"color":"6"
-		},
-		{
-			"id":"86792695c78b2d59",
-			"type":"text",
-			"text":"Servo Power Injector",
-			"styleAttributes":{"textAlign":"center"},
-			"x":-440,
-			"y":-160,
-			"width":180,
-			"height":60,
-			"color":"2"
-		},
-		{
-			"id":"b7514b6ae54e27cf",
-			"type":"text",
-			"text":"Digital Devices",
-			"styleAttributes":{"textAlign":"center"},
-			"x":-420,
-			"y":-420,
-			"width":160,
-			"height":60,
-			"color":"1"
-		},
-		{
-			"id":"f9a634b23b5064c5",
-			"type":"text",
-			"text":"Servos",
-			"styleAttributes":{"textAlign":"center"},
-			"x":-420,
-			"y":-340,
-			"width":160,
-			"height":60,
-			"color":"4"
-		},
-		{
-			"id":"26e535ad3414017c",
-			"type":"text",
-			"text":"Control System",
-			"styleAttributes":{"textAlign":"center"},
-			"x":-420,
-			"y":-260,
-			"width":160,
-			"height":60,
-			"color":"2"
 		},
 		{
 			"id":"bfb02b2a92b84ad2",
@@ -145,33 +93,11 @@
 			"color":"4"
 		},
 		{
-			"id":"f667221e45b8fc86",
-			"type":"text",
-			"text":"Intake Motor\nConfiguration Name: \"intake\"\nConfiguration Type: \"\"\nPort 0 - No Encoder",
-			"styleAttributes":{"textAlign":"center"},
-			"x":520,
-			"y":-80,
-			"width":320,
-			"height":140,
-			"color":"5"
-		},
-		{
 			"id":"81a20594db9883e0",
 			"type":"text",
 			"text":"Control Hub",
 			"styleAttributes":{"textAlign":"center"},
 			"x":-80,
-			"y":-160,
-			"width":260,
-			"height":60,
-			"color":"2"
-		},
-		{
-			"id":"d9c005396002882a",
-			"type":"text",
-			"text":"Expansion Hub",
-			"styleAttributes":{"textAlign":"center"},
-			"x":360,
 			"y":-160,
 			"width":260,
 			"height":60,
@@ -189,17 +115,6 @@
 			"color":"6"
 		},
 		{
-			"id":"7a1b2108fa3bc30e",
-			"type":"text",
-			"text":"Hall Effect Sensor\nConfiguration Name: \"hall\"\nPort 0",
-			"styleAttributes":{"textAlign":"center"},
-			"x":80,
-			"y":-460,
-			"width":280,
-			"height":80,
-			"color":"1"
-		},
-		{
 			"id":"d97803361edf47ba",
 			"type":"text",
 			"text":"Lower Color Sensors\nConfiguration Names: \"color3\", \"color4\"\nI2C Ports 2-3",
@@ -209,6 +124,28 @@
 			"width":340,
 			"height":80,
 			"color":"6"
+		},
+		{
+			"id":"f667221e45b8fc86",
+			"type":"text",
+			"text":"Intake Motor\nConfiguration Name: \"intake\"\nConfiguration Type: \"\"\nPort 0 - No Encoder",
+			"styleAttributes":{"textAlign":"center"},
+			"x":520,
+			"y":-80,
+			"width":320,
+			"height":140,
+			"color":"5"
+		},
+		{
+			"id":"d9c005396002882a",
+			"type":"text",
+			"text":"Expansion Hub",
+			"styleAttributes":{"textAlign":"center"},
+			"x":360,
+			"y":-160,
+			"width":260,
+			"height":60,
+			"color":"2"
 		},
 		{
 			"id":"0075a4079a1a472d",
@@ -288,26 +225,106 @@
 			"color":"5"
 		},
 		{
-			"id":"c8decba00b0187c8",
+			"id":"c0d0b8f7da631d38",
 			"type":"text",
-			"text":"Transfer Servo\nConfiguration Name: \"lift1\"\nConfiguration Type: CRServo\nPort 4 on Control Hub\nPort 5 on Servo Power Injector",
-			"styleAttributes":{"textAlign":"center"},
+			"text":"Transfer Servo\nConfiguration Name: \"lift2\"\nConfiguration Type: CRServo\nPort 5 on Control Hub\nPort 6 on Servo Power Injector\n4th Wire -> Blue Analog Plug",
+			"styleAttributes":{
+				"textAlign":"center",
+				"border":null
+			},
 			"x":-680,
-			"y":-80,
+			"y":120,
 			"width":280,
-			"height":139,
+			"height":180,
 			"color":"4"
 		},
 		{
-			"id":"c0d0b8f7da631d38",
+			"id":"7a1b2108fa3bc30e",
 			"type":"text",
-			"text":"Transfer Servo\nConfiguration Name: \"lift2\"\nConfiguration Type: CRServo\nPort 5 on Control Hub\nPort 6 on Servo Power Injector",
+			"text":"Hall Effect Sensor\nConfiguration Name: \"hall\"\nPort 0",
 			"styleAttributes":{"textAlign":"center"},
-			"x":-680,
-			"y":80,
+			"x":-260,
+			"y":-260,
 			"width":280,
-			"height":139,
+			"height":80,
+			"color":"1"
+		},
+		{
+			"id":"48faa728dd92705d",
+			"type":"text",
+			"text":"Motors",
+			"styleAttributes":{"textAlign":"center"},
+			"x":-600,
+			"y":460,
+			"width":160,
+			"height":60,
+			"color":"5"
+		},
+		{
+			"id":"2cad408dc2aae848",
+			"type":"text",
+			"text":"I2C Devices",
+			"styleAttributes":{"textAlign":"center"},
+			"x":-600,
+			"y":540,
+			"width":160,
+			"height":60,
+			"color":"6"
+		},
+		{
+			"id":"b7514b6ae54e27cf",
+			"type":"text",
+			"text":"Digital Devices",
+			"styleAttributes":{"textAlign":"center"},
+			"x":-780,
+			"y":380,
+			"width":160,
+			"height":60,
+			"color":"1"
+		},
+		{
+			"id":"e3fdefe17fe2310d",
+			"type":"text",
+			"text":"Analog Devices",
+			"styleAttributes":{"textAlign":"center"},
+			"x":-600,
+			"y":380,
+			"width":160,
+			"height":60,
+			"color":"3"
+		},
+		{
+			"id":"f9a634b23b5064c5",
+			"type":"text",
+			"text":"Servos",
+			"styleAttributes":{"textAlign":"center"},
+			"x":-780,
+			"y":460,
+			"width":160,
+			"height":60,
 			"color":"4"
+		},
+		{
+			"id":"26e535ad3414017c",
+			"type":"text",
+			"text":"Control System",
+			"styleAttributes":{"textAlign":"center"},
+			"x":-780,
+			"y":540,
+			"width":160,
+			"height":60,
+			"color":"2"
+		},
+		{
+			"id":"1c97878ebafa8ef3",
+			"type":"text",
+			"text":"Axon 4th Wire Combiner\nOrange Plug -> Analog Port 0\nConfiguration Name: AxonEnc0\nBlue Plug -> Analog Port 1\nConfiguration Name: AxonEnc1",
+			"styleAttributes":{"textAlign":"center"},
+			"x":-860,
+			"y":-460,
+			"width":320,
+			"height":160,
+			"color":"1"
 		}
 	],
 	"edges":[
@@ -465,7 +482,7 @@
 			"fromNode":"81a20594db9883e0",
 			"fromSide":"top",
 			"toNode":"7a1b2108fa3bc30e",
-			"toSide":"left"
+			"toSide":"right"
 		},
 		{
 			"id":"3fe0580e43888e49",
@@ -502,6 +519,36 @@
 			"fromSide":"bottom",
 			"toNode":"c0d0b8f7da631d38",
 			"toSide":"right"
+		},
+		{
+			"id":"db8756c2e0fb6ad7",
+			"styleAttributes":{"pathfindingMethod":"square"},
+			"toFloating":false,
+			"fromFloating":false,
+			"fromNode":"c8decba00b0187c8",
+			"fromSide":"left",
+			"toNode":"1c97878ebafa8ef3",
+			"toSide":"bottom"
+		},
+		{
+			"id":"fcac94ab4e311e90",
+			"styleAttributes":{"pathfindingMethod":"square"},
+			"toFloating":false,
+			"fromFloating":false,
+			"fromNode":"c0d0b8f7da631d38",
+			"fromSide":"left",
+			"toNode":"1c97878ebafa8ef3",
+			"toSide":"bottom"
+		},
+		{
+			"id":"67297f2c1150afea",
+			"styleAttributes":{"pathfindingMethod":"square"},
+			"toFloating":false,
+			"fromFloating":false,
+			"fromNode":"1c97878ebafa8ef3",
+			"fromSide":"right",
+			"toNode":"d9c005396002882a",
+			"toSide":"top"
 		}
 	],
 	"metadata":{

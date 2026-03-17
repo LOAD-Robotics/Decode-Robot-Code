@@ -104,18 +104,27 @@ public class Teleop_Testing_ extends LinearOpMode {
 
             pid.setGoal(new KineticState(0, 0));
 
+            double maxPower = 1;
+            double minPower = -1;
+            double power = 0;
+            if (Robot.turret.rotation.getAngleAbsolute() > 360){
+                maxPower = 0;
+            }
+            if (Robot.turret.rotation.getAngleAbsolute() < 0){
+                minPower = 0;
+            }
+
             if (limelight.result != null && limelight.result.isValid()){
-                Robot.turret.rotation.setPower(
-                        pid.calculate(
-                                new KineticState(
-                                        limelight.result.getTx(),
-                                        Robot.turret.rotation.getDegreesPerSecond()
-                                )
+                power = pid.calculate(
+                        new KineticState(
+                                limelight.result.getTx(),
+                                Robot.turret.rotation.getDegreesPerSecond()
                         )
                 );
             }else{
-                Robot.turret.rotation.setPower(0);
+                power = 0;
             }
+            Robot.turret.rotation.setPower(Math.min(Math.max(power, minPower), maxPower));
 
             telemetry.addData("Turret Motor Power", Robot.turret.rotation.getPower());
             telemetry.addData("Turret Error", limelight.result.getTx());
