@@ -39,6 +39,7 @@ import com.skeletonarmy.marrow.zones.PolygonZone;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Devices;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Intake;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Turret;
+import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Lift;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Drivetrain_.MecanumDrivetrainClass;
 
 /*
@@ -55,6 +56,7 @@ public class LoadHardwareClass {
     public final MecanumDrivetrainClass drivetrain;
     public final Turret turret;
     public final Intake intake;
+    public final Lift lift;
     public final Devices.GoBildaPrismBarClass lights;
 
     // Declare various enums & other variables that are useful across files
@@ -98,6 +100,7 @@ public class LoadHardwareClass {
         this.drivetrain = new MecanumDrivetrainClass();
         this.turret     = new Turret();
         this.intake     = new Intake();
+        this.lift       = new Lift();
         this.lights     = new Devices.GoBildaPrismBarClass();
     }
 

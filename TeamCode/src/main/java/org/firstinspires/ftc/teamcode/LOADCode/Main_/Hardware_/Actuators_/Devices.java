@@ -29,8 +29,8 @@ public class Devices {
 
     public static class CRServoClass {
         // CR for Continuous Rotation
-        private CRServo servo;
-        private DcMotorSimple.Direction servoDirection;
+        protected CRServo servo;
+        protected DcMotorSimple.Direction servoDirection;
 
         public void init(@NonNull OpMode opmode, String servoName) {
             servo = opmode.hardwareMap.get(CRServo.class, servoName);
@@ -61,6 +61,13 @@ public class Devices {
         public void setDirection(DcMotorSimple.Direction direction) {
             servo.setDirection(direction);
             servoDirection = direction;
+        }
+    }
+
+    public static class AxonClass extends CRServoClass {
+        @Override // Does the same thing for now but can be edited with more for the future.
+        public void init(@NonNull OpMode opmode, String servoName) {
+            servo = opmode.hardwareMap.get(CRServo.class, servoName);
         }
     }
 
