@@ -72,12 +72,6 @@ public class Teleop_Init_ extends LinearOpMode {
         Robot.turret.setGateState(Turret.gatestate.CLOSED);
         Robot.lights.setStripRainbow();
 
-        if (!Turret.zeroed){
-            while (!isStopRequested() && Robot.turret.zeroTurret()){
-                sleep(0);
-            }
-        }
-
         // Wait for the game to start (driver presses START)
         waitForStart();
         runtime.reset();

@@ -73,22 +73,13 @@ public class Auto_Main_ extends NextFTCOpMode {
                         new Far_9Ball()
                 ));
         prompter.onComplete(() -> {
-                    selectedAlliance = prompter.get("alliance");
-                    selectedAuto = prompter.get("auto");
-                    telemetry.update();
-                    // Build paths
-                    paths.buildPaths(follower());
-                    // Initialize all hardware of the robot
-                    Robot.init(selectedAuto.getStartPose(), follower());
-                    while (opModeInInit() && Robot.turret.zeroTurret()){
-                        telemetry.addLine("TURRET ZEROING");
-                        telemetry.addData("Selection", "Complete");
-                        telemetry.addData("Alliance", selectedAlliance.toString());
-                        telemetry.addData("Auto", selectedAuto);
-                        telemetry.update();
-                        sleep(0);
-                    }
-            telemetry.addLine("TURRET READY");
+            selectedAlliance = prompter.get("alliance");
+            selectedAuto = prompter.get("auto");
+            telemetry.update();
+            // Build paths
+            paths.buildPaths(follower());
+            // Initialize all hardware of the robot
+            Robot.init(selectedAuto.getStartPose(), follower());
             telemetry.addData("Selection", "Complete");
             telemetry.addData("Alliance", selectedAlliance.toString());
             telemetry.addData("Auto", selectedAuto);

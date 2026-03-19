@@ -41,7 +41,6 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Devices;
-import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Turret;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Drivetrain_.Pedro_Paths;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.LoadHardwareClass;
 
@@ -79,12 +78,6 @@ public class Teleop_Testing_ extends LinearOpMode {
         Robot.init(paths.farStart);
         paths.buildPaths(Robot.drivetrain.follower);
         selectedAlliance = LoadHardwareClass.Alliance.BLUE;
-
-        if (!Turret.zeroed){
-            while (!isStopRequested() && Robot.turret.zeroTurret()){
-                sleep(0);
-            }
-        }
 
         // Wait for the game to start (driver presses START)
         waitForStart();

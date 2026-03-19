@@ -4,7 +4,7 @@ import static org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.LoadHardwa
 
 import com.bylazar.configurables.annotations.Configurable;
 import com.pedropathing.geometry.Pose;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -91,7 +91,7 @@ public class Turret {
     public double cameraTurretError = 0;
 
     // Stores important objects for later access
-    OpMode opMode = null;
+    LinearOpMode opMode = null;
     LoadHardwareClass Robot = null;
     PolygonZone robotZone = new PolygonZone(15, 15);
 
@@ -99,7 +99,7 @@ public class Turret {
     public Utils_.InterpLUT hoodLUTnear = new Utils_.InterpLUT();
     public Utils_.InterpLUT hoodLUTfar = new Utils_.InterpLUT();
 
-    public void init(OpMode opmode, LoadHardwareClass robot){
+    public void init(LinearOpMode opmode, LoadHardwareClass robot){
         // Store important objects in their respective variables
         opMode = opmode;
         Robot = robot;
@@ -107,6 +107,8 @@ public class Turret {
         if (!limelight.initialized){
             limelight.init(opmode);
         }
+
+        zeroTurret(opmode);
 
         // Initialize hardware objects
         rotation.init(opmode, "turret", 751.8 * ((double) 131 / 36));
@@ -174,7 +176,7 @@ public class Turret {
         setHood(0);
     }
 
-    /** Sets the value of the internal motor PID coefficients */
+    /** Updates the values of the internal motor PID coefficients */
     public void updatePIDs(){
         // Pass PID pidCoefficients to motor classes
         rotation.setPidCoefficients(turretCoefficients);
@@ -218,6 +220,10 @@ public class Turret {
         }
     }
 
+    /**
+     * Updates the rotational auto-aim for the turret. <br>
+     * Must be called every loop to function properly.
+     */
     private void updateRotationalAimbot(){
         limelight.updateResult();
 
@@ -251,6 +257,11 @@ public class Turret {
         }
     }
 
+    /**
+     * Updates the distance-based automatic hood adjustment. <br>
+     * Must be called every loop to function properly.
+     * @param offset A value to offset the automatic angle, used for manually tweaking the hood angle in Teleop.
+     */
     private void updateHoodAimbot(double offset){
         // Set the hood angle
         Pose goalPose = new Pose(0,144,0);
@@ -282,8 +293,8 @@ public class Turret {
     public static Pose rotationalFarGoalPoseRed = new Pose(138, 136);
 
     /**
-     * Calculates the proper goal pose
-     * @return a pose of the rotational aimbot's target position.
+     * Calculates the proper goal pose for the odometry-based turret auto-aim.
+     * @return A pose containing the current target position.
      */
     public Pose calcGoalPose(){
         robotZone.setPosition(Robot.drivetrain.follower.getPose().getX(), Robot.drivetrain.follower.getPose().getY());
@@ -307,7 +318,7 @@ public class Turret {
     }
 
     /**
-     * Sets the state of the turret gate.
+     * Sets the current state of the turret gate.
      */
     public void setGateState(gatestate state){
         if (state == gatestate.CLOSED){
@@ -350,7 +361,7 @@ public class Turret {
     }
 
     /**
-     * Sets the RPM of the flywheel.
+     * Sets the current RPM of the flywheel.
      * @param rpm
      * Range [0,6000]
      */
@@ -366,11 +377,16 @@ public class Turret {
     }
 
     /**
-     * Gets the current RPM of the flywheel.
+     * @return The current RPM of the flywheel.
      */
     public double getFlywheelRPM(){
         return flywheel.getRPM();
     }
+
+    /**
+     * @return <code>true</code> if the flywheel's RPM is within 150RPM of the current <br>
+     * maximum speed, otherwise returns <code>false</code>.`
+     */
     public boolean isFlywheelReady(){
         return flywheel.getRPM() > getFlywheelCurrentMaxSpeed()-150;
     }
@@ -384,12 +400,21 @@ public class Turret {
         flywheelMode = state;
     }
 
+    /**
+     * @return The target speed of the flywheel, assuming it is on. <br>
+     */
     public double getFlywheelCurrentMaxSpeed(){
         return targetRPM;
     }
 
-
-    public boolean zeroTurret(){
+    public void zeroTurret(LinearOpMode opMode){
+        if (!Turret.zeroed){
+            while (!opMode.isStopRequested() && zeroTurret()){
+                Robot.sleep(0);
+            }
+        }
+    }
+    private boolean zeroTurret(){
         if (!zeroed){
             rotation.setPower(1);
             if (hall.getTriggered()){

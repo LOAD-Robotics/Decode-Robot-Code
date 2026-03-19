@@ -63,12 +63,6 @@ public class Teleop_Outreach_ extends LinearOpMode {
         // Initialize all hardware of the robot
         Robot.init(new Pose(72, 72, 90));
 
-        if (!Turret.zeroed){
-            while (!isStopRequested() && Robot.turret.zeroTurret()){
-                sleep(0);
-            }
-        }
-
         // Wait for the game to start (driver presses START)
         waitForStart();
         runtime.reset();

@@ -32,6 +32,7 @@ package org.firstinspires.ftc.teamcode.LOADCode.Main_.Teleop_;
 import static org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.LoadHardwareClass.selectedAlliance;
 
 import com.bylazar.configurables.annotations.Configurable;
+import com.bylazar.telemetry.JoinedTelemetry;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
 import com.pedropathing.geometry.Pose;
@@ -42,6 +43,7 @@ import com.skeletonarmy.marrow.TimerEx;
 import com.skeletonarmy.marrow.prompts.OptionPrompt;
 import com.skeletonarmy.marrow.prompts.Prompter;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Intake;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Intake.intakeMode;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Intake.transferState;
@@ -65,7 +67,9 @@ public class Teleop_Main_ extends LinearOpMode {
     // Declare OpMode members.
     private final ElapsedTime runtime = new ElapsedTime();
     private final ElapsedTime looptime = new ElapsedTime();
-    private final TelemetryManager panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
+    private final TelemetryManager.TelemetryWrapper panelsTelemetry = PanelsTelemetry.INSTANCE.getFtcTelemetry();
+    private final Telemetry ftcTelemetry = super.telemetry;
+    private final JoinedTelemetry telemetry = new JoinedTelemetry(ftcTelemetry, panelsTelemetry);
 
     public int shootingState = 0;
     public TimerEx stateTimerFifthSec = new TimerEx(0.2);
@@ -75,7 +79,7 @@ public class Teleop_Main_ extends LinearOpMode {
     public boolean leftTrigOldState = false;
     public boolean rightTrigOldState = false;
     public double hoodOffset = 0;
-    public double turretOffsetStep = 5;
+    public double turretOffsetStep = 10;
     public boolean turretOn = true;
     public boolean hoodOn = true;
     public Pose holdPoint = new Pose(72, 72, 90);
@@ -171,11 +175,6 @@ public class Teleop_Main_ extends LinearOpMode {
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
             looptime.reset();
-            if (!Turret.zeroed){
-                while (!isStopRequested() && Robot.turret.zeroTurret()){
-                    sleep(0);
-                }
-            }
 
             lightsState ledState = lightsState.SOLID;
             if (runtime.time(TimeUnit.SECONDS) > 115){
@@ -205,35 +204,30 @@ public class Teleop_Main_ extends LinearOpMode {
 
             double flywheelPercentage = (int) Math.round(Robot.turret.getFlywheelRPM()/Robot.turret.getFlywheelCurrentMaxSpeed() *100);
             telemetry.addData("Flywheel Percentage", flywheelPercentage+"%");
-            panelsTelemetry.addData("Flywheel Percentage", flywheelPercentage+"%");
             telemetry.addData("ALLIANCE", selectedAlliance);
 
+            // Drivetrain Telemetry
             telemetry.addData("SpeedMult", Robot.drivetrain.speedMultiplier);
-            //positional telemetry
             telemetry.addData("Robot Position [X, Y, H]", "[" + Robot.drivetrain.follower.getPose().getX() + ", " + Robot.drivetrain.follower.getPose().getY() + ", " + Robot.drivetrain.follower.getPose().getHeading() + "]");
             telemetry.addData("Distance From Goal", Robot.drivetrain.distanceFromGoal());
             telemetry.addData("Angular Velocity (Deg/sec)", Math.toDegrees(Robot.drivetrain.follower.getAngularVelocity()));
-            telemetry.addData("Turret Angular Velocity (Deg/sec)", Robot.turret.rotation.getDegreesPerSecond());
-
             telemetry.addLine();
-            // Turret-related Telemetry
-            panelsTelemetry.addData("Turret Target Angle", Robot.turret.rotation.target);
-            panelsTelemetry.addData("Turret Actual Angle", Robot.turret.rotation.getAngleAbsolute());
+
+            // Turret Rotation Telemetry
             telemetry.addData("Turret Target Angle", Robot.turret.rotation.target);
             telemetry.addData("Turret Actual Angle", Robot.turret.rotation.getAngleAbsolute());
+            telemetry.addData("Turret Angular Velocity (Deg/sec)", Robot.turret.rotation.getDegreesPerSecond());
             telemetry.addData("Turret Rotation Offset", turretOffsetStep);
+            telemetry.addData("Turret Target [X, Y]", "[" + Robot.turret.calcGoalPose().getX() + ", " + Robot.turret.calcGoalPose().getY() + "]");
+            telemetry.addLine();
+
+            // Turret Hood Telemetry
             telemetry.addData("Turret Hood Angle", Robot.turret.getHood());
             telemetry.addData("Turret Hood Offset", hoodOffset);
-            telemetry.addData("Turret Target [X, Y]", "[" + Robot.turret.calcGoalPose().getX() + ", " + Robot.turret.calcGoalPose().getY() + "]");
-            telemetry.addData("Hall Effect Triggered", Robot.turret.hall.getTriggered());
 
-            telemetry.addLine();
-            panelsTelemetry.addData("Flywheel Target Speed", Robot.turret.flywheel.target);
-            panelsTelemetry.addData("Flywheel Actual Speed", Robot.turret.getFlywheelRPM());
-            panelsTelemetry.addData("Flywheel Power", Robot.turret.flywheel.getPower());
+            // Flywheel Telemetry
             telemetry.addData("Flywheel Target Speed", Robot.turret.flywheel.target);
             telemetry.addData("Flywheel Actual Speed", Robot.turret.getFlywheelRPM());
-            telemetry.addData("Flywheel State", Robot.turret.getFlywheelRPM());
 
             // System-related Telemetry
             telemetry.addLine();
@@ -416,14 +410,6 @@ public class Teleop_Main_ extends LinearOpMode {
             }else{ // OFF
                 Robot.intake.setMode(intakeMode.OFF);
             }
-
-            /* TODO Uncomment once autobelt control is finished
-            if (Math.abs(gamepad2.left_stick_y) >= dylanStickDeadzones) {
-                Robot.intake.setMode(intakeMode.INTAKE_ALL);
-            }else{ // OFF
-                Robot.intake.setMode(intakeMode.OFF);
-            }
-             */
 
             //Flywheel Toggle Control (Y Button)
             if (gamepad2.yWasPressed()) {
