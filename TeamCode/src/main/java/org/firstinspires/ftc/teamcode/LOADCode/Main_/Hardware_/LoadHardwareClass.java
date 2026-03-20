@@ -119,7 +119,6 @@ public class LoadHardwareClass {
         myOpMode.telemetry.addData(">", "Hardware Initialized");
         myOpMode.telemetry.update();
     }
-
     /**
      * Initializes all hardware for the robot.
      * Must be called once at the start of each op-mode.
