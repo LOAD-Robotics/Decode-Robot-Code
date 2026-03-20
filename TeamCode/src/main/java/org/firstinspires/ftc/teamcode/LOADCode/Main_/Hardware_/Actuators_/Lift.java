@@ -46,9 +46,21 @@ public class Lift {
      @param opMode The current OpMode
      */
     public void init(OpMode opMode){
-        Lift1.init(opMode, "Lift1");
-        Lift2.init(opMode, "Lift2");
+        Lift1.init(opMode, "lift1");
+        Lift2.init(opMode, "lift2");
     };
+
+    /**
+     @param power Double value from [-1,1]
+     <br><br>
+     Public method for setting lift servo power.
+     <br>
+     <code><b><i>WARNING:</i> THIS METHOD HAS NO BUILT IN SAFETY, OUTREACH USE ONLY!</b></code>
+     */
+    public void UNSAFESetLiftPower(double power){
+        Lift1.setPower(power);
+        Lift2.setPower(power);
+    }
 
     /**
     @param power Double value from [-1,1]
