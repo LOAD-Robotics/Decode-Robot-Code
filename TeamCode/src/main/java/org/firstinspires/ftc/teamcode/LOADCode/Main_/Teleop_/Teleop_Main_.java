@@ -330,22 +330,11 @@ public class Teleop_Main_ extends LinearOpMode {
                 true
         );
 
-        if (gamepad1.xWasPressed()){
+        if (gamepad1.dpadDownWasPressed()){
             hoodOn = !hoodOn;
         }
         if (gamepad1.yWasPressed()){
             turretOn = !turretOn;
-        }
-
-        if (gamepad1.dpad_up){
-            Robot.lift.UNSAFESetLiftPower(0.5);
-        } else {
-            Robot.lift.UNSAFESetLiftPower(0);
-        }
-        if (gamepad1.dpad_down){
-            Robot.lift.UNSAFESetLiftPower(-0.5);
-        } else {
-            Robot.lift.UNSAFESetLiftPower(0);
         }
 
         if (gamepad1.dpadLeftWasPressed()){
