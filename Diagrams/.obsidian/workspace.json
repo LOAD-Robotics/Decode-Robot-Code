@@ -40,9 +40,26 @@
               "icon": "lucide-layout-dashboard",
               "title": "Robot Wiring"
             }
+          },
+          {
+            "id": "f3ed0e91d6b359a1",
+            "type": "leaf",
+            "state": {
+              "type": "canvas",
+              "state": {
+                "file": "Robot Wiring.canvas",
+                "viewState": {
+                  "x": 30,
+                  "y": 100,
+                  "zoom": -0.6153025295220605
+                }
+              },
+              "icon": "lucide-layout-dashboard",
+              "title": "Robot Wiring"
+            }
           }
         ],
-        "currentTab": 1
+        "currentTab": 2
       }
     ],
     "direction": "vertical"
@@ -202,7 +219,7 @@
       "theme-toggle:Toggle to dark mode": false
     }
   },
-  "active": "3c98fecc6f5ddbb9",
+  "active": "f3ed0e91d6b359a1",
   "lastOpenFiles": [
     "File Structure.canvas",
     "File Structure Dark.png",

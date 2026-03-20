@@ -63,12 +63,6 @@ public class Teleop_Outreach_ extends LinearOpMode {
         // Initialize all hardware of the robot
         Robot.init(new Pose(72, 72, 90));
 
-        if (!Turret.zeroed){
-            while (!isStopRequested() && Robot.turret.zeroTurret()){
-                sleep(0);
-            }
-        }
-
         // Wait for the game to start (driver presses START)
         waitForStart();
         runtime.reset();
@@ -86,7 +80,7 @@ public class Teleop_Outreach_ extends LinearOpMode {
             );
 
             if (Math.abs(gamepad1.right_stick_y) > 0.1){
-                Robot.intake.setMode(Intake.intakeMode.INTAKING);
+                Robot.intake.setMode(Intake.intakeMode.INTAKE_ALL);
             }else{
                 Robot.intake.setMode(Intake.intakeMode.OFF);
             }
@@ -128,20 +122,20 @@ public class Teleop_Outreach_ extends LinearOpMode {
                         stateTimerHalfSec.restart();
                         stateTimerHalfSec.start();
                     }
-                    Robot.intake.setMode(Intake.intakeMode.INTAKING);
-                    telemetry.addData("Shooting State", "SHOOTING FIRST TWO");
+                    Robot.intake.setMode(Intake.intakeMode.INTAKE_ALL);
+                    telemetry.addData("Shooting State", "INTAKE_NOINTAKE FIRST TWO");
                     if (stateTimerHalfSec.isDone() && Robot.intake.getTopSensorState() && !Robot.intake.getBottomSensorState()){
                         shootingState = 3;
                     }
                     break;
                 case 3:
-                    if (Robot.intake.getMode() == Intake.intakeMode.INTAKING){
+                    if (Robot.intake.getMode() == Intake.intakeMode.INTAKE_ALL){
                         stateTimerHalfSec.restart();
                         stateTimerHalfSec.start();
                     }
-                    Robot.intake.setMode(Intake.intakeMode.SHOOTING);
+                    Robot.intake.setMode(Intake.intakeMode.INTAKE_NOINTAKE);
                     Robot.intake.setTransfer(Intake.transferState.UP);
-                    telemetry.addData("Shooting State", "SHOOTING FINAL");
+                    telemetry.addData("Shooting State", "INTAKE_NOINTAKE FINAL");
                     if (stateTimerHalfSec.isDone()) {
                         shootingState = 4;
                     }

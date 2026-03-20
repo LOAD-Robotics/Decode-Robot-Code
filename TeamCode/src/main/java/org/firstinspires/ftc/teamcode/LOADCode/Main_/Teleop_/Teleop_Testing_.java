@@ -29,18 +29,19 @@
 
 package org.firstinspires.ftc.teamcode.LOADCode.Main_.Teleop_;
 
+import static org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.LoadHardwareClass.selectedAlliance;
+
 import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.JoinedTelemetry;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
-import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Devices;
-import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Turret;
+import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Drivetrain_.Pedro_Paths;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.LoadHardwareClass;
 
 import java.util.concurrent.TimeUnit;
@@ -62,9 +63,11 @@ public class Teleop_Testing_ extends LinearOpMode {
 
     public Devices.Limelight3AClass limelight = new Devices.Limelight3AClass();
     public LoadHardwareClass Robot = new LoadHardwareClass(this);
+    public Pedro_Paths paths = new Pedro_Paths();
 
-    public static PIDCoefficients cameraCoefficients = new PIDCoefficients(0, 0, 0);
+    public static PIDCoefficients cameraCoefficients = new PIDCoefficients(0.05, 0.00000000001, 0.0000001);
     private static PIDCoefficients oldCameraCoefficients = new PIDCoefficients(0, 0, 0);
+    private final PIDCoefficients turretCoefficients = new PIDCoefficients(0.022, 0.0000000002, 0.0015); // 223RPM Motor
 
     public ControlSystem pid = ControlSystem.builder().posPid(cameraCoefficients).build();
 
@@ -72,13 +75,9 @@ public class Teleop_Testing_ extends LinearOpMode {
     public void runOpMode() {
 
         limelight.init(this);
-        Robot.init(new Pose(72, 72, 90));
-
-        if (!Turret.zeroed){
-            while (!isStopRequested() && Robot.turret.zeroTurret()){
-                sleep(0);
-            }
-        }
+        Robot.init(paths.farStart);
+        paths.buildPaths(Robot.drivetrain.follower);
+        selectedAlliance = LoadHardwareClass.Alliance.BLUE;
 
         // Wait for the game to start (driver presses START)
         waitForStart();
@@ -95,35 +94,44 @@ public class Teleop_Testing_ extends LinearOpMode {
 
             Robot.drivetrain.pedroMecanumDrive(
                     gamepad1.left_stick_y,
-                    gamepad1.left_stick_y,
-                    gamepad1.right_stick_x,
+                    gamepad1.left_stick_x,
+                    gamepad1.right_stick_x/2,
                     true
             );
 
             limelight.updateResult();
-
-            pid.setGoal(new KineticState(0, 0));
-
-            if (limelight.result != null && limelight.result.isValid()){
-                Robot.turret.rotation.setPower(
-                        pid.calculate(
-                                new KineticState(
-                                        limelight.result.getTx(),
-                                        Robot.turret.rotation.getDegreesPerSecond()
-                                )
-                        )
-                );
-            }else{
-                Robot.turret.rotation.setPower(0);
+            pid.setGoal(new KineticState(0, -Math.toDegrees(Robot.drivetrain.follower.getAngularVelocity())));
+            double maxPower = 1;
+            double minPower = -1;
+            double power = 0;
+            if (Robot.turret.rotation.getAngleAbsolute() > 360){
+                maxPower = 0;
+            }
+            if (Robot.turret.rotation.getAngleAbsolute() < 0){
+                minPower = 0;
             }
 
-            telemetry.addData("Turret Motor Power", Robot.turret.rotation.getPower());
+            if (limelight.result != null && limelight.result.isValid()){
+                power = pid.calculate(
+                        new KineticState(
+                                limelight.result.getTx(),
+                                Robot.turret.rotation.getDegreesPerSecond()
+                        )
+                );
+                Robot.turret.rotation.setPower(Math.min(Math.max(power, minPower), maxPower));
+            }else{
+                Robot.turret.updateAimbot(true, false, 0);
+            }
+
+            telemetry.addData("Result Valid", limelight.result.isValid());
             telemetry.addData("Turret Error", limelight.result.getTx());
 
             if (gamepad1.bWasPressed()){
                 limelight.setPipeline(0);
+                selectedAlliance = LoadHardwareClass.Alliance.BLUE;
             }else if (gamepad1.xWasPressed()){
                 limelight.setPipeline(1);
+                selectedAlliance = LoadHardwareClass.Alliance.RED;
             }
 
             if (limelight.getPipeline() == 0){
@@ -132,7 +140,7 @@ public class Teleop_Testing_ extends LinearOpMode {
                 telemetry.addData("Current Tag Target", "BLUE");
             }
 
-            telemetry.addData("Loop Time", loopTimer.time(TimeUnit.MILLISECONDS));
+            telemetry.addData("Loop Time (ms)", loopTimer.time(TimeUnit.MILLISECONDS));
             telemetry.update();
             loopTimer.reset();
         }

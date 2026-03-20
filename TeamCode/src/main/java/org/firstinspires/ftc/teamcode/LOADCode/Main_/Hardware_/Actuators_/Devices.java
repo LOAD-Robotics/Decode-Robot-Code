@@ -26,7 +26,6 @@ import dev.nextftc.control.feedback.PIDCoefficients;
 import dev.nextftc.control.feedforward.BasicFeedforwardParameters;
 
 public class Devices {
-
     public static class CRServoClass {
         // CR for Continuous Rotation
         protected CRServo servo;
@@ -37,11 +36,12 @@ public class Devices {
         }
 
         /**
-         * @return The power the servo has been set to.
+         * @return The power the servo was last set to.
          */
         public double getPower() {
             return servo.getPower();
         }
+
         /**
          * @param power The power to set the servo to. Must be a value between -1 and 1.
          */
@@ -55,6 +55,7 @@ public class Devices {
         public DcMotorSimple.Direction getDirection(){
             return servoDirection;
         }
+
         /**
          * @param direction The direction to set the servo to.
          */
@@ -63,14 +64,12 @@ public class Devices {
             servoDirection = direction;
         }
     }
-
     public static class AxonClass extends CRServoClass {
         @Override // Does the same thing for now but can be edited with more for the future.
         public void init(@NonNull OpMode opmode, String servoName) {
             servo = opmode.hardwareMap.get(CRServo.class, servoName);
         }
     }
-
     public static class DcMotorExClass {
 
         // Old PID Coefficients
@@ -120,7 +119,10 @@ public class Devices {
         ControlSystem velPID = null;
         ControlSystem posPID = null;
 
-        public void buildPIDs(){
+        /**
+         * Rebuilds the PIDs if they have changed from the last run of the method.
+         */
+        private void buildPIDs(){
             if (old_pidCoefficients != pidCoefficients || old_ffCoefficients != ffCoefficients){
                 posPID = ControlSystem.builder().posPid(pidCoefficients).build();
                 velPID = ControlSystem.builder()
@@ -159,83 +161,87 @@ public class Devices {
         public void setOffsetTicks(double ticks){
             offset = ticks;
         }
+
+        /**
+         * Sets a position offset on the motor in degrees
+         */
         public void setOffsetDegrees(double degrees){
             setOffsetTicks(degrees * (ticksPerRotation/360));
         }
+        /**
+         * @return The current offset of the motor in encoder ticks.
+         */
         public double getOffsetTicks(){
             return offset;
         }
+        /**
+         * @return The current offset of the motor in degrees.
+         */
         public double getOffsetDegrees(){
             return offset/(ticksPerRotation/360);
         }
         /**
          * Sets the runMode of the motor.
-         * @param runMode The mode to set the motor to.
          */
         public void setRunMode(DcMotor.RunMode runMode){
             motorObject.setMode(runMode);
         }
         /**
          * Sets the zeroPowerBehaviour of the motor.
-         * @param behaviour The behaviour to apply to the motor.
          */
         public void setZeroPowerBehaviour(DcMotor.ZeroPowerBehavior behaviour){
             motorObject.setZeroPowerBehavior(behaviour);
         }
         /**
-         * @param direction The direction to set the motor to.
+         * Sets the direction of the motor
          */
         public void setDirection(DcMotorSimple.Direction direction){
             motorObject.setDirection(direction);
         }
-        public void setEncoderTicks(int ticks){
-            motorObject.setTargetPosition(ticks);
-            setRunMode(DcMotor.RunMode.RUN_TO_POSITION);
-        }
         /**
-         * @return The current position of the turret motor in encoder ticks. Can be any value.
+         * @return The current position of the motor in encoder ticks. Can be any value.
          */
         public double getEncoderTicks(){
             return motorObject.getCurrentPosition() + offset;
         }
         /**
-         * @param power A value between -1 and 1 that the turret motor's power will be set to.
+         * @param power A value between -1 and 1 that the motor's power will be set to.
          */
         public void setPower(double power){
             motorObject.setPower(power);
         }
         /**
-         * @return The angle of the turret in degrees. Can be any value.
+         * @return The angle of the motor in degrees. Can be any value.
          */
         public double getAngleAbsolute(){
             return (getEncoderTicks()/ticksPerRotation*360);
         }
         /**
-         * @return The angle of the turret in degrees. Can be any value between 0 and 360.
+         * @return The angle of the motor in degrees. Can be any value between 0 and 360.
          */
         public double getAngle(){
             return getAngleAbsolute()%360;
         }
         /**
-         * @return The velocity of the turret in encoder ticks/second.
+         * @return The velocity of the motor in encoder ticks/second.
          */
         public double getVelocity(){
             return motorObject.getVelocity();
         }
         /**
-         * @return The velocity of the turret in degrees/second.
+         * @return The velocity of the motor in degrees/second.
          */
         public double getDegreesPerSecond(){
             return (getVelocity()/ticksPerRotation)*360;
         }
         /**
-         * @return The velocity of the turret in RPM.
+         * @return The velocity of the motor in RPM.
          */
         public double getRPM(){
             return (getVelocity()/ticksPerRotation)*60;
         }
         /**
-         * @return The power that the turret motor has been set to.
+         * @return The power that the motor has been set to.
          */
         public double getPower(){
             return motorObject.getPower();
@@ -249,7 +255,7 @@ public class Devices {
             setAngle(angle, 0);
         }
         /**
-         * Uses a PID controller to move the motor to the desired position.
+         * Uses a PID controller to move the motor to the desired position and velocity. <br>
          * Must be called every loop to function properly.
          * @param angle The angle in degrees to move the motor to. Can be any number.
          * @param velocity The velocity in degrees/sec that the motor should be spinning at when it reaches the target point.
@@ -263,7 +269,7 @@ public class Devices {
         }
 
         /**
-         * Uses a PID controller to accelerate the motor to the desired RPM.
+         * Uses a PID controller to accelerate the motor to the desired RPM.<br>
          * Must be called every loop to function properly.
          * @param rpm The RPM to accelerate the motor to. Can be any number
          */
@@ -276,6 +282,10 @@ public class Devices {
             setPower(velPID.calculate(currentKineticState));
         }
 
+        /**
+         * @param units The units to use for the returned motor current
+         * @return The current draw of the motor
+         */
         public double getCurrent(CurrentUnit units){
             return motorObject.getCurrent(units);
         }
@@ -315,19 +325,29 @@ public class Devices {
         public void init(@NonNull OpMode opmode, String sensorName){
             sensor = opmode.hardwareMap.get(NormalizedColorSensor.class, sensorName);
         }
-
+        /**
+         * @return The current detected color of the sensor
+         */
         public NormalizedRGBA getNormalizedColors(){
             return sensor.getNormalizedColors();
         }
-
+        /**
+         * @return The current gain of the sensor
+         */
         public double getGain(){
             return sensor.getGain();
         }
-
+        /**
+         * Sets the current gain of the sensor
+         */
         public void setGain(double gain){
             sensor.setGain((float) gain);
         }
 
+        /**
+         * @param units The units to be used for the returned distance
+         * @return The current distance detected by the sensor
+         */
         public double getDistance(DistanceUnit units){
             return ((DistanceSensor) sensor).getDistance(units);
         }
@@ -348,11 +368,18 @@ public class Devices {
             sensor2.init(opmode, sensor2Name);
         }
 
+        /**
+         * Sets the gain of the sensors
+         */
         public void setGain(double gain){
             sensor1.setGain(gain);
             sensor2.setGain(gain);
         }
 
+        /**
+         * @return <code>true</code> if either sensor detects and object closer than the <br>
+         * set threshold, otherwise <code>false</code>.
+         */
         public boolean objectDetected(){
             if (!sensor1WasLastRead){
                 sensor1WasLastRead = true;
@@ -364,6 +391,9 @@ public class Devices {
             return sensor1Triggered || sensor2Triggered;
         }
 
+        /**
+         * @return A list containing the distance values for each sensor
+         */
         public double[] getDistances(){
             return new double[]{sensor1.getDistance(units), sensor2.getDistance(units)};
         }
@@ -376,14 +406,12 @@ public class Devices {
             sensor.setMode(DigitalChannel.Mode.INPUT);
         }
 
+        /**
+         * @return <code>true</code> if the sensor detects a magnet, otherwise <code>false</code>.
+         */
         public Boolean getTriggered(){
             return !sensor.getState();
         }
-    }
-    public enum StripState {
-        PROGRESS,
-        BLINK,
-        OFF
     }
     public static class GoBildaPrismBarClass {
         // Maximum length of 4 daisy chained strips is 36 (12 + 12 + 6 + 6)
@@ -431,7 +459,6 @@ public class Devices {
             }
         }
     }
-
     public static class Limelight3AClass {
         public Limelight3A device;
         public LLResult result = null;
@@ -443,13 +470,24 @@ public class Devices {
             device.start();
         }
 
+        /**
+         * Updates the current result of the limelight camera. <br>
+         * Must be called every loop.
+         */
         public void updateResult(){
             result = device.getLatestResult();
         }
 
+        /**
+         * Sets the current pipeline of the limelight camera.
+         */
         public void setPipeline(int pipelineIndex){
             device.pipelineSwitch(pipelineIndex);
         }
+
+        /**
+         * @return The currently selected pipeline of the limelight camera.
+         */
         public int getPipeline(){
             return device.getStatus().getPipelineIndex();
         }

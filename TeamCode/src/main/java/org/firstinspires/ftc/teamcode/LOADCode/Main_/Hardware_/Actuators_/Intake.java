@@ -19,10 +19,10 @@ public class Intake {
 
     public enum intakeMode {
         AUTO_INTAKING,
-        INTAKING,
-        SHOOTING,
-        NO_BELT,
-        REVERSING,
+        INTAKE_ALL,
+        INTAKE_NOINTAKE,
+        INTAKE_NOBELT,
+        REVERSE_ALL,
         REVERSE_NOBELT,
         OFF
     }
@@ -59,9 +59,9 @@ public class Intake {
      * @param direction
      * Takes the following inputs
      * <ul>
-     *     <li><code>intakeMode.INTAKING</code></li>
-     *     <li><code>intakeMode.SHOOTING</code></li>
-     *     <li><code>intakeMode.REVERSING</code></li>
+     *     <li><code>intakeMode.INTAKE_ALL</code></li>
+     *     <li><code>intakeMode.INTAKE_NOINTAKE</code></li>
+     *     <li><code>intakeMode.REVERSE_ALL</code></li>
      *     <li><code>intakeMode.OFF</code></li>
      * </ul>
      */
@@ -71,16 +71,16 @@ public class Intake {
                 belt.setPower(1);
             }
             intake.setPower(1);
-        }else if (direction == intakeMode.INTAKING){
+        }else if (direction == intakeMode.INTAKE_ALL){
             intake.setPower(1);
             belt.setPower(1);
-        }else if (direction == intakeMode.SHOOTING){
+        }else if (direction == intakeMode.INTAKE_NOINTAKE){
             intake.setPower(0);
             belt.setPower(1);
-        }else if (direction == intakeMode.REVERSING){
+        }else if (direction == intakeMode.REVERSE_ALL){
             intake.setPower(-1);
             belt.setPower(-1);
-        }else if (direction == intakeMode.NO_BELT){
+        }else if (direction == intakeMode.INTAKE_NOBELT){
             intake.setPower(1);
             belt.setPower(0);
         }else if (direction == intakeMode.REVERSE_NOBELT){
@@ -99,9 +99,9 @@ public class Intake {
     /**
      * Outputs one of the following modes
      * <ul>
-     *     <li><code>intakeMode.INTAKING</code></li>
-     *     <li><code>intakeMode.SHOOTING</code></li>
-     *     <li><code>intakeMode.REVERSING</code></li>
+     *     <li><code>intakeMode.INTAKE_ALL</code></li>
+     *     <li><code>intakeMode.INTAKE_NOINTAKE</code></li>
+     *     <li><code>intakeMode.REVERSE_ALL</code></li>
      *     <li><code>intakeMode.OFF</code></li>
      * </ul>
      */
@@ -109,13 +109,15 @@ public class Intake {
         double intakePower = intake.getPower();
         double beltPower = belt.getPower();
         if (intakePower == 1 && beltPower == 1){
-            return intakeMode.INTAKING;
+            return intakeMode.INTAKE_ALL;
         }else if (intakePower == 0 && beltPower == 1){
-            return intakeMode.SHOOTING;
+            return intakeMode.INTAKE_NOINTAKE;
         }else if (intakePower == 1 && beltPower == 0) {
-            return intakeMode.NO_BELT;
+            return intakeMode.INTAKE_NOBELT;
         }else if (intakePower == -1 && beltPower == -1){
-            return intakeMode.REVERSING;
+            return intakeMode.REVERSE_ALL;
+        }else if (intakePower == -1 && beltPower == 0){
+            return intakeMode.REVERSE_NOBELT;
         }else if (intakePower == -1 && beltPower == 0){
             return intakeMode.REVERSE_NOBELT;
         }else{

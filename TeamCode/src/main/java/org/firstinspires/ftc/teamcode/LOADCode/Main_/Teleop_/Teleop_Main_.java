@@ -32,10 +32,10 @@ package org.firstinspires.ftc.teamcode.LOADCode.Main_.Teleop_;
 import static org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.LoadHardwareClass.selectedAlliance;
 
 import com.bylazar.configurables.annotations.Configurable;
+import com.bylazar.telemetry.JoinedTelemetry;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
 import com.pedropathing.geometry.Pose;
-import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -43,6 +43,7 @@ import com.skeletonarmy.marrow.TimerEx;
 import com.skeletonarmy.marrow.prompts.OptionPrompt;
 import com.skeletonarmy.marrow.prompts.Prompter;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Intake;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Intake.intakeMode;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Intake.transferState;
@@ -53,7 +54,6 @@ import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Drivetrain_.Mecan
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Drivetrain_.Pedro_Paths;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.LoadHardwareClass;
 
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 
@@ -67,14 +67,19 @@ public class Teleop_Main_ extends LinearOpMode {
     // Declare OpMode members.
     private final ElapsedTime runtime = new ElapsedTime();
     private final ElapsedTime looptime = new ElapsedTime();
-    private final TelemetryManager panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
+    private final TelemetryManager.TelemetryWrapper panelsTelemetry = PanelsTelemetry.INSTANCE.getFtcTelemetry();
+    private final Telemetry ftcTelemetry = super.telemetry;
+    private final JoinedTelemetry telemetry = new JoinedTelemetry(ftcTelemetry, panelsTelemetry);
 
     public int shootingState = 0;
     public TimerEx stateTimerFifthSec = new TimerEx(0.2);
     public TimerEx stateTimerFullSec = new TimerEx(1);
     public TimerEx stateTimerHalfSec = new TimerEx(0.5);
+    public int manualFlywheelState = 0;
+    public boolean leftTrigOldState = false;
+    public boolean rightTrigOldState = false;
     public double hoodOffset = 0;
-    public double turretOffsetStep = 5;
+    public double turretOffsetStep = 10;
     public boolean turretOn = true;
     public boolean hoodOn = true;
     public Pose holdPoint = new Pose(72, 72, 90);
@@ -148,14 +153,6 @@ public class Teleop_Main_ extends LinearOpMode {
             telemetry.update();
         });
 
-        Robot.turret.initVision(this);
-
-        List<LynxModule> allHubs = hardwareMap.getAll(LynxModule.class);
-
-        for (LynxModule module : allHubs) {
-            module.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
-        }
-
         // Runs repeatedly while in init
         while (opModeInInit()) {
             prompter.run();
@@ -178,11 +175,6 @@ public class Teleop_Main_ extends LinearOpMode {
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
             looptime.reset();
-            if (!Turret.zeroed){
-                while (!isStopRequested() && Robot.turret.zeroTurret()){
-                    sleep(0);
-                }
-            }
 
             lightsState ledState = lightsState.SOLID;
             if (runtime.time(TimeUnit.SECONDS) > 115){
@@ -212,48 +204,38 @@ public class Teleop_Main_ extends LinearOpMode {
 
             double flywheelPercentage = (int) Math.round(Robot.turret.getFlywheelRPM()/Robot.turret.getFlywheelCurrentMaxSpeed() *100);
             telemetry.addData("Flywheel Percentage", flywheelPercentage+"%");
-            panelsTelemetry.addData("Flywheel Percentage", flywheelPercentage+"%");
             telemetry.addData("ALLIANCE", selectedAlliance);
 
+            // Drivetrain Telemetry
             telemetry.addData("SpeedMult", Robot.drivetrain.speedMultiplier);
-            //positional telemetry
             telemetry.addData("Robot Position [X, Y, H]", "[" + Robot.drivetrain.follower.getPose().getX() + ", " + Robot.drivetrain.follower.getPose().getY() + ", " + Robot.drivetrain.follower.getPose().getHeading() + "]");
             telemetry.addData("Distance From Goal", Robot.drivetrain.distanceFromGoal());
             telemetry.addData("Angular Velocity (Deg/sec)", Math.toDegrees(Robot.drivetrain.follower.getAngularVelocity()));
-            telemetry.addData("Turret Angular Velocity (Deg/sec)", Robot.turret.rotation.getDegreesPerSecond());
-
             telemetry.addLine();
-            // Turret-related Telemetry
-            panelsTelemetry.addData("Turret Target Angle", Robot.turret.rotation.target);
-            panelsTelemetry.addData("Turret Actual Angle", Robot.turret.rotation.getAngleAbsolute());
+
+            // Turret Rotation Telemetry
             telemetry.addData("Turret Target Angle", Robot.turret.rotation.target);
             telemetry.addData("Turret Actual Angle", Robot.turret.rotation.getAngleAbsolute());
+            telemetry.addData("Turret Angular Velocity (Deg/sec)", Robot.turret.rotation.getDegreesPerSecond());
             telemetry.addData("Turret Rotation Offset", turretOffsetStep);
+            telemetry.addData("Turret Target [X, Y]", "[" + Robot.turret.calcGoalPose().getX() + ", " + Robot.turret.calcGoalPose().getY() + "]");
+            telemetry.addLine();
+
+            // Turret Hood Telemetry
             telemetry.addData("Turret Hood Angle", Robot.turret.getHood());
             telemetry.addData("Turret Hood Offset", hoodOffset);
-            telemetry.addData("Turret Target [X, Y]", "[" + Robot.turret.calcGoalPose().getX() + ", " + Robot.turret.calcGoalPose().getY() + "]");
-            telemetry.addData("Hall Effect Triggered", Robot.turret.hall.getTriggered());
 
-            telemetry.addLine();
-            panelsTelemetry.addData("Flywheel Target Speed", Robot.turret.flywheel.target);
-            panelsTelemetry.addData("Flywheel Actual Speed", Robot.turret.getFlywheelRPM());
-            panelsTelemetry.addData("Flywheel Power", Robot.turret.flywheel.getPower());
+            // Flywheel Telemetry
             telemetry.addData("Flywheel Target Speed", Robot.turret.flywheel.target);
             telemetry.addData("Flywheel Actual Speed", Robot.turret.getFlywheelRPM());
-            telemetry.addData("Flywheel State", Robot.turret.getFlywheelRPM());
 
             // System-related Telemetry
             telemetry.addLine();
-            telemetry.addData("Loop Time", looptime);
+            telemetry.addData("Loop Time (ms)", looptime.time(TimeUnit.MILLISECONDS));
             telemetry.addData("Status", "Run Time: " + runtime);
             telemetry.addData("Version: ", "2/13/25");
             telemetry.update();
             panelsTelemetry.update();
-
-            // Important Step 4: If you are using MANUAL mode, you must clear the BulkCache once per control cycle
-            for (LynxModule module : allHubs) {
-                module.clearBulkCache();
-            }
         }
 
         selectedAlliance = null;
@@ -425,26 +407,20 @@ public class Teleop_Main_ extends LinearOpMode {
         if (shootingState == 0) {
             if (Math.abs(gamepad2.left_stick_y) >= dylanStickDeadzones &&
                     Math.abs(gamepad2.right_stick_y) >= dylanStickDeadzones) {
-                Robot.intake.setMode(intakeMode.INTAKING);
+                Robot.intake.setMode(intakeMode.INTAKE_ALL);
             }else if (Math.abs(gamepad2.left_stick_y) >= dylanStickDeadzones &&
                     Math.abs(gamepad2.right_stick_y) < dylanStickDeadzones) {
-                Robot.intake.setMode(intakeMode.NO_BELT);
+                Robot.intake.setMode(intakeMode.INTAKE_NOBELT);
             }else if (Math.abs(gamepad2.left_stick_y) < dylanStickDeadzones &&
                     Math.abs(gamepad2.right_stick_y) >= dylanStickDeadzones) {
-                Robot.intake.setMode(intakeMode.SHOOTING);
+                Robot.intake.setMode(intakeMode.INTAKE_NOINTAKE);
+            }else if (gamepad2.left_bumper){
+                Robot.intake.setMode(intakeMode.REVERSE_NOBELT);
             }else if (gamepad2.back){
-                Robot.intake.setMode(intakeMode.REVERSING);
+                Robot.intake.setMode(intakeMode.REVERSE_ALL);
             }else{ // OFF
                 Robot.intake.setMode(intakeMode.OFF);
             }
-
-            /* TODO Uncomment once autobelt control is finished
-            if (Math.abs(gamepad2.left_stick_y) >= dylanStickDeadzones) {
-                Robot.intake.setMode(intakeMode.INTAKING);
-            }else{ // OFF
-                Robot.intake.setMode(intakeMode.OFF);
-            }
-             */
 
             //Flywheel Toggle Control (Y Button)
             if (gamepad2.yWasPressed()) {
@@ -455,7 +431,23 @@ public class Teleop_Main_ extends LinearOpMode {
                 }
             }
         }
-        Robot.turret.updateFlywheel();
+
+        if (gamepad2.left_trigger > 0.8 && !leftTrigOldState && manualFlywheelState >= 1){
+            leftTrigOldState = true;
+            manualFlywheelState--;
+        }else if (gamepad2.left_trigger < 0.2 && leftTrigOldState){
+            leftTrigOldState = false;
+        }
+        if (gamepad2.right_trigger > 0.8 && !leftTrigOldState){
+            leftTrigOldState = true;
+            manualFlywheelState++;
+        }else if (gamepad2.right_trigger < 0.2 && leftTrigOldState){
+            leftTrigOldState = false;
+        }
+        if (gamepad2.aWasPressed()){
+            manualFlywheelState = 0;
+        }
+        Robot.turret.updateFlywheel(manualFlywheelState);
 
         // Hood Controls
         if (gamepad2.dpadUpWasPressed()){
@@ -499,20 +491,20 @@ public class Teleop_Main_ extends LinearOpMode {
                     stateTimerHalfSec.restart();
                     stateTimerHalfSec.start();
                 }
-                Robot.intake.setMode(intakeMode.INTAKING);
-                telemetry.addData("Shooting State", "SHOOTING FIRST TWO");
+                Robot.intake.setMode(intakeMode.INTAKE_ALL);
+                telemetry.addData("Shooting State", "INTAKE_NOINTAKE FIRST TWO");
                 if (stateTimerHalfSec.isDone() && Robot.intake.getTopSensorState() && !Robot.intake.getBottomSensorState()){
                     shootingState = 3;
                 }
                 return;
             case 3:
-                if (Robot.intake.getMode() == intakeMode.INTAKING){
+                if (Robot.intake.getMode() == intakeMode.INTAKE_ALL){
                     stateTimerHalfSec.restart();
                     stateTimerHalfSec.start();
                 }
-                Robot.intake.setMode(Intake.intakeMode.SHOOTING);
+                Robot.intake.setMode(Intake.intakeMode.INTAKE_NOINTAKE);
                 Robot.intake.setTransfer(transferState.UP);
-                telemetry.addData("Shooting State", "SHOOTING FINAL");
+                telemetry.addData("Shooting State", "INTAKE_NOINTAKE FINAL");
                 if (stateTimerHalfSec.isDone()) {
                     shootingState = 4;
                 }
