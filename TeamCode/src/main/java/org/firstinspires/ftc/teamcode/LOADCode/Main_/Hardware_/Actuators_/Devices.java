@@ -5,6 +5,7 @@ import androidx.annotation.NonNull;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -30,32 +31,27 @@ public class Devices {
         // CR for Continuous Rotation
         protected CRServo servo;
         protected DcMotorSimple.Direction servoDirection;
-
         public void init(@NonNull OpMode opmode, String servoName) {
             servo = opmode.hardwareMap.get(CRServo.class, servoName);
         }
-
         /**
          * @return The power the servo was last set to.
          */
         public double getPower() {
             return servo.getPower();
         }
-
         /**
          * @param power The power to set the servo to. Must be a value between -1 and 1.
          */
         public void setPower(double power) {
             servo.setPower(power);
         }
-
         /**
          * @return servoDirection : The direction the servo is currently set to.
          */
         public DcMotorSimple.Direction getDirection(){
             return servoDirection;
         }
-
         /**
          * @param direction The direction to set the servo to.
          */
@@ -63,12 +59,41 @@ public class Devices {
             servo.setDirection(direction);
             servoDirection = direction;
         }
+
+
     }
     public static class AxonClass extends CRServoClass {
-        @Override // Does the same thing for now but can be edited with more for the future.
+
+        private AnalogInput encoderObject;
+
+        // THE UNITS FOR THE FOLLOWING VARIABLES ARE IN VOLTS ON A SCALE OF 0-3.3
+        private double rawAngleV;
+        private double deltaAngleV;
+        private double totalAngleV;
+        private double targetAngleV;
+
+
         public void init(@NonNull OpMode opmode, String servoName) {
             servo = opmode.hardwareMap.get(CRServo.class, servoName);
+            encoderObject = opmode.hardwareMap.get(AnalogInput.class, servoName + "-encoder");
+
         }
+
+        public void update() {
+            deltaAngleV = encoderObject.getVoltage() - rawAngleV;
+            rawAngleV = encoderObject.getVoltage();
+
+            if (deltaAngleV > 3.3 / 2) deltaAngleV -= 3.3;
+            else if (deltaAngleV < -3.3 / 2) deltaAngleV += 3.3;
+
+            totalAngleV += deltaAngleV;
+        }
+
+        public double degreesToVolts(double angle){return angle * (3.3/360);}
+        public double voltsToDegrees(double angle){return angle * (360/3.3);}
+        public double getTotalRotations(double angle){return totalAngleV/3.3;}
+
+
     }
     public static class DcMotorExClass {
 

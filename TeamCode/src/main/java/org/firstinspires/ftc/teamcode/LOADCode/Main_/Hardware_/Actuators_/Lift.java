@@ -55,10 +55,12 @@ public class Lift {
     <br><br>
     Sets the power for Lift1 & Lift2.
      */
-    private void setLiftPower(double power){
+    public void setLiftPower(double power){
         Lift1.setPower(power);
         Lift2.setPower(power);
     }
+
+
 
     /**
      @param target Int value for target rotations.
