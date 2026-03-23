@@ -80,6 +80,11 @@ public class Auto_Main_ extends NextFTCOpMode {
             paths.buildPaths(follower());
             // Initialize all hardware of the robot
             Robot.init(selectedAuto.getStartPose(), follower());
+            if (!Turret.zeroed){
+                while (!isStopRequested() && Robot.turret.zeroTurret()){
+                    Robot.sleep(0);
+                }
+            }
             telemetry.addData("Selection", "Complete");
             telemetry.addData("Alliance", selectedAlliance.toString());
             telemetry.addData("Auto", selectedAuto);

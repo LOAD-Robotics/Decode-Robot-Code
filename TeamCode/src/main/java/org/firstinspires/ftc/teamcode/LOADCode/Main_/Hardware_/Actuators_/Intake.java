@@ -18,13 +18,9 @@ public class Intake {
     public final Devices.DualProximitySensorClass bottomSensor = new Devices.DualProximitySensorClass();
 
     public enum intakeMode {
-        AUTO_INTAKING,
-        INTAKE_ALL,
-        INTAKE_NOINTAKE,
-        INTAKE_NOBELT,
-        REVERSE_ALL,
-        REVERSE_NOBELT,
-        OFF
+        OFF,
+        REVERSE,
+        INTAKE
     }
 
     public enum transferState {
@@ -65,30 +61,28 @@ public class Intake {
      *     <li><code>intakeMode.OFF</code></li>
      * </ul>
      */
-    public void setMode(intakeMode direction) {
-        if (direction == intakeMode.AUTO_INTAKING) {
-            if (!(getTopSensorState() && getBottomSensorState())) {
+    public void setMode(intakeMode intakeDirection, intakeMode transferDirection) {
+        switch (intakeDirection){
+            case OFF:
+                intake.setPower(0);
+                break;
+            case INTAKE:
+                intake.setPower(1);
+                break;
+            case REVERSE:
+                intake.setPower(-1);
+                break;
+        }
+        switch (transferDirection){
+            case OFF:
+                belt.setPower(0);
+                break;
+            case INTAKE:
                 belt.setPower(1);
-            }
-            intake.setPower(1);
-        }else if (direction == intakeMode.INTAKE_ALL){
-            intake.setPower(1);
-            belt.setPower(1);
-        }else if (direction == intakeMode.INTAKE_NOINTAKE){
-            intake.setPower(0);
-            belt.setPower(1);
-        }else if (direction == intakeMode.REVERSE_ALL){
-            intake.setPower(-1);
-            belt.setPower(-1);
-        }else if (direction == intakeMode.INTAKE_NOBELT){
-            intake.setPower(1);
-            belt.setPower(0);
-        }else if (direction == intakeMode.REVERSE_NOBELT){
-            intake.setPower(-1);
-            belt.setPower(0);
-        }else{
-            intake.setPower(0);
-            belt.setPower(0);
+                break;
+            case REVERSE:
+                belt.setPower(-1);
+                break;
         }
     }
 
@@ -105,24 +99,17 @@ public class Intake {
      *     <li><code>intakeMode.OFF</code></li>
      * </ul>
      */
-    public intakeMode getMode(){
+    public intakeMode getIntakeMode(){
         double intakePower = intake.getPower();
-        double beltPower = belt.getPower();
-        if (intakePower == 1 && beltPower == 1){
-            return intakeMode.INTAKE_ALL;
-        }else if (intakePower == 0 && beltPower == 1){
-            return intakeMode.INTAKE_NOINTAKE;
-        }else if (intakePower == 1 && beltPower == 0) {
-            return intakeMode.INTAKE_NOBELT;
-        }else if (intakePower == -1 && beltPower == -1){
-            return intakeMode.REVERSE_ALL;
-        }else if (intakePower == -1 && beltPower == 0){
-            return intakeMode.REVERSE_NOBELT;
-        }else if (intakePower == -1 && beltPower == 0){
-            return intakeMode.REVERSE_NOBELT;
-        }else{
-            return intakeMode.OFF;
+        switch ((int) intakePower){
+            case 0:
+                return intakeMode.OFF;
+            case 1:
+                return intakeMode.INTAKE;
+            case -1:
+                return intakeMode.REVERSE;
         }
+        return intakeMode.OFF;
     }
 
     public void setTransfer(transferState state) {

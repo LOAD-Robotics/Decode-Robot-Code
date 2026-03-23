@@ -4,7 +4,7 @@ import static org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.LoadHardwa
 
 import com.bylazar.configurables.annotations.Configurable;
 import com.pedropathing.geometry.Pose;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -91,7 +91,7 @@ public class Turret {
     public double cameraTurretError = 0;
 
     // Stores important objects for later access
-    LinearOpMode opMode = null;
+    OpMode opMode = null;
     LoadHardwareClass Robot = null;
     PolygonZone robotZone = new PolygonZone(15, 15);
 
@@ -99,7 +99,7 @@ public class Turret {
     public Utils_.InterpLUT hoodLUTnear = new Utils_.InterpLUT();
     public Utils_.InterpLUT hoodLUTfar = new Utils_.InterpLUT();
 
-    public void init(LinearOpMode opmode, LoadHardwareClass robot){
+    public void init(OpMode opmode, LoadHardwareClass robot){
         // Store important objects in their respective variables
         opMode = opmode;
         Robot = robot;
@@ -107,8 +107,6 @@ public class Turret {
         if (!limelight.initialized){
             limelight.init(opmode);
         }
-
-        zeroTurret(opmode);
 
         // Initialize hardware objects
         rotation.init(opmode, "turret", 751.8 * ((double) 131 / 36));
@@ -407,14 +405,7 @@ public class Turret {
         return targetRPM;
     }
 
-    public void zeroTurret(LinearOpMode opMode){
-        if (!Turret.zeroed){
-            while (!opMode.isStopRequested() && zeroTurret()){
-                Robot.sleep(0);
-            }
-        }
-    }
-    private boolean zeroTurret(){
+    public boolean zeroTurret(){
         if (!zeroed){
             rotation.setPower(1);
             if (hall.getTriggered()){

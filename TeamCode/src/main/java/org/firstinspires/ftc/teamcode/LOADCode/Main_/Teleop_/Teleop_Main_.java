@@ -166,6 +166,13 @@ public class Teleop_Main_ extends LinearOpMode {
         }else{
             Robot.init(startPose);
         }
+
+        if (!Turret.zeroed){
+            while (!isStopRequested() && Robot.turret.zeroTurret()){
+                Robot.sleep(0);
+            }
+        }
+
         runtime.reset();
         Paths.buildPaths(Robot.drivetrain.follower);
         Robot.drivetrain.startTeleOpDrive();
