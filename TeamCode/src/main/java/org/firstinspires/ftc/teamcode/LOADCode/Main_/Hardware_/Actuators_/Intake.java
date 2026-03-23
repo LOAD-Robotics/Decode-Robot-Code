@@ -20,7 +20,7 @@ public class Intake {
     public enum intakeMode {
         OFF,
         REVERSE,
-        INTAKE
+        ON
     }
 
     public enum transferState {
@@ -52,21 +52,16 @@ public class Intake {
     }
 
     /**
-     * @param direction
-     * Takes the following inputs
-     * <ul>
-     *     <li><code>intakeMode.INTAKE_ALL</code></li>
-     *     <li><code>intakeMode.INTAKE_NOINTAKE</code></li>
-     *     <li><code>intakeMode.REVERSE_ALL</code></li>
-     *     <li><code>intakeMode.OFF</code></li>
-     * </ul>
+     * Sets the current mode of the intake
+     * @param intakeDirection the current mode of the Intake
+     * @param transferDirection the current mode of the Transfer
      */
     public void setMode(intakeMode intakeDirection, intakeMode transferDirection) {
         switch (intakeDirection){
             case OFF:
                 intake.setPower(0);
                 break;
-            case INTAKE:
+            case ON:
                 intake.setPower(1);
                 break;
             case REVERSE:
@@ -77,7 +72,7 @@ public class Intake {
             case OFF:
                 belt.setPower(0);
                 break;
-            case INTAKE:
+            case ON:
                 belt.setPower(1);
                 break;
             case REVERSE:
@@ -105,7 +100,7 @@ public class Intake {
             case 0:
                 return intakeMode.OFF;
             case 1:
-                return intakeMode.INTAKE;
+                return intakeMode.ON;
             case -1:
                 return intakeMode.REVERSE;
         }

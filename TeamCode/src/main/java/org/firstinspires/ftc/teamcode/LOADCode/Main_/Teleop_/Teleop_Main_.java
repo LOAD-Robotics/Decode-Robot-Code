@@ -29,6 +29,9 @@
 
 package org.firstinspires.ftc.teamcode.LOADCode.Main_.Teleop_;
 
+import static org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Intake.intakeMode.OFF;
+import static org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Intake.intakeMode.ON;
+import static org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Intake.intakeMode.REVERSE;
 import static org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.LoadHardwareClass.selectedAlliance;
 
 import com.bylazar.configurables.annotations.Configurable;
@@ -44,7 +47,6 @@ import com.skeletonarmy.marrow.prompts.OptionPrompt;
 import com.skeletonarmy.marrow.prompts.Prompter;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Intake;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Intake.intakeMode;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Intake.transferState;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Turret;
@@ -401,22 +403,21 @@ public class Teleop_Main_ extends LinearOpMode {
 
         //Intake Controls (Left Stick Y)
         if (shootingState == 0) {
-            if (Math.abs(gamepad2.left_stick_y) >= dylanStickDeadzones &&
-                    Math.abs(gamepad2.right_stick_y) >= dylanStickDeadzones) {
-                Robot.intake.setMode(intakeMode.INTAKE_ALL);
-            }else if (Math.abs(gamepad2.left_stick_y) >= dylanStickDeadzones &&
-                    Math.abs(gamepad2.right_stick_y) < dylanStickDeadzones) {
-                Robot.intake.setMode(intakeMode.INTAKE_NOBELT);
-            }else if (Math.abs(gamepad2.left_stick_y) < dylanStickDeadzones &&
-                    Math.abs(gamepad2.right_stick_y) >= dylanStickDeadzones) {
-                Robot.intake.setMode(intakeMode.INTAKE_NOINTAKE);
+            intakeMode intake = OFF;
+            intakeMode belt = OFF;
+            if (Math.abs(gamepad2.left_stick_y) >= dylanStickDeadzones){
+                intake = ON;
             }else if (gamepad2.left_bumper){
-                Robot.intake.setMode(intakeMode.REVERSE_NOBELT);
-            }else if (gamepad2.back){
-                Robot.intake.setMode(intakeMode.REVERSE_ALL);
-            }else{ // OFF
-                Robot.intake.setMode(intakeMode.OFF);
+                intake = REVERSE;
             }
+            if (Math.abs(gamepad2.right_stick_y) >= dylanStickDeadzones){
+                belt = ON;
+            }
+            if (gamepad2.back){
+                intake = REVERSE;
+                belt = REVERSE;
+            }
+            Robot.intake.setMode(intake, belt);
 
             //Flywheel Toggle Control (Y Button)
             if (gamepad2.yWasPressed()) {
@@ -480,25 +481,21 @@ public class Teleop_Main_ extends LinearOpMode {
                 telemetry.addData("Shooting State", "GATE OPENING");
                 if (stateTimerFifthSec.isDone()){
                     shootingState = 2;
+                    stateTimerHalfSec.restart();
+                    stateTimerHalfSec.start();
                 }
                 return;
             case 2:
-                if (Robot.intake.getMode() == intakeMode.OFF){
-                    stateTimerHalfSec.restart();
-                    stateTimerHalfSec.start();
-                }
-                Robot.intake.setMode(intakeMode.INTAKE_ALL);
+                Robot.intake.setMode(ON, ON);
                 telemetry.addData("Shooting State", "INTAKE_NOINTAKE FIRST TWO");
                 if (stateTimerHalfSec.isDone() && Robot.intake.getTopSensorState() && !Robot.intake.getBottomSensorState()){
                     shootingState = 3;
-                }
-                return;
-            case 3:
-                if (Robot.intake.getMode() == intakeMode.INTAKE_ALL){
                     stateTimerHalfSec.restart();
                     stateTimerHalfSec.start();
                 }
-                Robot.intake.setMode(Intake.intakeMode.INTAKE_NOINTAKE);
+                return;
+            case 3:
+                Robot.intake.setMode(OFF, ON);
                 Robot.intake.setTransfer(transferState.UP);
                 telemetry.addData("Shooting State", "INTAKE_NOINTAKE FINAL");
                 if (stateTimerHalfSec.isDone()) {
@@ -507,7 +504,7 @@ public class Teleop_Main_ extends LinearOpMode {
                 return;
             case 4:
                 Robot.turret.setGateState(gatestate.CLOSED);
-                Robot.intake.setMode(intakeMode.OFF);
+                Robot.intake.setMode(OFF, OFF);
                 Robot.intake.setTransfer(transferState.DOWN);
                 telemetry.addData("Shooting State", "RESET");
                 shootingState = 0;
