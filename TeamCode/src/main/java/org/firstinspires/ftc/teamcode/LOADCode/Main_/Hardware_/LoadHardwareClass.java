@@ -115,6 +115,7 @@ public class LoadHardwareClass {
         intake.init(myOpMode);
         lights.init(myOpMode, 36);
 
+
         // Misc telemetry
         myOpMode.telemetry.addData(">", "Hardware Initialized");
         myOpMode.telemetry.update();
