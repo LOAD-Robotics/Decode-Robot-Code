@@ -244,7 +244,6 @@ public class Teleop_Main_ extends LinearOpMode {
             telemetry.addData("Status", "Run Time: " + runtime);
             telemetry.addData("Version: ", "2/13/25");
             telemetry.update();
-            panelsTelemetry.update();
         }
 
         selectedAlliance = null;

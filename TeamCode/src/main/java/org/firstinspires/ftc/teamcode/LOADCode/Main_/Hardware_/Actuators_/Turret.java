@@ -10,6 +10,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.skeletonarmy.marrow.zones.PolygonZone;
 
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.LoadHardwareClass;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Utils_;
 
@@ -83,6 +84,7 @@ public class Turret {
      * Stores the zeroing state of the turret
      */
     public static boolean zeroed = false;
+    private int zeroingState = 0;
     /**
      * Controls which aiming system to use.
      */
@@ -407,11 +409,35 @@ public class Turret {
 
     public boolean zeroTurret(){
         if (!zeroed){
-            rotation.setPower(1);
-            if (hall.getTriggered()){
-                rotation.setPower(0);
-                rotation.resetEncoder();
-                zeroed = true;
+            switch (zeroingState){
+                case 0:
+                    rotation.setPower(1);
+                    if (hall.getTriggered()){
+                        rotation.setPower(0);
+                        rotation.resetEncoder();
+                        zeroed = true;
+                    }
+                    if (rotation.getCurrent(CurrentUnit.AMPS) > 4){
+                        zeroingState = 1;
+                    }
+                    break;
+                case 1:
+                    rotation.setPower(-1);
+                    if (hall.getTriggered()){
+                        zeroingState = 2;
+                    }
+                    if (rotation.getCurrent(CurrentUnit.AMPS) > 4){
+                        zeroingState = 3;
+                    }
+                    break;
+                case 2:
+                    rotation.setPower(-1);
+                    if (!hall.getTriggered()){
+                        zeroingState = 0;
+                    }
+                    break;
+                case 3:
+                    rotation.setPower(0);
             }
         }
         return !zeroed;

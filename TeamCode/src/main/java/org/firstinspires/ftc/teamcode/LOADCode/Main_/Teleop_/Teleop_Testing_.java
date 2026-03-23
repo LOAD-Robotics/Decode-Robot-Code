@@ -40,6 +40,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Devices;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Turret;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Drivetrain_.Pedro_Paths;
@@ -83,6 +84,8 @@ public class Teleop_Testing_ extends LinearOpMode {
         if (!Turret.zeroed){
             while (!isStopRequested() && Robot.turret.zeroTurret()){
                 Robot.sleep(0);
+                telemetry.addData("Turret Current", Robot.turret.rotation.getCurrent(CurrentUnit.AMPS));
+                telemetry.update();
             }
         }
 
@@ -94,6 +97,7 @@ public class Teleop_Testing_ extends LinearOpMode {
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
+
             if (oldCameraCoefficients != cameraCoefficients){
                 oldCameraCoefficients = cameraCoefficients;
                 pid = ControlSystem.builder().posPid(cameraCoefficients).build();
@@ -130,6 +134,7 @@ public class Teleop_Testing_ extends LinearOpMode {
                 Robot.turret.updateAimbot(true, false, 0);
             }
 
+            telemetry.addLine();
             telemetry.addData("Result Valid", limelight.result.isValid());
             telemetry.addData("Turret Error", limelight.result.getTx());
 
