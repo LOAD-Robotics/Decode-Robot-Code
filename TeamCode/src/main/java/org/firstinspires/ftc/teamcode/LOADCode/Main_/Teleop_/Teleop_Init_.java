@@ -101,9 +101,9 @@ public class Teleop_Init_ extends LinearOpMode {
             Robot.turret.updateFlywheel(0);
 
             if (Math.abs(gamepad2.left_stick_y) < 0.1){
-                Robot.intake.setMode(Intake.intakeMode.INTAKE_ALL);
+                Robot.intake.setMode(Intake.intakeMode.ON, Intake.intakeMode.ON);
             }else{
-                Robot.intake.setMode(Intake.intakeMode.OFF);
+                Robot.intake.setMode(Intake.intakeMode.OFF, Intake.intakeMode.OFF);
             }
             if (gamepad2.dpadUpWasPressed()) hoodOffset += 10;
             if (gamepad2.dpadDownWasPressed()) hoodOffset -= 10;

@@ -1,5 +1,8 @@
 package org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_;
 
+import static org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Intake.intakeMode.OFF;
+import static org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Intake.intakeMode.ON;
+
 import androidx.annotation.NonNull;
 
 import com.pedropathing.geometry.BezierLine;
@@ -84,9 +87,9 @@ public class Commands {
         );
     }
 
-    public Command setIntakeMode(Intake.intakeMode state) {
+    public Command setIntakeMode(Intake.intakeMode intake, Intake.intakeMode belt) {
         return new InstantCommand(new LambdaCommand("setIntakeMode()")
-                .setStart(() -> Robot.intake.setMode(state))
+                .setStart(() -> Robot.intake.setMode(intake, belt))
         );
     }
 
@@ -141,21 +144,21 @@ public class Commands {
                                 waitForTurret(2, 4),
                                 setGateState(Turret.gatestate.OPEN),
                                 new Delay(0.3),
-                                setIntakeMode(Intake.intakeMode.INTAKE_ALL),
+                                setIntakeMode(ON, ON),
                                 new ParallelGroup(
                                         new Delay(0.7),
                                         new WaitUntil(() -> (Robot.intake.getTopSensorState() && !Robot.intake.getBottomSensorState()))
                                 ),
 
                                 // Shoot the last ball
-                                setIntakeMode(Intake.intakeMode.INTAKE_NOINTAKE),
+                                setIntakeMode(OFF, ON),
                                 setTransferState(Intake.transferState.UP),
                                 new Delay(0.5)
                         ),
                         new Delay(3)
                 ),
                 new ParallelGroup(
-                        setIntakeMode(Intake.intakeMode.OFF),
+                        setIntakeMode(OFF, OFF),
                         setGateState(Turret.gatestate.CLOSED),
                         setTransferState(Intake.transferState.DOWN)
                 )
