@@ -36,8 +36,8 @@ Axon rotation scale 0-3.3
 
 
 public class Lift {
-    private final Devices.CRServoClass Lift1 = new Devices.CRServoClass();
-    private final Devices.CRServoClass Lift2 = new Devices.CRServoClass();
+    private final Devices.AxonClass Lift1 = new Devices.AxonClass();
+    private final Devices.AxonClass Lift2 = new Devices.AxonClass();
 
     private int rotationCount;
     private int targetRotationCount;
@@ -83,5 +83,14 @@ public class Lift {
     // Finish after making AXON class
     public boolean checkWraparound(){
         return false;
+    }
+
+    public double getLift1Rotations(){
+        return Lift1.getTotalRotations();
+    }
+
+    public void update(){
+        Lift1.update();
+        Lift2.update();
     }
 }

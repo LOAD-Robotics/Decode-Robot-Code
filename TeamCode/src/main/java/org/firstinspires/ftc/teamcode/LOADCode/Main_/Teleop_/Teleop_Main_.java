@@ -215,12 +215,16 @@ public class Teleop_Main_ extends LinearOpMode {
             telemetry.addData("Flywheel Percentage", flywheelPercentage+"%");
             telemetry.addData("ALLIANCE", selectedAlliance);
 
+
             // Drivetrain Telemetry
             telemetry.addData("SpeedMult", Robot.drivetrain.speedMultiplier);
             telemetry.addData("Robot Position [X, Y, H]", "[" + Robot.drivetrain.follower.getPose().getX() + ", " + Robot.drivetrain.follower.getPose().getY() + ", " + Robot.drivetrain.follower.getPose().getHeading() + "]");
             telemetry.addData("Distance From Goal", Robot.drivetrain.distanceFromGoal());
             telemetry.addData("Angular Velocity (Deg/sec)", Math.toDegrees(Robot.drivetrain.follower.getAngularVelocity()));
             telemetry.addLine();
+
+            //Lift Telemetry
+            telemetry.addData("Lift Roation Count", Robot.lift.getLift1Rotations());
 
             // Turret Rotation Telemetry
             telemetry.addData("Turret Target Angle", Robot.turret.rotation.target);
@@ -337,12 +341,19 @@ public class Teleop_Main_ extends LinearOpMode {
                 gamepad1.right_stick_x / turnMult,
                 true
         );
+        Robot.lift.update();
 
-        if (gamepad1.dpadDownWasPressed()){
+        if (gamepad1.xWasPressed()){
             hoodOn = !hoodOn;
         }
         if (gamepad1.yWasPressed()){
             turretOn = !turretOn;
+        }
+        if (gamepad1.dpad_up){
+            Robot.lift.setLiftPower(1);
+        }
+        if (gamepad1.dpad_down){
+            Robot.lift.setLiftPower(-1);
         }
 
         if (gamepad1.dpadLeftWasPressed()){

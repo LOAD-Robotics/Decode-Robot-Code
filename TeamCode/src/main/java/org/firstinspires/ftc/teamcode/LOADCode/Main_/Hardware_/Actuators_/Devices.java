@@ -91,7 +91,7 @@ public class Devices {
 
         public double degreesToVolts(double angle){return angle * (3.3/360);}
         public double voltsToDegrees(double angle){return angle * (360/3.3);}
-        public double getTotalRotations(double angle){return totalAngleV/3.3;}
+        public double getTotalRotations(){return totalAngleV/3.3;}
 
 
     }
