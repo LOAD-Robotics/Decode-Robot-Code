@@ -76,7 +76,6 @@ public class Devices {
         public void init(@NonNull OpMode opmode, String servoName) {
             servo = opmode.hardwareMap.get(CRServo.class, servoName);
             encoderObject = opmode.hardwareMap.get(AnalogInput.class, servoName + "-encoder");
-
         }
 
         public void update() {

@@ -8,11 +8,14 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.skeletonarmy.marrow.TimerEx;
 import com.skeletonarmy.marrow.zones.PolygonZone;
 
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.LoadHardwareClass;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Utils_;
+
+import java.util.concurrent.TimeUnit;
 
 import dev.nextftc.control.ControlSystem;
 import dev.nextftc.control.KineticState;
@@ -85,6 +88,7 @@ public class Turret {
      */
     public static boolean zeroed = false;
     private int zeroingState = 0;
+    private TimerEx zeroingTimer = new TimerEx(0.25, TimeUnit.SECONDS);
     /**
      * Controls which aiming system to use.
      */
@@ -419,6 +423,7 @@ public class Turret {
                     }
                     if (rotation.getCurrent(CurrentUnit.AMPS) > 4){
                         zeroingState = 1;
+                        zeroingTimer.restart();
                     }
                     break;
                 case 1:
@@ -426,7 +431,7 @@ public class Turret {
                     if (hall.getTriggered()){
                         zeroingState = 2;
                     }
-                    if (rotation.getCurrent(CurrentUnit.AMPS) > 4){
+                    if (rotation.getCurrent(CurrentUnit.AMPS) > 4 && zeroingTimer.isDone()){
                         zeroingState = 3;
                     }
                     break;
@@ -438,6 +443,7 @@ public class Turret {
                     break;
                 case 3:
                     rotation.setPower(0);
+                    zeroed = true;
             }
         }
         return !zeroed;

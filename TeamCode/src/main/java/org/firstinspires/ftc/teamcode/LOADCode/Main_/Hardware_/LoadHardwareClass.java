@@ -38,8 +38,8 @@ import com.skeletonarmy.marrow.zones.PolygonZone;
 
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Devices;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Intake;
-import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Turret;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Lift;
+import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Turret;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Drivetrain_.MecanumDrivetrainClass;
 
 /*
@@ -111,14 +111,7 @@ public class LoadHardwareClass {
     public void init(Pose initialPose)    {
         // Initialize all subclasses
         drivetrain.init(myOpMode, initialPose);
-        turret.init(myOpMode, this);
-        intake.init(myOpMode);
-        lights.init(myOpMode, 36);
-
-
-        // Misc telemetry
-        myOpMode.telemetry.addData(">", "Hardware Initialized");
-        myOpMode.telemetry.update();
+        init();
     }
     /**
      * Initializes all hardware for the robot.
@@ -127,12 +120,18 @@ public class LoadHardwareClass {
     public void init(Pose initialPose, Follower follower)    {
         // Initialize all subclasses
         drivetrain.init(myOpMode, initialPose, follower);
+        init();
+    }
+
+    private void init(){
         turret.init(myOpMode, this);
         intake.init(myOpMode);
+        lift.init(myOpMode);
         lights.init(myOpMode, 36);
 
         // Misc telemetry
         myOpMode.telemetry.addData(">", "Hardware Initialized");
         myOpMode.telemetry.update();
     }
+
 }
