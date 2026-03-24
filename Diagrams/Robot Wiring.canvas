@@ -85,17 +85,6 @@
 			"color":"1"
 		},
 		{
-			"id":"b7514b6ae54e27cf",
-			"type":"text",
-			"text":"Digital Devices",
-			"styleAttributes":{"textAlign":"center"},
-			"x":-780,
-			"y":380,
-			"width":160,
-			"height":60,
-			"color":"1"
-		},
-		{
 			"id":"1c97878ebafa8ef3",
 			"type":"text",
 			"text":"Axon 4th Wire Combiner\nOrange Plug -> Analog Port 0\nConfiguration Name: lift1-encoder\nBlue Plug -> Analog Port 1\nConfiguration Name: lift2-encoder",
@@ -105,6 +94,28 @@
 			"width":320,
 			"height":160,
 			"color":"1"
+		},
+		{
+			"id":"bfb02b2a92b84ad2",
+			"type":"text",
+			"text":"Belt Servo\nConfiguration Name: \"belt\"\nConfiguration Type: CRServo\nPort 0 on Control Hub\nPort 1 on Servo Power Injector",
+			"styleAttributes":{"textAlign":"center"},
+			"x":-300,
+			"y":-80,
+			"width":280,
+			"height":140,
+			"color":"4"
+		},
+		{
+			"id":"41c5560b3c8edc13",
+			"type":"text",
+			"text":"Hood Servo\nConfiguration Name: \"hood\"\nConfiguration Type: Servo\nPort 1 on Control Hub\nPort 2 on Servo Power Injector",
+			"styleAttributes":{"textAlign":"center"},
+			"x":-300,
+			"y":80,
+			"width":280,
+			"height":139,
+			"color":"4"
 		},
 		{
 			"id":"a0abe0901b65ac56",
@@ -173,17 +184,6 @@
 			"color":"5"
 		},
 		{
-			"id":"76edd4abcf05a2a3",
-			"type":"text",
-			"text":"Back Left Drive Motor\nConfiguration Name: \"BL\"\nConfiguration Type: \"\"\nPort 3 - No Encoder",
-			"styleAttributes":{"textAlign":"center"},
-			"x":80,
-			"y":400,
-			"width":320,
-			"height":140,
-			"color":"5"
-		},
-		{
 			"id":"440a120e5375c485",
 			"type":"text",
 			"text":"Front Left Drive Motor\nConfiguration Name: \"FL\"\nConfiguration Type: \"\"\nPort 2 - No Encoder",
@@ -206,39 +206,6 @@
 			"color":"5"
 		},
 		{
-			"id":"e3fdefe17fe2310d",
-			"type":"text",
-			"text":"Analog Devices",
-			"styleAttributes":{"textAlign":"center"},
-			"x":-600,
-			"y":380,
-			"width":160,
-			"height":60,
-			"color":"3"
-		},
-		{
-			"id":"bfb02b2a92b84ad2",
-			"type":"text",
-			"text":"Belt Servo\nConfiguration Name: \"belt\"\nConfiguration Type: CRServo\nPort 0 on Control Hub\nPort 1 on Servo Power Injector",
-			"styleAttributes":{"textAlign":"center"},
-			"x":-300,
-			"y":-80,
-			"width":280,
-			"height":140,
-			"color":"4"
-		},
-		{
-			"id":"41c5560b3c8edc13",
-			"type":"text",
-			"text":"Hood Servo\nConfiguration Name: \"hood\"\nConfiguration Type: Servo\nPort 1 on Control Hub\nPort 2 on Servo Power Injector",
-			"styleAttributes":{"textAlign":"center"},
-			"x":-300,
-			"y":80,
-			"width":280,
-			"height":139,
-			"color":"4"
-		},
-		{
 			"id":"b2918b70ae0b4303",
 			"type":"text",
 			"text":"Gate Servo\nConfiguration Name: \"gate\"\nConfiguration Type: Servo\nPort 2 on Control Hub\nPort 3 on Servo Power Injector",
@@ -259,6 +226,28 @@
 			"width":280,
 			"height":139,
 			"color":"4"
+		},
+		{
+			"id":"b7514b6ae54e27cf",
+			"type":"text",
+			"text":"Digital/Analog Devices",
+			"styleAttributes":{"textAlign":"center"},
+			"x":-780,
+			"y":380,
+			"width":340,
+			"height":60,
+			"color":"1"
+		},
+		{
+			"id":"76edd4abcf05a2a3",
+			"type":"text",
+			"text":"Back Left Drive Motor\nConfiguration Name: \"BL\"\nConfiguration Type: \"\"\nPort 3 - No Encoder",
+			"styleAttributes":{"textAlign":"center"},
+			"x":80,
+			"y":400,
+			"width":320,
+			"height":140,
+			"color":"5"
 		},
 		{
 			"id":"c6d790ec667c829f",

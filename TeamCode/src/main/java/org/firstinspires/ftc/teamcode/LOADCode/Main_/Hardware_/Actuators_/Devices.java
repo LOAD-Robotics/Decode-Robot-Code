@@ -74,8 +74,9 @@ public class Devices {
 
 
         public void init(@NonNull OpMode opmode, String servoName) {
-            servo = opmode.hardwareMap.get(CRServo.class, servoName);
+            super.init(opmode, servoName);
             encoderObject = opmode.hardwareMap.get(AnalogInput.class, servoName + "-encoder");
+            rawAngleV = encoderObject.getVoltage();
         }
 
         public void update() {
@@ -118,6 +119,8 @@ public class Devices {
         public double target = 0;
         // Offset position of the motor
         public double offset = 0;
+        // Maximum acceptable error of the angle PID
+        public KineticState maxAcceptableError = new KineticState(1, 5);
         // Motor object
         private DcMotorEx motorObject = null;
 
@@ -293,7 +296,11 @@ public class Devices {
             buildPIDs();
             KineticState currentKineticState = new KineticState(getAngleAbsolute(), getDegreesPerSecond());
             posPID.setGoal(new KineticState(target, velocity));
-            setPower(posPID.calculate(currentKineticState));
+            if (!posPID.isWithinTolerance(maxAcceptableError)){
+                setPower(posPID.calculate(currentKineticState));
+            }else{
+                setPower(0);
+            }
         }
 
         /**

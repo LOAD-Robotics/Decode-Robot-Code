@@ -28,7 +28,8 @@ public class Intake {
         DOWN
     }
 
-    public static double proximitySensorThreshold = 20;
+    public static double topProximitySensorThreshold = 50;
+    public static double bottomProximitySensorThreshold = 30;
 
     public void init(OpMode opmode){
         intake.init(opmode, "intake");
@@ -45,10 +46,10 @@ public class Intake {
 
         topSensor.setGain(2);
         topSensor.units = DistanceUnit.MM;
-        topSensor.threshold = proximitySensorThreshold;
+        topSensor.threshold = topProximitySensorThreshold;
         bottomSensor.setGain(2);
         bottomSensor.units = DistanceUnit.MM;
-        bottomSensor.threshold = proximitySensorThreshold;
+        bottomSensor.threshold = bottomProximitySensorThreshold;
     }
 
     /**
@@ -118,11 +119,11 @@ public class Intake {
     }
 
     public boolean getTopSensorState(){
-        topSensor.threshold = proximitySensorThreshold;
+        topSensor.threshold = topProximitySensorThreshold;
         return topSensor.objectDetected();
     }
     public boolean getBottomSensorState(){
-        bottomSensor.threshold = proximitySensorThreshold;
+        bottomSensor.threshold = bottomProximitySensorThreshold;
         return bottomSensor.objectDetected();
     }
 }

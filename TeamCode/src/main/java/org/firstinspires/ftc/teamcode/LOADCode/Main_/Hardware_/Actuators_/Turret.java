@@ -40,7 +40,7 @@ public class Turret {
     public ControlSystem cameraPID = ControlSystem.builder().posPid(cameraCoefficients).build();
 
     // Turret PID coefficients
-    public static PIDCoefficients turretCoefficients = new PIDCoefficients(0.022, 0.0000000002, 0.0015); // 223RPM Motor
+    public static PIDCoefficients turretCoefficients = new PIDCoefficients(0.025, 0.0000000001, 0.003); // 223RPM Motor
 
     // Flywheel PID coefficients for various speeds
     //public static PIDCoefficients flywheelCoefficients = new PIDCoefficients(0.0002, 0, 0); // 4500 RPM
@@ -92,9 +92,7 @@ public class Turret {
     /**
      * Controls which aiming system to use.
      */
-    public boolean useCameraAim = false;
-    public static boolean aprilTagToggle = false;
-    public double cameraTurretError = 0;
+    public boolean cameraAimOn = false;
 
     // Stores important objects for later access
     OpMode opMode = null;
@@ -129,8 +127,10 @@ public class Turret {
 
         // Flywheel Motor Settings
         flywheel2.setDirection(DcMotorSimple.Direction.REVERSE);
+
         flywheel.setRunMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         flywheel2.setRunMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
         flywheel.setZeroPowerBehaviour(DcMotor.ZeroPowerBehavior.FLOAT);
         flywheel2.setZeroPowerBehaviour(DcMotor.ZeroPowerBehavior.FLOAT);
 
@@ -138,6 +138,7 @@ public class Turret {
         rotation.setZeroPowerBehaviour(DcMotor.ZeroPowerBehavior.BRAKE);
         rotation.setDirection(DcMotorSimple.Direction.REVERSE);
         rotation.setOffsetDegrees(turretOffset);
+        rotation.maxAcceptableError = new KineticState(0.5, 2);
 
         // Pass PID pidCoefficients to motor classes
         rotation.setPidCoefficients(turretCoefficients);
@@ -146,6 +147,11 @@ public class Turret {
         flywheel2.setPidCoefficients(actualFlywheelCoefficients);
         flywheel2.setFFCoefficients(actualFlywheelFFCoefficients);
 
+        // hood old ratio: 264/28, 1.00%
+        // hood current ratio: 264/30, 0.93%
+
+        double hoodRatio = 0.97;
+
         // Safety points for LUTs
         hoodLUTnear.add(0, 0);
         hoodLUTfar.add(0, 190);
@@ -153,20 +159,20 @@ public class Turret {
         // --------------------------------------------------------
 
         // Near zone measurements
-        hoodLUTnear.add(60, 0);
-        hoodLUTnear.add(68.5, 140.5);
-        hoodLUTnear.add(71, 182);
-        hoodLUTnear.add(84.5, 175);
-        hoodLUTnear.add(88, 145);
-        hoodLUTnear.add(90, 145);
-        hoodLUTnear.add(97.5, 200);
-        hoodLUTnear.add(102, 187);
-        hoodLUTnear.add(114, 165);
+        hoodLUTnear.add(60 * hoodRatio, 0);
+        hoodLUTnear.add(68.5 * hoodRatio, 140.5);
+        hoodLUTnear.add(71 * hoodRatio, 182);
+        hoodLUTnear.add(84.5 * hoodRatio, 175);
+        hoodLUTnear.add(88 * hoodRatio, 145);
+        hoodLUTnear.add(90 * hoodRatio, 145);
+        hoodLUTnear.add(97.5 * hoodRatio, 200);
+        hoodLUTnear.add(102 * hoodRatio, 187);
+        hoodLUTnear.add(114 * hoodRatio, 165);
 
         // Far zone measurements
-        hoodLUTfar.add(139.5, 190);
-        hoodLUTfar.add(150, 190);
-        hoodLUTfar.add(160, 160);
+        hoodLUTfar.add(139.5 * hoodRatio, 190);
+        hoodLUTfar.add(150 * hoodRatio, 190);
+        hoodLUTfar.add(160 * hoodRatio, 160);
 
         // --------------------------------------------------------
 
@@ -195,6 +201,7 @@ public class Turret {
             cameraPID = ControlSystem.builder().posPid(cameraCoefficients).build();
         }
     }
+    public static boolean cameraON = false;
 
     /**
      * Runs the aimbot program to control the turret rotation and hood angle. </br>
@@ -211,9 +218,7 @@ public class Turret {
         robotZone.setRotation(Robot.drivetrain.follower.getPose().getHeading());
 
         if (turret){
-            rotation.setAngle(Math.min(Math.max(0, rotationalAimbotLocalizer()), 360), -Math.toDegrees(Robot.drivetrain.follower.getAngularVelocity()));
-            //updateRotationalAimbot();
-            // TODO remove the setAngle and uncomment when vision aiming works
+            updateRotationalAimbot();
         }else{
             rotation.setAngle(90);
         }
@@ -242,7 +247,8 @@ public class Turret {
             minPower = 0;
         }
 
-        if (limelight.result != null && limelight.result.isValid()){
+        if (limelight.result != null && limelight.result.isValid() && cameraON){
+            cameraAimOn = true;
             double power = cameraPID.calculate(
                     new KineticState(
                             limelight.result.getTx(),
@@ -251,13 +257,14 @@ public class Turret {
             );
             Robot.turret.rotation.setPower(Math.min(Math.max(power, minPower), maxPower));
         }else{
+            cameraAimOn = false;
             rotation.setAngle(Math.min(Math.max(0, rotationalAimbotLocalizer()), 360), -Math.toDegrees(Robot.drivetrain.follower.getAngularVelocity()));
         }
 
         if (selectedAlliance == LoadHardwareClass.Alliance.RED){
-            limelight.setPipeline(1);
-        }else{
             limelight.setPipeline(0);
+        }else{
+            limelight.setPipeline(1);
         }
     }
 
@@ -421,7 +428,7 @@ public class Turret {
                         rotation.resetEncoder();
                         zeroed = true;
                     }
-                    if (rotation.getCurrent(CurrentUnit.AMPS) > 4){
+                    if (rotation.getCurrent(CurrentUnit.AMPS) > 7){
                         zeroingState = 1;
                         zeroingTimer.restart();
                     }
@@ -431,7 +438,7 @@ public class Turret {
                     if (hall.getTriggered()){
                         zeroingState = 2;
                     }
-                    if (rotation.getCurrent(CurrentUnit.AMPS) > 4 && zeroingTimer.isDone()){
+                    if (rotation.getCurrent(CurrentUnit.AMPS) > 7 && zeroingTimer.isDone()){
                         zeroingState = 3;
                     }
                     break;

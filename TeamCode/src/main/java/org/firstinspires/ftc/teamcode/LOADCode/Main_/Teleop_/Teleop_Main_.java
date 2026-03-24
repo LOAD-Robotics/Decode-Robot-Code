@@ -180,6 +180,7 @@ public class Teleop_Main_ extends LinearOpMode {
         Robot.drivetrain.startTeleOpDrive();
         Robot.intake.setTransfer(transferState.DOWN);
         Robot.lights.setSolidAllianceDisplay(selectedAlliance);
+        telemetry.setMsTransmissionInterval(200);
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
@@ -224,13 +225,18 @@ public class Teleop_Main_ extends LinearOpMode {
             telemetry.addLine();
 
             //Lift Telemetry
+            telemetry.addData("Lift Active", Robot.lift.liftIsActivated);
             telemetry.addData("Lift Percent", Robot.lift.getLiftPercentage());
+            telemetry.addData("Lift1 Rotations", Robot.lift.getLift1Rotations());
+            telemetry.addData("Lift2 Rotations", Robot.lift.getLift2Rotations());
 
             // Turret Rotation Telemetry
+            telemetry.addData("Camera Aim On", Robot.turret.cameraAimOn);
             telemetry.addData("Turret Target Angle", Robot.turret.rotation.target);
             telemetry.addData("Turret Actual Angle", Robot.turret.rotation.getAngleAbsolute());
             telemetry.addData("Turret Angular Velocity (Deg/sec)", Robot.turret.rotation.getDegreesPerSecond());
             telemetry.addData("Turret Rotation Offset", turretOffsetStep);
+            telemetry.addData("Turret Set Power", Robot.turret.rotation.getPower());
             telemetry.addData("Turret Target [X, Y]", "[" + Robot.turret.calcGoalPose().getX() + ", " + Robot.turret.calcGoalPose().getY() + "]");
             telemetry.addLine();
 
@@ -239,8 +245,12 @@ public class Teleop_Main_ extends LinearOpMode {
             telemetry.addData("Turret Hood Offset", hoodOffset);
 
             // Flywheel Telemetry
+            telemetry.addLine();
             telemetry.addData("Flywheel Target Speed", Robot.turret.flywheel.target);
             telemetry.addData("Flywheel Actual Speed", Robot.turret.getFlywheelRPM());
+
+            telemetry.addData("Top Prox Sensor", Robot.intake.getTopSensorState());
+            telemetry.addData("Bottom Prox Sensor", Robot.intake.getBottomSensorState());
 
             // System-related Telemetry
             telemetry.addLine();
@@ -341,22 +351,15 @@ public class Teleop_Main_ extends LinearOpMode {
                 gamepad1.right_stick_x / turnMult,
                 true
         );
-        Robot.lift.update();
 
-        if (gamepad1.xWasPressed()){
-            hoodOn = !hoodOn;
-        }
         if (gamepad1.yWasPressed()){
             turretOn = !turretOn;
         }
-        if (gamepad1.dpad_up){
-            Robot.lift.setLiftPower(1);
-        }
-        if (gamepad1.dpad_down){
-            Robot.lift.setLiftPower(-1);
-        }
-        if (gamepad1.dpad_left){
+
+        Robot.lift.update();
+        if (gamepad1.dpadUpWasPressed()){
             Robot.lift.activate();
+            hoodOn = false;
         }
 
         if (gamepad1.dpadLeftWasPressed()){
@@ -425,9 +428,7 @@ public class Teleop_Main_ extends LinearOpMode {
             }
             if (Math.abs(gamepad2.right_stick_y) >= dylanStickDeadzones){
                 belt = ON;
-            }
-            if (gamepad2.back){
-                intake = REVERSE;
+            }else if (gamepad2.right_bumper){
                 belt = REVERSE;
             }
             Robot.intake.setMode(intake, belt);

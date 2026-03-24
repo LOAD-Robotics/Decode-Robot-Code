@@ -140,10 +140,10 @@ public class Teleop_Testing_ extends LinearOpMode {
 
             if (gamepad1.bWasPressed()){
                 limelight.setPipeline(0);
-                selectedAlliance = LoadHardwareClass.Alliance.BLUE;
+                selectedAlliance = LoadHardwareClass.Alliance.RED;
             }else if (gamepad1.xWasPressed()){
                 limelight.setPipeline(1);
-                selectedAlliance = LoadHardwareClass.Alliance.RED;
+                selectedAlliance = LoadHardwareClass.Alliance.BLUE;
             }
 
             if (limelight.getPipeline() == 0){
