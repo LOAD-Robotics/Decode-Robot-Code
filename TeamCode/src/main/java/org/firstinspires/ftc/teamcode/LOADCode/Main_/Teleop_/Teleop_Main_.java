@@ -224,7 +224,7 @@ public class Teleop_Main_ extends LinearOpMode {
             telemetry.addLine();
 
             //Lift Telemetry
-            telemetry.addData("Lift Roation Count", Robot.lift.getLift1Rotations());
+            telemetry.addData("Lift Percent", Robot.lift.getLiftPercentage());
 
             // Turret Rotation Telemetry
             telemetry.addData("Turret Target Angle", Robot.turret.rotation.target);
@@ -354,6 +354,9 @@ public class Teleop_Main_ extends LinearOpMode {
         }
         if (gamepad1.dpad_down){
             Robot.lift.setLiftPower(-1);
+        }
+        if (gamepad1.dpad_left){
+            Robot.lift.activate();
         }
 
         if (gamepad1.dpadLeftWasPressed()){

@@ -88,6 +88,10 @@ public class Devices {
             totalAngleV += deltaAngleV;
         }
 
+        public void resetZeroPos(){
+            totalAngleV = 0;
+        }
+
         public double degreesToVolts(double angle){return angle * (3.3/360);}
         public double voltsToDegrees(double angle){return angle * (360/3.3);}
         public double getTotalRotations(){return totalAngleV/3.3;}
