@@ -57,22 +57,38 @@ public class Lift {
         Lift1.setPower(power);
         Lift2.setPower(power);
     }
+
+    /**
+     Sets liftIsActivated to <code>true</code>
+     */
     public void activate(){
         liftIsActivated = true;
     }
 
+    /**
+     @return <code>double</code> : Average lift percentage
+     */
     public double getLiftPercentage(){
         double lift1Percent = (int) ((Lift1.getTotalRotations() - initialLift1Angle) / targetRotationCount) * 100;
         double lift2Percent = (int) ((Lift2.getTotalRotations() - initialLift1Angle) / targetRotationCount) * 100;
         return (lift1Percent + lift2Percent)/2;
     }
+    /**
+     @return <code>double</code> : Lift1 Percentage
+     */
     public double getLift1Rotations(){
         return (Lift1.getTotalRotations() - initialLift1Angle);
     }
+    /**
+     @return <code>double</code> : Lift2 Percentage
+     */
     public double getLift2Rotations(){
         return (Lift2.getTotalRotations() - initialLift2Angle);
     }
 
+    /**
+     Should run every loop to track lift progress
+     */
     public void update(){
         Lift1.update();
         Lift2.update();

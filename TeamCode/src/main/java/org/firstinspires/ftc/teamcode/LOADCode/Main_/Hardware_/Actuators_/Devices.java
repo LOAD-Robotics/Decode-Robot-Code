@@ -62,6 +62,10 @@ public class Devices {
 
 
     }
+
+    /**
+     * Extension of the CRServo class for Axons specifically and equipped to track rotations outside of the [0,360] range.
+     */
     public static class AxonClass extends CRServoClass {
 
         private AnalogInput encoderObject;
@@ -79,6 +83,9 @@ public class Devices {
             rawAngleV = encoderObject.getVoltage();
         }
 
+        /**
+         * This should run every loop to count rotations
+         */
         public void update() {
             deltaAngleV = encoderObject.getVoltage() - rawAngleV;
             rawAngleV = encoderObject.getVoltage();
@@ -89,12 +96,26 @@ public class Devices {
             totalAngleV += deltaAngleV;
         }
 
+        /**
+         * Resets the <code>totalAngleV</code> to zero
+         */
         public void resetZeroPos(){
             totalAngleV = 0;
         }
 
+        /**
+         * @param angle angle in degrees in range [0,360]
+         * @return <code>angle</code> - angle in volts in range [0:3.3]
+         */
         public double degreesToVolts(double angle){return angle * (3.3/360);}
+        /**
+         * @param angle angle in volts in range [0,3.3]
+         * @return <code>angle</code> - angle in degrees in range [0:360]
+         */
         public double voltsToDegrees(double angle){return angle * (360/3.3);}
+        /**
+         * @return absolute rotations count
+         */
         public double getTotalRotations(){return totalAngleV/3.3;}
 
 
