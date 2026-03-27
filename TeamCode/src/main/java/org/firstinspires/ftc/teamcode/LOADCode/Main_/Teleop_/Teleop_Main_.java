@@ -282,6 +282,7 @@ public class Teleop_Main_ extends LinearOpMode {
         }
 
         selectedAlliance = null;
+        isLiftAttached = null;
     }
 
     /**
