@@ -61,7 +61,14 @@ public class LoadHardwareClass {
 
     // Declare various enums & other variables that are useful across files
     public static Alliance selectedAlliance = null;
+    public static IsLiftAttached isLiftAttached = null;
     public Pose goalPose = new Pose(144, 144);
+
+    public enum IsLiftAttached {
+        YES,
+        NO
+    }
+
     public enum Alliance {
         RED,
         BLUE

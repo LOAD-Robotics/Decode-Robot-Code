@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.LOADCode.Main_.Auto_;
 
 import static org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Intake.intakeMode.OFF;
 import static org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Intake.intakeMode.ON;
+import static org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.LoadHardwareClass.isLiftAttached;
 import static org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.LoadHardwareClass.selectedAlliance;
 import static dev.nextftc.extensions.pedro.PedroComponent.follower;
 
@@ -57,6 +58,10 @@ public class Auto_Main_ extends NextFTCOpMode {
     @Override
     public void onInit() {
         prompter = new Prompter(this);
+        prompter.prompt("lift", new OptionPrompt<>("Is Lift Attached?",
+                LoadHardwareClass.IsLiftAttached.NO,
+                LoadHardwareClass.IsLiftAttached.YES
+        ));
         prompter.prompt("alliance",
                 new OptionPrompt<>("Select Alliance",
                         LoadHardwareClass.Alliance.RED,
@@ -74,6 +79,7 @@ public class Auto_Main_ extends NextFTCOpMode {
                         new Far_9Ball()
                 ));
         prompter.onComplete(() -> {
+            isLiftAttached = prompter.get("lift");
             selectedAlliance = prompter.get("alliance");
             selectedAuto = prompter.get("auto");
             telemetry.update();

@@ -32,6 +32,7 @@ package org.firstinspires.ftc.teamcode.LOADCode.Main_.Teleop_;
 import static org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Intake.intakeMode.OFF;
 import static org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Intake.intakeMode.ON;
 import static org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Intake.intakeMode.REVERSE;
+import static org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.LoadHardwareClass.isLiftAttached;
 import static org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.LoadHardwareClass.selectedAlliance;
 
 import com.bylazar.configurables.annotations.Configurable;
@@ -43,6 +44,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.skeletonarmy.marrow.TimerEx;
+import com.skeletonarmy.marrow.prompts.BooleanPrompt;
 import com.skeletonarmy.marrow.prompts.OptionPrompt;
 import com.skeletonarmy.marrow.prompts.Prompter;
 
@@ -115,6 +117,13 @@ public class Teleop_Main_ extends LinearOpMode {
 
         // Create a new prompter for selecting alliance
         prompter = new Prompter(this);
+        prompter.prompt("lift", () -> {
+            if (isLiftAttached == null){
+                return new BooleanPrompt("Is Lift Attached?", false);
+            }else{
+                return null;
+            }
+        });
         prompter.prompt("alliance", () -> {
             if (selectedAlliance == null){
                 return new OptionPrompt<>("Select Alliance", LoadHardwareClass.Alliance.RED, LoadHardwareClass.Alliance.BLUE);
@@ -214,6 +223,9 @@ public class Teleop_Main_ extends LinearOpMode {
 
             double flywheelPercentage = (int) Math.round(Robot.turret.getFlywheelRPM()/Robot.turret.getFlywheelCurrentMaxSpeed() *100);
             telemetry.addData("Flywheel Percentage", flywheelPercentage+"%");
+            if (manualFlywheelState != 0){
+                telemetry.addData("manualFlywheelState", manualFlywheelState);
+            }
             telemetry.addData("ALLIANCE", selectedAlliance);
 
 
@@ -229,9 +241,11 @@ public class Teleop_Main_ extends LinearOpMode {
             telemetry.addData("Lift Percent", Robot.lift.getLiftPercentage());
             telemetry.addData("Lift1 Rotations", Robot.lift.getLift1Rotations());
             telemetry.addData("Lift2 Rotations", Robot.lift.getLift2Rotations());
+            telemetry.addLine();
 
             // Turret Rotation Telemetry
             telemetry.addData("Camera Aim On", Robot.turret.cameraAimOn);
+            telemetry.addData("Camera Error", Robot.turret.limelight.result.getTx());
             telemetry.addData("Turret Target Angle", Robot.turret.rotation.target);
             telemetry.addData("Turret Actual Angle", Robot.turret.rotation.getAngleAbsolute());
             telemetry.addData("Turret Angular Velocity (Deg/sec)", Robot.turret.rotation.getDegreesPerSecond());
@@ -246,7 +260,7 @@ public class Teleop_Main_ extends LinearOpMode {
 
             // Flywheel Telemetry
             telemetry.addLine();
-            telemetry.addData("Flywheel Target Speed", Robot.turret.flywheel.target);
+            telemetry.addData("Flywheel Target Speed", Robot.turret.getFlywheelCurrentMaxSpeed());
             telemetry.addData("Flywheel Actual Speed", Robot.turret.getFlywheelRPM());
 
             telemetry.addData("Top Prox Sensor", Robot.intake.getTopSensorState());
@@ -341,14 +355,10 @@ public class Teleop_Main_ extends LinearOpMode {
             }
         }
 
-        double turnMult = 2;
-//        if (gamepad1.left_stick_y == 0 && gamepad1.left_stick_x == 0){
-//            turnMult = 1;
-//        }
         Robot.drivetrain.pedroMecanumDrive(
                 gamepad1.left_stick_y,
                 gamepad1.left_stick_x,
-                gamepad1.right_stick_x / turnMult,
+                gamepad1.right_stick_x / 2,
                 true
         );
 
@@ -358,8 +368,10 @@ public class Teleop_Main_ extends LinearOpMode {
 
         Robot.lift.update();
         if (gamepad1.dpadUpWasPressed()){
-            Robot.lift.activate();
-            hoodOn = false;
+            if (isLiftAttached == LoadHardwareClass.IsLiftAttached.YES){
+                Robot.lift.activate();
+                hoodOn = false;
+            }
         }
 
         if (gamepad1.dpadLeftWasPressed()){
@@ -443,17 +455,17 @@ public class Teleop_Main_ extends LinearOpMode {
             }
         }
 
-        if (gamepad2.left_trigger > 0.8 && !leftTrigOldState && manualFlywheelState >= 1){
+        if (gamepad2.left_trigger > 0.8 && !leftTrigOldState && manualFlywheelState > 1){
             leftTrigOldState = true;
             manualFlywheelState--;
         }else if (gamepad2.left_trigger < 0.2 && leftTrigOldState){
             leftTrigOldState = false;
         }
-        if (gamepad2.right_trigger > 0.8 && !leftTrigOldState){
-            leftTrigOldState = true;
+        if (gamepad2.right_trigger > 0.8 && !rightTrigOldState && manualFlywheelState < 4){
+            rightTrigOldState = true;
             manualFlywheelState++;
-        }else if (gamepad2.right_trigger < 0.2 && leftTrigOldState){
-            leftTrigOldState = false;
+        }else if (gamepad2.right_trigger < 0.2 && rightTrigOldState){
+            rightTrigOldState = false;
         }
         if (gamepad2.aWasPressed()){
             manualFlywheelState = 0;
@@ -495,14 +507,14 @@ public class Teleop_Main_ extends LinearOpMode {
                 telemetry.addData("Shooting State", "GATE OPENING");
                 if (stateTimerFifthSec.isDone()){
                     shootingState = 2;
-                    stateTimerHalfSec.restart();
-                    stateTimerHalfSec.start();
+                    stateTimerFullSec.restart();
+                    stateTimerFullSec.start();
                 }
                 return;
             case 2:
                 Robot.intake.setMode(ON, ON);
                 telemetry.addData("Shooting State", "INTAKE_NOINTAKE FIRST TWO");
-                if (stateTimerHalfSec.isDone() && Robot.intake.getTopSensorState() && !Robot.intake.getBottomSensorState()){
+                if (stateTimerFullSec.isDone() && Robot.intake.getTopSensorState() && !Robot.intake.getBottomSensorState()){
                     shootingState = 3;
                     stateTimerHalfSec.restart();
                     stateTimerHalfSec.start();

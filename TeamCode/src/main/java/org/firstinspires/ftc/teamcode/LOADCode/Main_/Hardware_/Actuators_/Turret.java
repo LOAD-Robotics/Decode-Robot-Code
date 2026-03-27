@@ -90,7 +90,7 @@ public class Turret {
     private int zeroingState = 0;
     private TimerEx zeroingTimer = new TimerEx(0.25, TimeUnit.SECONDS);
     /**
-     * Controls which aiming system to use.
+     * Indicates which aiming system is in use.
      */
     public boolean cameraAimOn = false;
 
@@ -201,7 +201,6 @@ public class Turret {
             cameraPID = ControlSystem.builder().posPid(cameraCoefficients).build();
         }
     }
-    public static boolean cameraON = false;
 
     /**
      * Runs the aimbot program to control the turret rotation and hood angle. </br>
@@ -247,11 +246,11 @@ public class Turret {
             minPower = 0;
         }
 
-        if (limelight.result != null && limelight.result.isValid() && cameraON){
+        if (limelight.result != null && limelight.result.isValid()){
             cameraAimOn = true;
             double power = cameraPID.calculate(
                     new KineticState(
-                            limelight.result.getTx(),
+                            limelight.result.getTx()*10,
                             Robot.turret.rotation.getDegreesPerSecond()
                     )
             );
@@ -488,22 +487,27 @@ public class Turret {
                     actualFlywheelCoefficients = flywheelCoefficients3500;
                     actualFlywheelFFCoefficients = flywheelFFCoefficients3500;
                 }
+                break;
             case 1:
                 targetRPM = flywheelReallyNearSpeed;
                 actualFlywheelCoefficients = flywheelCoefficients3000;
                 actualFlywheelFFCoefficients = flywheelFFCoefficients3000;
+                break;
             case 2:
                 targetRPM = flywheelNearSpeed;
                 actualFlywheelCoefficients = flywheelCoefficients3500;
                 actualFlywheelFFCoefficients = flywheelFFCoefficients3500;
+                break;
             case 3:
                 targetRPM = flywheelFarNearSpeed;
                 actualFlywheelCoefficients = flywheelCoefficients3500;
                 actualFlywheelFFCoefficients = flywheelFFCoefficients3500;
+                break;
             case 4:
                 targetRPM = flywheelFarSpeed;
                 actualFlywheelCoefficients = flywheelCoefficients4200;
                 actualFlywheelFFCoefficients = flywheelFFCoefficients4200;
+                break;
         }
 
         if (flywheelMode == flywheelState.ON){
