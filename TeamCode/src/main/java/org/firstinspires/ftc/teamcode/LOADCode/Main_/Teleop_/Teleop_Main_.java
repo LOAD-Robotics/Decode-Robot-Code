@@ -149,6 +149,9 @@ public class Teleop_Main_ extends LinearOpMode {
             if (selectedAlliance == null){
                 selectedAlliance = prompter.get("alliance");
             }
+            if (isLiftAttached == null){
+                isLiftAttached = prompter.get("lift");
+            }
             telemetry.addData("Selection", "Complete");
             telemetry.addData("Alliance", selectedAlliance);
             if (MecanumDrivetrainClass.robotPose == null){
