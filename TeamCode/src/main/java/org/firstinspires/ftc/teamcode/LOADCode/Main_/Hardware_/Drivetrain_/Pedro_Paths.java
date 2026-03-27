@@ -14,6 +14,7 @@ public class Pedro_Paths {
     // The variable to store PedroPathing's follower object for path building
     private Follower follower;
     private LoadHardwareClass.Alliance alliance = LoadHardwareClass.selectedAlliance;
+    private LoadHardwareClass.IsLiftAttached isUsingGarage = LoadHardwareClass.isLiftAttached;
 
     /**
      * Define primary poses to be used in paths
@@ -160,12 +161,21 @@ public class Pedro_Paths {
      * @return Adjusted <code>Pose</code> object
      */
     public Pose offsetPose(@NonNull Pose pose){
-        double constX = 0;
-        double constY = 0;
-        double angle = pose.getHeading();
-        double newX = pose.getX() + (constX*Math.cos(angle));
-        double newY = pose.getX() + (constY*Math.sin(angle));
-        return new Pose(newX, newY, angle);
+        Pose newPose = new Pose();
+        switch (isUsingGarage){
+            case YES:
+                double constX = 0;
+                double constY = 0;
+                double angle = pose.getHeading();
+                double newX = pose.getX() + (constX*Math.cos(angle));
+                double newY = pose.getX() + (constY*Math.sin(angle));
+                newPose = new Pose(newX, newY, angle);
+                break;
+            case NO:
+                newPose = pose;
+                break;
+        }
+        return newPose;
     }
 
     /**
@@ -176,10 +186,17 @@ public class Pedro_Paths {
      * @return Adjusted <code>Pose</code> object
      */
     public Pose offsetPose(@NonNull Pose pose, double X, double Y){
-        double angle = pose.getHeading();
-        double newX = pose.getX() + (X*Math.cos(angle));
-        double newY = pose.getX() + (Y*Math.sin(angle));
-        return new Pose(newX, newY, angle);
+        Pose newPose = new Pose();
+        switch (isUsingGarage){
+            case YES:
+                double angle = pose.getHeading();
+                double newX = pose.getX() + (X*Math.cos(angle));
+                double newY = pose.getX() + (Y*Math.sin(angle));
+                newPose = new Pose(newX, newY, angle);
+            case NO:
+                newPose = pose;
+        }
+        return newPose;
     }
     public void buildStart1ToShootings(){
         nearStart_to_nearShoot = follower.pathBuilder()
