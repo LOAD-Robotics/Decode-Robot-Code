@@ -35,12 +35,12 @@ public class Turret {
     public final Devices.REVHallEffectSensorClass hall = new Devices.REVHallEffectSensorClass();
 
     // Camera PID stuff
-    public static PIDCoefficients cameraCoefficients = new PIDCoefficients(0.05, 0.00000000001, 0.0000001);
+    public static PIDCoefficients cameraCoefficients = new PIDCoefficients(2, 0, 0);
     private static PIDCoefficients oldCameraCoefficients = new PIDCoefficients(0, 0, 0);
     public ControlSystem cameraPID = ControlSystem.builder().posPid(cameraCoefficients).build();
 
     // Turret PID coefficients
-    public static PIDCoefficients turretCoefficients = new PIDCoefficients(0.025, 0.0000000001, 0.003); // 223RPM Motor
+    public static PIDCoefficients turretCoefficients = new PIDCoefficients(0.025, 0.0000000001, 0.002); // 223RPM Motor
 
     // Flywheel PID coefficients for various speeds
     //public static PIDCoefficients flywheelCoefficients = new PIDCoefficients(0.0002, 0, 0); // 4500 RPM
@@ -73,7 +73,7 @@ public class Turret {
     public flywheelState flywheelMode = flywheelState.OFF;
     double targetRPM = 0;
     /** Controls the target speed of the flywheel when it is on.*/
-    public static double flywheelReallyNearSpeed = 2800;
+    public static double flywheelReallyNearSpeed = 2700;
     public static double flywheelNearSpeed = 3300;
     public static double flywheelFarNearSpeed = 3600;
     public static double flywheelFarSpeed = 4200;
@@ -138,7 +138,7 @@ public class Turret {
         rotation.setZeroPowerBehaviour(DcMotor.ZeroPowerBehavior.BRAKE);
         rotation.setDirection(DcMotorSimple.Direction.REVERSE);
         rotation.setOffsetDegrees(turretOffset);
-        rotation.maxAcceptableError = new KineticState(0.5, 2);
+        rotation.maxAcceptableError = new KineticState(5, 2);
 
         // Pass PID pidCoefficients to motor classes
         rotation.setPidCoefficients(turretCoefficients);
@@ -248,13 +248,18 @@ public class Turret {
 
         if (limelight.result != null && limelight.result.isValid()){
             cameraAimOn = true;
+            double error = limelight.result.getTx();
             double power = cameraPID.calculate(
                     new KineticState(
-                            limelight.result.getTx()*10,
+                            limelight.result.getTx()/100,
                             Robot.turret.rotation.getDegreesPerSecond()
                     )
             );
-            Robot.turret.rotation.setPower(Math.min(Math.max(power, minPower), maxPower));
+            if (Math.abs(error) > 0.75){
+                Robot.turret.rotation.setPower(Math.min(Math.max(power, minPower), maxPower));
+            }else{
+                Robot.turret.rotation.setPower(0);
+            }
         }else{
             cameraAimOn = false;
             rotation.setAngle(Math.min(Math.max(0, rotationalAimbotLocalizer()), 360), -Math.toDegrees(Robot.drivetrain.follower.getAngularVelocity()));
@@ -474,7 +479,7 @@ public class Turret {
                     targetRPM = flywheelFarSpeed;
                     actualFlywheelCoefficients = flywheelCoefficients4200;
                     actualFlywheelFFCoefficients = flywheelFFCoefficients4200;
-                }else if (Robot.drivetrain.distanceFromGoal() < 60){
+                }else if (Robot.drivetrain.distanceFromGoal() < 65){
                     targetRPM = flywheelReallyNearSpeed;
                     actualFlywheelCoefficients = flywheelCoefficients3000;
                     actualFlywheelFFCoefficients = flywheelFFCoefficients3000;

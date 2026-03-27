@@ -44,7 +44,6 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.skeletonarmy.marrow.TimerEx;
-import com.skeletonarmy.marrow.prompts.BooleanPrompt;
 import com.skeletonarmy.marrow.prompts.OptionPrompt;
 import com.skeletonarmy.marrow.prompts.Prompter;
 
@@ -108,6 +107,7 @@ public class Teleop_Main_ extends LinearOpMode {
     }
 
     private lightsState ledStateOld = lightsState.RAINBOW;
+    private boolean forceGateOpen = false;
 
     // Contains the start Pose of our robot. This can be changed or saved from the autonomous period.
     private Pose startPose = Paths.farStart;
@@ -119,7 +119,10 @@ public class Teleop_Main_ extends LinearOpMode {
         prompter = new Prompter(this);
         prompter.prompt("lift", () -> {
             if (isLiftAttached == null){
-                return new BooleanPrompt("Is Lift Attached?", false);
+                return new OptionPrompt<>("Is Lift Attached?",
+                        LoadHardwareClass.IsLiftAttached.NO,
+                        LoadHardwareClass.IsLiftAttached.YES
+                        );
             }else{
                 return null;
             }
@@ -246,6 +249,7 @@ public class Teleop_Main_ extends LinearOpMode {
             // Turret Rotation Telemetry
             telemetry.addData("Camera Aim On", Robot.turret.cameraAimOn);
             telemetry.addData("Camera Error", Robot.turret.limelight.result.getTx());
+            panelsTelemetry.addData("0 Line", 0);
             telemetry.addData("Turret Target Angle", Robot.turret.rotation.target);
             telemetry.addData("Turret Actual Angle", Robot.turret.rotation.getAngleAbsolute());
             telemetry.addData("Turret Angular Velocity (Deg/sec)", Robot.turret.rotation.getDegreesPerSecond());
@@ -425,7 +429,7 @@ public class Teleop_Main_ extends LinearOpMode {
      * </ul>
      */
     public void Gamepad2() {
-        Robot.turret.updateAimbot(turretOn, hoodOn, hoodOffset);
+        Robot.turret.updateAimbot(turretOn && !gamepad1.a, hoodOn, hoodOffset);
 
         double dylanStickDeadzones = 0.2;
 
@@ -452,6 +456,12 @@ public class Teleop_Main_ extends LinearOpMode {
                 } else {
                     Robot.turret.setFlywheelState(flywheelState.OFF);
                 }
+            }
+
+            if (forceGateOpen){
+                Robot.turret.setGateState(gatestate.OPEN);
+            }else{
+                Robot.turret.setGateState(gatestate.CLOSED);
             }
         }
 
@@ -484,6 +494,9 @@ public class Teleop_Main_ extends LinearOpMode {
             Turret.turretOffset -= turretOffsetStep;
         }
 
+        if (gamepad2.backWasPressed()){
+            forceGateOpen = !forceGateOpen;
+        }
 
         //Shoot (B Button Press)
         // Increment the shooting state
@@ -503,7 +516,9 @@ public class Teleop_Main_ extends LinearOpMode {
                     stateTimerFifthSec.restart();
                     stateTimerFifthSec.start();
                 }
-                Robot.turret.setGateState(gatestate.OPEN);
+                if (!forceGateOpen){
+                    Robot.turret.setGateState(gatestate.OPEN);
+                }
                 telemetry.addData("Shooting State", "GATE OPENING");
                 if (stateTimerFifthSec.isDone()){
                     shootingState = 2;
@@ -529,7 +544,9 @@ public class Teleop_Main_ extends LinearOpMode {
                 }
                 return;
             case 4:
-                Robot.turret.setGateState(gatestate.CLOSED);
+                if (!forceGateOpen){
+                    Robot.turret.setGateState(gatestate.CLOSED);
+                }
                 Robot.intake.setMode(OFF, OFF);
                 Robot.intake.setTransfer(transferState.DOWN);
                 telemetry.addData("Shooting State", "RESET");

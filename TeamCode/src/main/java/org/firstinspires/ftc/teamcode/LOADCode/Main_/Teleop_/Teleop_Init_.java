@@ -47,9 +47,9 @@ import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.LoadHardwareClass
 public class Teleop_Init_ extends LinearOpMode {
 
     // Declare OpMode members.
-    private ElapsedTime runtime = new ElapsedTime();
-    private ElapsedTime loopTimer = new ElapsedTime();
-    private TelemetryManager panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
+    private final ElapsedTime runtime = new ElapsedTime();
+    private final ElapsedTime loopTimer = new ElapsedTime();
+    private final TelemetryManager panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
 
     public static double hoodOffset = 0;
 
@@ -72,10 +72,10 @@ public class Teleop_Init_ extends LinearOpMode {
         Robot.turret.setGateState(Turret.gatestate.CLOSED);
         Robot.lights.setStripRainbow();
 
-        if (!Turret.zeroed){
-            while (!isStopRequested() && Robot.turret.zeroTurret()){
-                Robot.sleep(0);
-            }
+        Turret.zeroed = false;
+
+        while (!isStopRequested() && Robot.turret.zeroTurret()){
+            Robot.sleep(0);
         }
 
         // Wait for the game to start (driver presses START)
