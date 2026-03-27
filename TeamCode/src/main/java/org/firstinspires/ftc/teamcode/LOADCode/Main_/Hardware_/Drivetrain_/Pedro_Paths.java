@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Drivetrain_;
 
+import androidx.annotation.NonNull;
+
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
@@ -152,6 +154,33 @@ public class Pedro_Paths {
         }
     }
 
+    /**
+     * Takes a <code>Pose</code> and offsets it by a constant offset in local coordinates to adjust for garage bot.
+     * @param pose Input Pose to offset
+     * @return Adjusted <code>Pose</code> object
+     */
+    public Pose offsetPose(@NonNull Pose pose){
+        double constX = 0;
+        double constY = 0;
+        double angle = pose.getHeading();
+        double newX = pose.getX() + (constX*Math.cos(angle));
+        double newY = pose.getX() + (constY*Math.sin(angle));
+        return new Pose(newX, newY, angle);
+    }
+
+    /**
+     * Takes a <code>Pose</code> and offsets it by <code>X</code> and <code>Y</code> in local coordinates.
+     * @param pose Input Pose to offset
+     * @param X double X offset for pose (in local coords)
+     * @param Y double Y offset for pose (in local coords)
+     * @return Adjusted <code>Pose</code> object
+     */
+    public Pose offsetPose(@NonNull Pose pose, double X, double Y){
+        double angle = pose.getHeading();
+        double newX = pose.getX() + (X*Math.cos(angle));
+        double newY = pose.getX() + (Y*Math.sin(angle));
+        return new Pose(newX, newY, angle);
+    }
     public void buildStart1ToShootings(){
         nearStart_to_nearShoot = follower.pathBuilder()
                 .addPath(new BezierLine(
