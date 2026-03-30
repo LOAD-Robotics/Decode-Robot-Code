@@ -143,7 +143,7 @@ public class Commands {
                                 // Shoot the first two balls
                                 waitForTurret(2, 4),
                                 setGateState(Turret.gatestate.OPEN),
-                                new Delay(0.3),
+                                new Delay(0.25),
                                 setIntakeMode(ON, ON),
                                 new ParallelGroup(
                                         new Delay(0.7),
@@ -153,7 +153,7 @@ public class Commands {
                                 // Shoot the last ball
                                 setIntakeMode(OFF, ON),
                                 setTransferState(Intake.transferState.UP),
-                                new Delay(0.5)
+                                new Delay(0.3)
                         ),
                         new Delay(3)
                 ),

@@ -8,7 +8,7 @@ import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.LoadHardwareClass;
-import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode.pedroPathing.Constants_NoLift;
 
 public class MecanumDrivetrainClass {
     // Controls the speed of the robot
@@ -27,7 +27,7 @@ public class MecanumDrivetrainClass {
      */
     public void init (@NonNull OpMode myOpMode, Pose initialPose){
         // PedroPathing initialization
-        follower = Constants.createFollower(myOpMode.hardwareMap);  // Initializes the PedroPathing path follower
+        follower = Constants_NoLift.createFollower(myOpMode.hardwareMap);  // Initializes the PedroPathing path follower
         follower.setStartingPose(initialPose);                      // Sets the initial position of the robot on the field
         follower.update(); // Applies the initialization
     }

@@ -53,6 +53,7 @@ import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Intake
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Turret;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Turret.flywheelState;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Turret.gatestate;
+import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Drawing;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Drivetrain_.MecanumDrivetrainClass;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Drivetrain_.Pedro_Paths;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.LoadHardwareClass;
@@ -288,6 +289,9 @@ public class Teleop_Main_ extends LinearOpMode {
             telemetry.addData("Status", "Run Time: " + runtime);
             telemetry.addData("Version: ", "2/13/25");
             telemetry.update();
+
+            Drawing.drawRobot(Robot.drivetrain.follower.getPose());
+            Drawing.sendPacket();
         }
 
         selectedAlliance = null;
@@ -386,7 +390,7 @@ public class Teleop_Main_ extends LinearOpMode {
         }
 
         Robot.lift.update();
-        if (gamepad1.dpadUpWasPressed()){
+        if (gamepad1.dpadUpWasPressed() && runtime.time(TimeUnit.SECONDS) > 0){
             if (isLiftAttached == LoadHardwareClass.IsLiftAttached.YES){
                 Robot.lift.activate();
                 hoodOn = false;

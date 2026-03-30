@@ -47,15 +47,15 @@
             "state": {
               "type": "canvas",
               "state": {
-                "file": "Robot Wiring.canvas",
+                "file": "Servo Cable Diagram.canvas",
                 "viewState": {
-                  "x": -262.5418292535084,
-                  "y": 150.85601013637654,
-                  "zoom": -0.5506108409953099
+                  "x": -90,
+                  "y": 80,
+                  "zoom": 0
                 }
               },
               "icon": "lucide-layout-dashboard",
-              "title": "Robot Wiring"
+              "title": "Servo Cable Diagram"
             }
           }
         ],
@@ -221,12 +221,16 @@
   },
   "active": "f3ed0e91d6b359a1",
   "lastOpenFiles": [
+    "Servo Cable Diagram.png",
+    "Servo Cable Color.canvas",
+    "Servo Cable Diagram.canvas",
+    "Untitled.md",
+    "Robot Wiring.canvas",
     "File Structure.canvas",
     "File Structure Dark.png",
     "File Structure Light.png",
     "Robot Wiring Light.png",
     "Robot Wiring Dark.png",
-    "Robot Wiring.canvas",
     "File Structure_Light.png",
     "Robot_Wiring.png",
     "File Structure.png",

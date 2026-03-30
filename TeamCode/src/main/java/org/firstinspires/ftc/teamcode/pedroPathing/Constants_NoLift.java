@@ -14,7 +14,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
-public class Constants {
+public class Constants_NoLift {
     public static FollowerConstants followerConstants = new FollowerConstants()
             .mass(12.9) // TODO: Change this to the actual weight of the robot
             .forwardZeroPowerAcceleration(-31.6509)
