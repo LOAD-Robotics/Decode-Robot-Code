@@ -106,6 +106,13 @@ public class Teleop_Main_ extends LinearOpMode {
         RAINBOW
     }
 
+    enum turretState {
+        ON,
+        OFF,
+        PAUSED,
+    }
+    private turretState teleopTurretState = turretState.ON;
+
     private lightsState ledStateOld = lightsState.RAINBOW;
     private boolean forceGateOpen = false;
 
@@ -222,6 +229,7 @@ public class Teleop_Main_ extends LinearOpMode {
             }
             telemetry.addData("lightsState", ledState);
 
+            teleopTurretState = turretState.ON;
             Gamepad1();
             Gamepad2();
 
@@ -253,6 +261,7 @@ public class Teleop_Main_ extends LinearOpMode {
             telemetry.addData("Camera Aim On", Robot.turret.cameraAimOn);
             telemetry.addData("Camera Error", Robot.turret.limelight.result.getTx());
             panelsTelemetry.addData("0 Line", 0);
+            telemetry.addData("TurretState", teleopTurretState);
             telemetry.addData("Turret Target Angle", Robot.turret.rotation.target);
             telemetry.addData("Turret Actual Angle", Robot.turret.rotation.getAngleAbsolute());
             telemetry.addData("Turret Angular Velocity (Deg/sec)", Robot.turret.rotation.getDegreesPerSecond());
@@ -328,6 +337,8 @@ public class Teleop_Main_ extends LinearOpMode {
     public void Gamepad1() {
 
         double ariDeadZone = 0.3;
+
+        if (turretOn && gamepad1.a) {teleopTurretState = turretState.PAUSED;}
 
         if (gamepad1.left_trigger >= ariDeadZone && gamepad1.right_trigger >= ariDeadZone) {
             if (!holdJustTriggered){
@@ -433,7 +444,10 @@ public class Teleop_Main_ extends LinearOpMode {
      * </ul>
      */
     public void Gamepad2() {
-        Robot.turret.updateAimbot(turretOn && !gamepad1.a, hoodOn, hoodOffset);
+
+        if (!turretOn) {teleopTurretState = turretState.OFF;}
+
+        Robot.turret.updateAimbot(teleopTurretState==turretState.ON, hoodOn, hoodOffset);
 
         double dylanStickDeadzones = 0.2;
 
