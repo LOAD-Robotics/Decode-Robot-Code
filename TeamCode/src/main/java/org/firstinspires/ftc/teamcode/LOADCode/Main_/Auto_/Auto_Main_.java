@@ -23,6 +23,7 @@ import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Drivetrain_.Pedro
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.LoadHardwareClass;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants_NoLift;
 
+import dev.nextftc.core.commands.Command;
 import dev.nextftc.core.commands.delays.Delay;
 import dev.nextftc.core.commands.delays.WaitUntil;
 import dev.nextftc.core.commands.groups.ParallelRaceGroup;
@@ -70,7 +71,7 @@ public class Auto_Main_ extends NextFTCOpMode {
                 ));
         prompter.prompt("auto",
                 new OptionPrompt<>("Select Auto",
-                        new testAuto(),
+                        //new testAuto(),
                         new MOE_365_FAR(),
                         new Near_15Ball(),
                         new Near_15Ball2(),
@@ -109,7 +110,10 @@ public class Auto_Main_ extends NextFTCOpMode {
     public void onStartButtonPressed() {
         Robot.lights.setSolidAllianceDisplay(selectedAlliance);
         // Schedule the proper auto
-        selectedAuto.runAuto();
+        Commands.leaveAtEnd(
+                selectedAuto.runAuto(),
+                selectedAuto.getEndPose()
+        ).schedule();
         turretOn = selectedAuto.getTurretEnabled();
         timer25Sec.restart();
 
@@ -149,6 +153,11 @@ public class Auto_Main_ extends NextFTCOpMode {
         abstract Pose getStartPose();
 
         /**
+         * @return The end pose of the robot for auto
+         */
+        abstract Pose getEndPose();
+
+        /**
          * @return The offset of the hood for this auto
          */
         abstract double getHoodOffset();
@@ -159,7 +168,7 @@ public class Auto_Main_ extends NextFTCOpMode {
         abstract boolean getTurretEnabled();
 
         /** Override this to schedule the auto command*/
-        abstract void runAuto();
+        abstract Command runAuto();
         /** Override this to rename the auto*/
         @NonNull
         @Override
@@ -171,20 +180,22 @@ public class Auto_Main_ extends NextFTCOpMode {
         public Pose getStartPose(){
             return paths.farStart;
         }
-
+        @Override
+        public Pose getEndPose(){
+            return paths.farLeave;
+        }
         @Override
         double getHoodOffset() {
             return 10;
         }
-
         @Override
         public boolean getTurretEnabled(){
             return true;
         }
 
         @Override
-        public void runAuto(){
-            new SequentialGroup(
+        public Command runAuto(){
+            return new SequentialGroup(
                     new InstantCommand(Commands.setFlywheelState(Turret.flywheelState.ON)),
                     Commands.runPath(paths.farStart_to_farShoot, true, 1),
                     Commands.shootBalls(),
@@ -197,7 +208,7 @@ public class Auto_Main_ extends NextFTCOpMode {
                     Commands.runPath(paths.hpPreload_to_farShoot, true, 1),
                     Commands.shootBalls(),
                     Commands.runPath(paths.farShoot_to_farLeave, true, 1)
-            ).schedule();
+            );
         }
 
         @NonNull
@@ -210,6 +221,10 @@ public class Auto_Main_ extends NextFTCOpMode {
             return paths.farStart;
         }
         @Override
+        public Pose getEndPose(){
+            return paths.farLeave;
+        }
+        @Override
         public boolean getTurretEnabled(){
             return true;
         }
@@ -219,8 +234,8 @@ public class Auto_Main_ extends NextFTCOpMode {
         }
 
         @Override
-        public void runAuto(){
-            new SequentialGroup(
+        public Command runAuto(){
+            return new SequentialGroup(
                     new InstantCommand(Commands.setFlywheelState(Turret.flywheelState.ON)),
                     Commands.runPath(paths.farStart_to_farShoot, true, 1),
                     Commands.shootBalls(),
@@ -237,7 +252,7 @@ public class Auto_Main_ extends NextFTCOpMode {
                     Commands.runPath(paths.hpPreload_to_farShoot, true, 1),
                     Commands.shootBalls(),
                     Commands.runPath(paths.farShoot_to_farLeave, true, 1)
-            ).schedule();
+            );
         }
 
         @NonNull
@@ -251,6 +266,10 @@ public class Auto_Main_ extends NextFTCOpMode {
             return paths.nearStart;
         }
         @Override
+        public Pose getEndPose(){
+            return paths.nearLeave;
+        }
+        @Override
         public boolean getTurretEnabled(){
             return true;
         }
@@ -260,8 +279,8 @@ public class Auto_Main_ extends NextFTCOpMode {
         }
 
         @Override
-        public void runAuto(){
-            new SequentialGroup(
+        public Command runAuto(){
+            return new SequentialGroup(
                     new InstantCommand(Commands.setFlywheelState(Turret.flywheelState.ON)),
                     Commands.runPath(paths.nearStart_to_midShoot, true, 1),
                     Commands.shootBalls(),
@@ -273,10 +292,9 @@ public class Auto_Main_ extends NextFTCOpMode {
                     Commands.setFlywheelState(Turret.flywheelState.ON),
                     Commands.setIntakeMode(ON, ON),
                     Commands.runPath(paths.midShoot_to_midPreload, true, 1),
-                    Commands.runPath(paths.midPreload_to_midShoot, true, 1),
-                    Commands.shootBalls(),
-                    Commands.runPath(paths.midShoot_to_nearLeave, true, 1)
-            ).schedule();
+                    Commands.runPath(paths.midPreload_to_nearLeave, true, 1),
+                    Commands.shootBalls()
+            );
         }
 
         @NonNull
@@ -289,6 +307,10 @@ public class Auto_Main_ extends NextFTCOpMode {
             return paths.nearStart;
         }
         @Override
+        public Pose getEndPose(){
+            return paths.nearLeave;
+        }
+        @Override
         public boolean getTurretEnabled(){
             return true;
         }
@@ -298,8 +320,8 @@ public class Auto_Main_ extends NextFTCOpMode {
         }
 
         @Override
-        public void runAuto(){
-            new SequentialGroup(
+        public Command runAuto(){
+            return new SequentialGroup(
                     new InstantCommand(Commands.setFlywheelState(Turret.flywheelState.ON)),
                     Commands.runPath(paths.nearStart_to_midShoot, true, 1),
                     Commands.shootBalls(),
@@ -313,10 +335,9 @@ public class Auto_Main_ extends NextFTCOpMode {
                     Commands.shootBalls(),
                     Commands.setIntakeMode(ON, ON),
                     Commands.runPath(paths.midShoot_to_farPreload, true, 1),
-                    Commands.runPath(paths.farPreload_to_midShoot, true, 1),
-                    Commands.shootBalls(),
-                    Commands.runPath(paths.midShoot_to_nearLeave, true, 1)
-            ).schedule();
+                    Commands.runPath(paths.farPreload_to_nearLeave, true, 1),
+                    Commands.shootBalls()
+            );
         }
 
         @NonNull
@@ -329,6 +350,10 @@ public class Auto_Main_ extends NextFTCOpMode {
             return paths.nearStart;
         }
         @Override
+        public Pose getEndPose(){
+            return paths.nearLeave;
+        }
+        @Override
         boolean getTurretEnabled() {
             return true;
         }
@@ -338,8 +363,8 @@ public class Auto_Main_ extends NextFTCOpMode {
         }
 
         @Override
-        void runAuto() {
-            new SequentialGroup(
+        public Command runAuto(){
+            return new SequentialGroup(
                     new ParallelRaceGroup(
                             new Delay(29),
                             new SequentialGroup(
@@ -364,9 +389,8 @@ public class Auto_Main_ extends NextFTCOpMode {
                                     Commands.setIntakeMode(ON, ON),
                                     Commands.runPath(paths.midShoot_to_nearPreload, true, 1),
                                     Commands.setIntakeMode(OFF, ON),
-                                    Commands.runPath(paths.nearPreload_to_midShoot, false, 1),
-                                    Commands.shootBalls(),
-                                    Commands.runPath(paths.midShoot_to_nearLeave, true, 1)
+                                    Commands.runPath(paths.nearPreload_to_nearLeave, false, 1),
+                                    Commands.shootBalls()
                             )
                     ),
                     Commands.runPath(
@@ -379,7 +403,7 @@ public class Auto_Main_ extends NextFTCOpMode {
                                     Robot.drivetrain.follower.getPose().getHeading(),
                                     paths.farLeave.getHeading()
                             ).build(), true, 1)
-            ).schedule();
+            );
         }
 
         @NonNull
@@ -394,6 +418,10 @@ public class Auto_Main_ extends NextFTCOpMode {
             return paths.nearStart;
         }
         @Override
+        public Pose getEndPose(){
+            return paths.nearLeave;
+        }
+        @Override
         boolean getTurretEnabled() {
             return true;
         }
@@ -403,8 +431,8 @@ public class Auto_Main_ extends NextFTCOpMode {
         }
 
         @Override
-        void runAuto() {
-            new SequentialGroup(
+        public Command runAuto(){
+            return new SequentialGroup(
                     new InstantCommand(Commands.setFlywheelState(Turret.flywheelState.ON)),
                     Commands.runPath(paths.nearStart_to_midShoot, true, 1),
                     Commands.shootBalls(),
@@ -424,10 +452,9 @@ public class Auto_Main_ extends NextFTCOpMode {
                     Commands.shootBalls(),
                     Commands.setIntakeMode(ON, ON),
                     Commands.runPath(paths.midShoot_to_nearPreload, true, 1),
-                    Commands.runPath(paths.nearPreload_to_midShoot, false, 1),
-                    Commands.shootBalls(),
-                    Commands.runPath(paths.midShoot_to_nearLeave, true, 1)
-            ).schedule();
+                    Commands.runPath(paths.nearPreload_to_nearLeave, false, 1),
+                    Commands.shootBalls()
+            );
         }
 
         @NonNull
@@ -442,6 +469,10 @@ public class Auto_Main_ extends NextFTCOpMode {
             return paths.farStart;
         }
         @Override
+        public Pose getEndPose(){
+            return paths.farLeave;
+        }
+        @Override
         public boolean getTurretEnabled(){
             return true;
         }
@@ -451,8 +482,8 @@ public class Auto_Main_ extends NextFTCOpMode {
         }
 
         @Override
-        public void runAuto(){
-            new SequentialGroup(
+        public Command runAuto(){
+            return new SequentialGroup(
                     new ParallelRaceGroup(
                             new Delay(29),
                             new SequentialGroup(
@@ -488,7 +519,7 @@ public class Auto_Main_ extends NextFTCOpMode {
                                     Robot.drivetrain.follower.getPose().getHeading(),
                                     paths.farLeave.getHeading()
                             ).build(), true, 1)
-            ).schedule();
+            );
         }
 
         @NonNull
@@ -502,6 +533,10 @@ public class Auto_Main_ extends NextFTCOpMode {
             return paths.farStart;
         }
         @Override
+        public Pose getEndPose(){
+            return paths.farLeave;
+        }
+        @Override
         boolean getTurretEnabled() {
             return false;
         }
@@ -511,13 +546,13 @@ public class Auto_Main_ extends NextFTCOpMode {
         }
 
         @Override
-        void runAuto() {
-            new SequentialGroup(
+        public Command runAuto(){
+            return new SequentialGroup(
                     Commands.setIntakeMode(ON, ON),
                     Commands.setFlywheelState(Turret.flywheelState.ON),
                     new WaitUntil(() -> gamepad1.bWasPressed()),
                     Commands.shootBalls()
-            ).schedule();
+            );
         }
 
         @NonNull

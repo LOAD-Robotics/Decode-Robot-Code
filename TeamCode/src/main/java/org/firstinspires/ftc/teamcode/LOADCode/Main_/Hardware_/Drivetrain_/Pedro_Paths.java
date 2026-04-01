@@ -36,7 +36,7 @@ public class Pedro_Paths {
     public Pose noTurretMidShoot = new Pose(85, 85, Math.toRadians(45));
     public Pose noTurretFarShoot = new Pose(85, 15, Math.toRadians(67.3));
     // Leave Poses
-    public Pose nearLeave = new Pose(90,120, Math.toRadians(90));
+    public Pose nearLeave = new Pose(88,120, Math.toRadians(90));
     public Pose midLeave = new Pose(95,55, Math.toRadians(90));
     public Pose farLeave = new Pose(105,20, Math.toRadians(90));
     // Open Gate Pose
@@ -65,17 +65,20 @@ public class Pedro_Paths {
      */
     public PathChain nearPreload_to_nearShoot, nearPreload_to_midShoot, nearPreload_to_farShoot;
     public PathChain nearPreload_to_openGateBasic;
+    public PathChain nearPreload_to_nearLeave;
     /**
      * <hr></br>
      * <h4>Mid Preload Pose</h4>
      */
     public PathChain midPreload_to_nearShoot, midPreload_to_midShoot, midPreload_to_farShoot;
     public PathChain midPreload_to_openGateBasic;
+    public PathChain midPreload_to_nearLeave;
     /**
      * <hr></br>
      * <h4>Far Preload Pose</h4>
      */
     public PathChain farPreload_to_nearShoot, farPreload_to_midShoot, farPreload_to_farShoot;
+    public PathChain farPreload_to_nearLeave;
     /**
      * <hr></br>
      * <h4>Human Player Preload Pose</h4>
@@ -198,6 +201,8 @@ public class Pedro_Paths {
         }
         return newPose;
     }
+
+
     public void buildStart1ToShootings(){
         nearStart_to_nearShoot = follower.pathBuilder()
                 .addPath(new BezierLine(
@@ -253,6 +258,13 @@ public class Pedro_Paths {
                 ))
                 .setLinearHeadingInterpolation(nearPreload.getHeading(), farShoot.getHeading())
                 .build();
+        nearPreload_to_midShoot = follower.pathBuilder()
+                .addPath(new BezierLine(
+                        nearPreload,
+                        nearLeave
+                ))
+                .setTangentHeadingInterpolation()
+                .build();
     }
     public void buildPreload2ToShootings(){
         midPreload_to_nearShoot = follower.pathBuilder()
@@ -279,6 +291,13 @@ public class Pedro_Paths {
                 ))
                 .setLinearHeadingInterpolation(midPreload.getHeading(), farShoot.getHeading())
                 .build();
+        midPreload_to_midShoot = follower.pathBuilder()
+                .addPath(new BezierLine(
+                        midPreload,
+                        nearLeave
+                ))
+                .setTangentHeadingInterpolation()
+                .build();
     }
     public void buildPreload3ToShootings(){
         farPreload_to_nearShoot = follower.pathBuilder()
@@ -304,6 +323,13 @@ public class Pedro_Paths {
                         farShoot
                 ))
                 .setLinearHeadingInterpolation(midPreload.getHeading(), farShoot.getHeading())
+                .build();
+        farPreload_to_midShoot = follower.pathBuilder()
+                .addPath(new BezierLine(
+                        farPreload,
+                        nearLeave
+                ))
+                .setTangentHeadingInterpolation()
                 .build();
     }
     public void buildShooting1ToPreloads(){

@@ -6,6 +6,7 @@ import static org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_
 import androidx.annotation.NonNull;
 
 import com.pedropathing.geometry.BezierLine;
+import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
 import com.skeletonarmy.marrow.TimerEx;
 
@@ -113,6 +114,22 @@ public class Commands {
         return new ParallelRaceGroup(
                 new Delay(0.7),
                 new WaitUntil(() -> (Robot.intake.getTopSensorState()))
+        );
+    }
+
+    public Command leaveAtEnd(Command auto, Pose leavePose){
+        return new SequentialGroup(
+                new ParallelRaceGroup(
+                        new Delay(29),
+                        auto
+                ),
+                runPath(
+                        Robot.drivetrain.follower.pathBuilder().addPath(
+                                new BezierLine(
+                                        Robot.drivetrain.follower.getPose(),
+                                        leavePose
+                                )
+                        ).setTangentHeadingInterpolation().build(), true, 1)
         );
     }
 

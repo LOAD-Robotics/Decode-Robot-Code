@@ -17,13 +17,16 @@ import com.pedropathing.util.PoseHistory;
  * @version 1.1, 5/19/2025
  */
 public class Drawing {
-    public static final double ROBOT_RADIUS = 9; // woah
+    public static double ROBOT_RADIUS = 9; // woah
     private static final FieldManager panelsField = PanelsField.INSTANCE.getField();
 
-    private static final Style robotLook = new Style(
+    public static final Style robotLook = new Style(
             "", "#3F51B5", 0.75
     );
-    private static final Style historyLook = new Style(
+    public static final Style turretLook = new Style(
+            "", "#3F51B5", 0.75
+    );
+    public static final Style historyLook = new Style(
             "", "#4CAF50", 0.75
     );
 

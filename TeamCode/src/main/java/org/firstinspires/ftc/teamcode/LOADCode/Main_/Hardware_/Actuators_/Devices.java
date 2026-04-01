@@ -529,8 +529,10 @@ public class Devices {
         /**
          * Updates the current result of the limelight camera. <br>
          * Must be called every loop.
+         * @param robotHeading the current heading of the robot, used for more accurate 3D tracking
          */
-        public void updateResult(){
+        public void updateResult(double robotHeading){
+            device.updateRobotOrientation(robotHeading);
             result = device.getLatestResult();
         }
 

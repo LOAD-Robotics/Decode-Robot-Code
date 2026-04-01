@@ -15,6 +15,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.LoadHardwareClass;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Utils_;
 
+import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
 import dev.nextftc.control.ControlSystem;
@@ -93,6 +94,12 @@ public class Turret {
      * Indicates which aiming system is in use.
      */
     public boolean cameraAimOn = false;
+
+    public ArrayList<Double> errorList = new ArrayList<>();
+    public ArrayList<Boolean> llValidList = new ArrayList<>();
+    private double rawCameraError = 0;
+    public double smoothedCameraError = 0;
+    public static int averageErrorDatasetSize = 8;
 
     // Stores important objects for later access
     OpMode opMode = null;
@@ -198,7 +205,9 @@ public class Turret {
 
         if (oldCameraCoefficients != cameraCoefficients){
             oldCameraCoefficients = cameraCoefficients;
-            cameraPID = ControlSystem.builder().posPid(cameraCoefficients).build();
+            cameraPID = ControlSystem.builder()
+                    .posPid(cameraCoefficients)
+                    .build();
         }
     }
 
@@ -233,7 +242,7 @@ public class Turret {
      * Must be called every loop to function properly.
      */
     private void updateRotationalAimbot(){
-        limelight.updateResult();
+        limelight.updateResult(Math.toDegrees(Robot.drivetrain.follower.getHeading()));
 
         cameraPID.setGoal(new KineticState(0, -Math.toDegrees(Robot.drivetrain.follower.getAngularVelocity())));
 
@@ -246,21 +255,50 @@ public class Turret {
             minPower = 0;
         }
 
-        if (limelight.result != null && limelight.result.isValid()){
+        llValidList.add(0, limelight.result != null && limelight.result.isValid());
+        if (llValidList.size() > 8){
+            llValidList.remove(8);
+        }
+        int validCount = 0;
+        for (int i = 0; i < llValidList.size(); i++){
+            if (llValidList.get(i) == true){
+                validCount++;
+            }
+        }
+        boolean llIsValid = validCount > 4;
+
+        if (llIsValid){
             cameraAimOn = true;
-            double error = limelight.result.getTx();
+            if (limelight.result != null && limelight.result.isValid()){
+                rawCameraError = limelight.result.getTx();
+            }
+
+            // Calculate Average Camera Error
+            errorList.add(0, rawCameraError);
+            while (errorList.size() > averageErrorDatasetSize){
+                errorList.remove(averageErrorDatasetSize);
+            }
+            double error = 0;
+            for (int i = 0; i < errorList.size(); i++){
+                error += errorList.get(i);
+            }
+            error = error/errorList.size();
+            smoothedCameraError = error;
+
             double power = cameraPID.calculate(
                     new KineticState(
-                            limelight.result.getTx()/100,
+                            rawCameraError/100,
                             Robot.turret.rotation.getDegreesPerSecond()
                     )
             );
-            if (Math.abs(error) > 0.75){
+            if (Math.abs(error) > 0.5){
                 Robot.turret.rotation.setPower(Math.min(Math.max(power, minPower), maxPower));
             }else{
                 Robot.turret.rotation.setPower(0);
             }
         }else{
+            errorList.clear();
+            smoothedCameraError = 0;
             cameraAimOn = false;
             rotation.setAngle(Math.min(Math.max(0, rotationalAimbotLocalizer()), 360), -Math.toDegrees(Robot.drivetrain.follower.getAngularVelocity()));
         }

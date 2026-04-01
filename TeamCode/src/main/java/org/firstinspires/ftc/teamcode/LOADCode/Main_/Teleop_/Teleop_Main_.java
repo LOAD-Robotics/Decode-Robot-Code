@@ -89,6 +89,7 @@ public class Teleop_Main_ extends LinearOpMode {
     public Pose holdPoint = new Pose(72, 72, 90);
     public Boolean holdJustTriggered = false;
 
+
     // Create a new instance of our Robot class
     LoadHardwareClass Robot = new LoadHardwareClass(this);
     // Create a new Paths instance
@@ -260,7 +261,8 @@ public class Teleop_Main_ extends LinearOpMode {
 
             // Turret Rotation Telemetry
             telemetry.addData("Camera Aim On", Robot.turret.cameraAimOn);
-            telemetry.addData("Camera Error", Robot.turret.limelight.result.getTx());
+            telemetry.addData("Raw Camera Error", Robot.turret.limelight.result.getTx());
+            telemetry.addData("Smoothed Camera Error", Robot.turret.smoothedCameraError);
             panelsTelemetry.addData("0 Line", 0);
             telemetry.addData("TurretState", teleopTurretState);
             telemetry.addData("Turret Target Angle", Robot.turret.rotation.target);
@@ -290,12 +292,16 @@ public class Teleop_Main_ extends LinearOpMode {
             telemetry.addData("Version: ", "2/13/25");
             telemetry.update();
 
+            Drawing.ROBOT_RADIUS = 9;
             Drawing.drawRobot(Robot.drivetrain.follower.getPose());
+            Drawing.ROBOT_RADIUS = 5;
+            Drawing.drawRobot(Robot.drivetrain.follower.getPose().setHeading(Robot.turret.rotation.getAngle()-(Math.PI/2)+Robot.drivetrain.follower.getHeading()), Drawing.turretLook);
             Drawing.sendPacket();
         }
 
         selectedAlliance = null;
         isLiftAttached = null;
+        Turret.zeroed = false;
     }
 
     /**
@@ -375,6 +381,10 @@ public class Teleop_Main_ extends LinearOpMode {
                 Robot.drivetrain.follower.setPose(new Pose(7, 7, Math.toRadians(90)));
             }else if (selectedAlliance == LoadHardwareClass.Alliance.BLUE){
                 Robot.drivetrain.follower.setPose(new Pose(137, 7, Math.toRadians(90)));
+            }
+            Turret.zeroed = false;
+            while (!isStopRequested() && Robot.turret.zeroTurret()){
+                Robot.sleep(0);
             }
         }
 
