@@ -41,7 +41,8 @@ public class Turret {
     public ControlSystem cameraPID = ControlSystem.builder().posPid(cameraCoefficients).build();
 
     // Turret PID coefficients
-    public static PIDCoefficients turretCoefficients = new PIDCoefficients(0.025, 0.0000000001, 0.002); // 223RPM Motor
+    public static PIDCoefficients turretCoefficients = new PIDCoefficients(0, 0, 0); // 223RPM Motor
+    public static double turretConstantFF = 0;
 
     // Flywheel PID coefficients for various speeds
     //public static PIDCoefficients flywheelCoefficients = new PIDCoefficients(0.0002, 0, 0); // 4500 RPM
@@ -120,7 +121,7 @@ public class Turret {
         }
 
         // Initialize hardware objects
-        rotation.init(opmode, "turret", 751.8 * ((double) 131 / 36));
+        rotation.init(opmode, "turret", 384.5 * ((double) 131 / 36));
         flywheel.init(opmode, "flywheel", 28);
         flywheel2.init(opmode, "flywheel2", 28);
         hood.init(opmode, "hood");
@@ -145,6 +146,7 @@ public class Turret {
         rotation.setZeroPowerBehaviour(DcMotor.ZeroPowerBehavior.BRAKE);
         rotation.setDirection(DcMotorSimple.Direction.REVERSE);
         rotation.setOffsetDegrees(turretOffset);
+        rotation.constantFFparameter = turretConstantFF;
         rotation.maxAcceptableError = new KineticState(5, 2);
 
         // Pass PID pidCoefficients to motor classes
@@ -197,6 +199,7 @@ public class Turret {
     public void updatePIDs(){
         // Pass PID pidCoefficients to motor classes
         rotation.setPidCoefficients(turretCoefficients);
+        rotation.constantFFparameter = turretConstantFF;
         flywheel.setPidCoefficients(actualFlywheelCoefficients);
         flywheel.setFFCoefficients(actualFlywheelFFCoefficients);
         flywheel2.setPidCoefficients(actualFlywheelCoefficients);
@@ -244,7 +247,7 @@ public class Turret {
     private void updateRotationalAimbot(){
         limelight.updateResult(Math.toDegrees(Robot.drivetrain.follower.getHeading()));
 
-        cameraPID.setGoal(new KineticState(0, -Math.toDegrees(Robot.drivetrain.follower.getAngularVelocity())));
+        cameraPID.setGoal(new KineticState(0));
 
         double maxPower = 1;
         double minPower = -1;
@@ -255,52 +258,23 @@ public class Turret {
             minPower = 0;
         }
 
-        llValidList.add(0, limelight.result != null && limelight.result.isValid());
-        if (llValidList.size() > 8){
-            llValidList.remove(8);
-        }
-        int validCount = 0;
-        for (int i = 0; i < llValidList.size(); i++){
-            if (llValidList.get(i) == true){
-                validCount++;
-            }
-        }
-        boolean llIsValid = validCount > 4;
-
-        if (llIsValid){
+        if (false && limelight.result != null && limelight.result.isValid()){
             cameraAimOn = true;
-            if (limelight.result != null && limelight.result.isValid()){
-                rawCameraError = limelight.result.getTx();
-            }
-
-            // Calculate Average Camera Error
-            errorList.add(0, rawCameraError);
-            while (errorList.size() > averageErrorDatasetSize){
-                errorList.remove(averageErrorDatasetSize);
-            }
             double error = 0;
-            for (int i = 0; i < errorList.size(); i++){
-                error += errorList.get(i);
+            if (limelight.result != null && limelight.result.isValid()){
+                error = limelight.result.getTx();
             }
-            error = error/errorList.size();
-            smoothedCameraError = error;
 
-            double power = cameraPID.calculate(
-                    new KineticState(
-                            rawCameraError/100,
-                            Robot.turret.rotation.getDegreesPerSecond()
-                    )
-            );
+            double power = cameraPID.calculate(new KineticState(error, Robot.turret.rotation.getDegreesPerSecond()));
+
             if (Math.abs(error) > 0.5){
                 Robot.turret.rotation.setPower(Math.min(Math.max(power, minPower), maxPower));
             }else{
                 Robot.turret.rotation.setPower(0);
             }
         }else{
-            errorList.clear();
-            smoothedCameraError = 0;
             cameraAimOn = false;
-            rotation.setAngle(Math.min(Math.max(0, rotationalAimbotLocalizer()), 360), -Math.toDegrees(Robot.drivetrain.follower.getAngularVelocity()));
+            rotation.setAngle(Math.min(Math.max(0, rotationalAimbotLocalizer()), 360));
         }
 
         if (selectedAlliance == LoadHardwareClass.Alliance.RED){
@@ -470,7 +444,7 @@ public class Turret {
                         rotation.resetEncoder();
                         zeroed = true;
                     }
-                    if (rotation.getCurrent(CurrentUnit.AMPS) > 7){
+                    if (rotation.getCurrent(CurrentUnit.AMPS) > 20){
                         zeroingState = 1;
                         zeroingTimer.restart();
                     }

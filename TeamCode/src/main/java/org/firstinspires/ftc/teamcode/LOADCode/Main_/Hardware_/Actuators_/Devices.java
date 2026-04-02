@@ -129,6 +129,8 @@ public class Devices {
         // PID Coefficients
         PIDCoefficients pidCoefficients = new PIDCoefficients(0, 0, 0);
         BasicFeedforwardParameters ffCoefficients = new BasicFeedforwardParameters(0,0,0);
+
+        public double constantFFparameter = 0;
         /**
          * <h4>Encoder ticks/rotation:</h4><br>
          *      1620rpm Gobilda - 103.8<br>
@@ -176,7 +178,9 @@ public class Devices {
          */
         private void buildPIDs(){
             if (old_pidCoefficients != pidCoefficients || old_ffCoefficients != ffCoefficients){
-                posPID = ControlSystem.builder().posPid(pidCoefficients).build();
+                posPID = ControlSystem.builder().
+                        posPid(pidCoefficients)
+                        .build();
                 velPID = ControlSystem.builder()
                         .velPid(pidCoefficients)
                         .basicFF(ffCoefficients)
@@ -317,11 +321,12 @@ public class Devices {
             buildPIDs();
             KineticState currentKineticState = new KineticState(getAngleAbsolute(), getDegreesPerSecond());
             posPID.setGoal(new KineticState(target, velocity));
-            if (!posPID.isWithinTolerance(maxAcceptableError)){
-                setPower(posPID.calculate(currentKineticState));
-            }else{
-                setPower(0);
-            }
+//            if (!posPID.isWithinTolerance(maxAcceptableError)){
+            double pidPower = posPID.calculate(currentKineticState);
+            setPower(pidPower + Math.signum(pidPower) * constantFFparameter);
+//            }else{
+//                setPower(0);
+//            }
         }
 
         /**

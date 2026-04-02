@@ -40,6 +40,7 @@ import com.bylazar.telemetry.JoinedTelemetry;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
 import com.pedropathing.geometry.Pose;
+import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -58,6 +59,7 @@ import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Drivetrain_.Mecan
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Drivetrain_.Pedro_Paths;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.LoadHardwareClass;
 
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 
@@ -123,6 +125,12 @@ public class Teleop_Main_ extends LinearOpMode {
 
     @Override
     public void runOpMode() {
+
+        List<LynxModule> allHubs = hardwareMap.getAll(LynxModule.class);
+
+        for (LynxModule hub : allHubs) {
+            hub.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
+        }
 
         // Create a new prompter for selecting alliance
         prompter = new Prompter(this);
@@ -196,6 +204,9 @@ public class Teleop_Main_ extends LinearOpMode {
         if (!Turret.zeroed){
             while (!isStopRequested() && Robot.turret.zeroTurret()){
                 Robot.sleep(0);
+                for (LynxModule hub : allHubs) {
+                    hub.clearBulkCache();
+                }
             }
         }
 
@@ -297,6 +308,10 @@ public class Teleop_Main_ extends LinearOpMode {
             Drawing.ROBOT_RADIUS = 5;
             Drawing.drawRobot(Robot.drivetrain.follower.getPose().setHeading(Robot.turret.rotation.getAngle()-(Math.PI/2)+Robot.drivetrain.follower.getHeading()), Drawing.turretLook);
             Drawing.sendPacket();
+
+            for (LynxModule hub : allHubs) {
+                hub.clearBulkCache();
+            }
         }
 
         selectedAlliance = null;

@@ -29,8 +29,6 @@
 
 package org.firstinspires.ftc.teamcode.LOADCode.Main_.Teleop_;
 
-import static org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.LoadHardwareClass.isLiftAttached;
-
 import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.JoinedTelemetry;
 import com.bylazar.telemetry.PanelsTelemetry;
@@ -41,6 +39,8 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
+import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Turret;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.LoadHardwareClass;
 
 import java.util.concurrent.TimeUnit;
@@ -57,11 +57,20 @@ public class Teleop_Testing_ extends LinearOpMode {
     private final JoinedTelemetry telemetry = new JoinedTelemetry(ftcTelemetry, panelsTelemetry);
     public LoadHardwareClass Robot = new LoadHardwareClass(this);
 
+    double target = 90;
+
     @Override
     public void runOpMode() {
 
         Robot.init(new Pose(0,0,0));
-        isLiftAttached = LoadHardwareClass.IsLiftAttached.YES;
+
+        Turret.zeroed = false;
+
+        while (!isStopRequested() && Robot.turret.zeroTurret()){
+            Robot.sleep(0);
+            telemetry.addData("Current", Robot.turret.rotation.getCurrent(CurrentUnit.AMPS));
+            telemetry.update();
+        }
 
         // Wait for the game to start (driver presses START)
         waitForStart();
@@ -70,17 +79,28 @@ public class Teleop_Testing_ extends LinearOpMode {
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
 
-            Robot.lift.update();
+            Robot.turret.updatePIDs();
+
+            if (gamepad1.dpadLeftWasPressed()){
+                target = 180;
+            }
+            if (gamepad1.dpadRightWasPressed()){
+                target = 0;
+            }
             if (gamepad1.dpadUpWasPressed()){
-                if (isLiftAttached == LoadHardwareClass.IsLiftAttached.YES){
-                    Robot.lift.activate();
-                }
+                target = 90;
             }
             if (gamepad1.dpadDownWasPressed()){
-                Robot.lift.liftIsActivated = false;
-                Robot.lift.lift1IsDone = false;
-                Robot.lift.lift2IsDone = false;
+                target = 270;
             }
+
+            Robot.turret.rotation.setAngle(target);
+
+            telemetry.addData("Target", target);
+            telemetry.addData("Actual", Robot.turret.rotation.getAngleAbsolute());
+            telemetry.addData("Power", Robot.turret.rotation.getPower());
+            telemetry.addData("Current", Robot.turret.rotation.getCurrent(CurrentUnit.AMPS));
+            telemetry.addData("FF", Robot.turret.rotation.constantFFparameter);
 
             telemetry.addData("Loop Time (ms)", loopTimer.time(TimeUnit.MILLISECONDS));
             telemetry.update();
