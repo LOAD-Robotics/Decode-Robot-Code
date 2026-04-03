@@ -393,9 +393,9 @@ public class Teleop_Main_ extends LinearOpMode {
 
         if (gamepad1.bWasPressed()){
             if (selectedAlliance == LoadHardwareClass.Alliance.RED){
-                Robot.drivetrain.follower.setPose(new Pose(7, 7, Math.toRadians(90)));
+                Robot.drivetrain.follower.setPose(new Pose(9.6, 7.1, Math.toRadians(90)));
             }else if (selectedAlliance == LoadHardwareClass.Alliance.BLUE){
-                Robot.drivetrain.follower.setPose(new Pose(137, 7, Math.toRadians(90)));
+                Robot.drivetrain.follower.setPose(new Pose(144-9.6, 7.1, Math.toRadians(90)));
             }
             Turret.zeroed = false;
             while (!isStopRequested() && Robot.turret.zeroTurret()){

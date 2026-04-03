@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_;
 
 import androidx.annotation.NonNull;
 
+import com.bylazar.configurables.annotations.Configurable;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -120,6 +121,7 @@ public class Devices {
 
 
     }
+    @Configurable
     public static class DcMotorExClass {
 
         // Old PID Coefficients
@@ -323,11 +325,21 @@ public class Devices {
             posPID.setGoal(new KineticState(target, velocity));
 //            if (!posPID.isWithinTolerance(maxAcceptableError)){
             double pidPower = posPID.calculate(currentKineticState);
-            setPower(pidPower + Math.signum(pidPower) * constantFFparameter);
+            setPower(pidPower + fancySignum(pidPower) * constantFFparameter);
 //            }else{
 //                setPower(0);
 //            }
         }
+
+        private double fancySignum(double in){
+            if (in >= 0){
+                return 1;
+            } else {
+                return -fancySigMult;
+            }
+        }
+
+        public static double fancySigMult = 1;
 
         /**
          * Uses a PID controller to accelerate the motor to the desired RPM.<br>

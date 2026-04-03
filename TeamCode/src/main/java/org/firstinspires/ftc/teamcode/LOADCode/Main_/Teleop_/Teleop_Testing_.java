@@ -88,10 +88,10 @@ public class Teleop_Testing_ extends LinearOpMode {
                 target = 0;
             }
             if (gamepad1.dpadUpWasPressed()){
-                target = 90;
+                target = 93;
             }
             if (gamepad1.dpadDownWasPressed()){
-                target = 270;
+                target = 90;
             }
 
             Robot.turret.rotation.setAngle(target);

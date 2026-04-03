@@ -41,8 +41,8 @@ public class Turret {
     public ControlSystem cameraPID = ControlSystem.builder().posPid(cameraCoefficients).build();
 
     // Turret PID coefficients
-    public static PIDCoefficients turretCoefficients = new PIDCoefficients(0, 0, 0); // 223RPM Motor
-    public static double turretConstantFF = 0;
+    public static PIDCoefficients turretCoefficients = new PIDCoefficients(0.035, 0, 0.001); // 223RPM Motor
+    public static double turretConstantFF = 0.003;
 
     // Flywheel PID coefficients for various speeds
     //public static PIDCoefficients flywheelCoefficients = new PIDCoefficients(0.0002, 0, 0); // 4500 RPM
@@ -147,7 +147,7 @@ public class Turret {
         rotation.setDirection(DcMotorSimple.Direction.REVERSE);
         rotation.setOffsetDegrees(turretOffset);
         rotation.constantFFparameter = turretConstantFF;
-        rotation.maxAcceptableError = new KineticState(5, 2);
+        rotation.maxAcceptableError = new KineticState(0.5, 2);
 
         // Pass PID pidCoefficients to motor classes
         rotation.setPidCoefficients(turretCoefficients);
