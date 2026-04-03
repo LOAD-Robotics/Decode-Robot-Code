@@ -258,7 +258,7 @@ public class Pedro_Paths {
                 ))
                 .setLinearHeadingInterpolation(nearPreload.getHeading(), farShoot.getHeading())
                 .build();
-        nearPreload_to_midShoot = follower.pathBuilder()
+        nearPreload_to_nearLeave = follower.pathBuilder()
                 .addPath(new BezierLine(
                         nearPreload,
                         nearLeave
@@ -291,7 +291,7 @@ public class Pedro_Paths {
                 ))
                 .setLinearHeadingInterpolation(midPreload.getHeading(), farShoot.getHeading())
                 .build();
-        midPreload_to_midShoot = follower.pathBuilder()
+        midPreload_to_nearLeave = follower.pathBuilder()
                 .addPath(new BezierLine(
                         midPreload,
                         nearLeave
@@ -324,7 +324,7 @@ public class Pedro_Paths {
                 ))
                 .setLinearHeadingInterpolation(midPreload.getHeading(), farShoot.getHeading())
                 .build();
-        farPreload_to_midShoot = follower.pathBuilder()
+        farPreload_to_nearLeave = follower.pathBuilder()
                 .addPath(new BezierLine(
                         farPreload,
                         nearLeave
