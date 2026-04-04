@@ -444,7 +444,7 @@ public class Turret {
                         rotation.resetEncoder();
                         zeroed = true;
                     }
-                    if (rotation.getCurrent(CurrentUnit.AMPS) > 20){
+                    if (rotation.getCurrent(CurrentUnit.AMPS) > 8){
                         zeroingState = 1;
                         zeroingTimer.restart();
                     }

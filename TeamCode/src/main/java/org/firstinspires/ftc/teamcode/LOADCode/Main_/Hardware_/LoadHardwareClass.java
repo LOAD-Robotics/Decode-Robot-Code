@@ -38,7 +38,6 @@ import com.skeletonarmy.marrow.zones.PolygonZone;
 
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Devices;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Intake;
-import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Lift;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Turret;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Drivetrain_.MecanumDrivetrainClass;
 
@@ -56,12 +55,10 @@ public class LoadHardwareClass {
     public final MecanumDrivetrainClass drivetrain;
     public final Turret turret;
     public final Intake intake;
-    public final Lift lift;
     public final Devices.GoBildaPrismBarClass lights;
 
     // Declare various enums & other variables that are useful across files
     public static Alliance selectedAlliance = null;
-    public static IsLiftAttached isLiftAttached = null;
     public Pose goalPose = new Pose(144, 144);
 
     public enum IsLiftAttached {
@@ -107,7 +104,6 @@ public class LoadHardwareClass {
         this.drivetrain = new MecanumDrivetrainClass();
         this.turret     = new Turret();
         this.intake     = new Intake();
-        this.lift       = new Lift();
         this.lights     = new Devices.GoBildaPrismBarClass();
     }
 
@@ -133,7 +129,6 @@ public class LoadHardwareClass {
     private void init(){
         turret.init(myOpMode, this);
         intake.init(myOpMode);
-        lift.init(myOpMode);
         lights.init(myOpMode, 36);
 
         // Misc telemetry
@@ -141,4 +136,11 @@ public class LoadHardwareClass {
         myOpMode.telemetry.update();
     }
 
+    public void updatePanelsDrawing(){
+        Drawing.ROBOT_RADIUS = 9;
+        Drawing.drawRobot(drivetrain.follower.getPose());
+        Drawing.ROBOT_RADIUS = 4;
+        Drawing.drawRobot(drivetrain.follower.getPose().setHeading(turret.rotation.getAngle()-(Math.PI/2)+drivetrain.follower.getHeading()), Drawing.turretLook);
+        Drawing.sendPacket();
+    }
 }

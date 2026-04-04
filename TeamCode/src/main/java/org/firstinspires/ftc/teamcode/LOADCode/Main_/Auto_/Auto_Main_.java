@@ -2,13 +2,11 @@ package org.firstinspires.ftc.teamcode.LOADCode.Main_.Auto_;
 
 import static org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Intake.intakeMode.OFF;
 import static org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Intake.intakeMode.ON;
-import static org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.LoadHardwareClass.isLiftAttached;
 import static org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.LoadHardwareClass.selectedAlliance;
 import static dev.nextftc.extensions.pedro.PedroComponent.follower;
 
 import androidx.annotation.NonNull;
 
-import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.skeletonarmy.marrow.TimerEx;
@@ -17,16 +15,13 @@ import com.skeletonarmy.marrow.prompts.Prompter;
 
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Turret;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Commands;
-import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Drawing;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Drivetrain_.MecanumDrivetrainClass;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Drivetrain_.Pedro_Paths;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.LoadHardwareClass;
-import org.firstinspires.ftc.teamcode.pedroPathing.Constants_NoLift;
+import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 import dev.nextftc.core.commands.Command;
-import dev.nextftc.core.commands.delays.Delay;
 import dev.nextftc.core.commands.delays.WaitUntil;
-import dev.nextftc.core.commands.groups.ParallelRaceGroup;
 import dev.nextftc.core.commands.groups.SequentialGroup;
 import dev.nextftc.core.commands.utility.InstantCommand;
 import dev.nextftc.extensions.pedro.PedroComponent;
@@ -53,17 +48,13 @@ public class Auto_Main_ extends NextFTCOpMode {
     @SuppressWarnings("unused")
     public Auto_Main_() {
         addComponents(
-                new PedroComponent(Constants_NoLift::createFollower)
+                new PedroComponent(Constants::createFollower)
         );
     }
 
     @Override
     public void onInit() {
         prompter = new Prompter(this);
-        prompter.prompt("lift", new OptionPrompt<>("Is Lift Attached?",
-                LoadHardwareClass.IsLiftAttached.NO,
-                LoadHardwareClass.IsLiftAttached.YES
-        ));
         prompter.prompt("alliance",
                 new OptionPrompt<>("Select Alliance",
                         LoadHardwareClass.Alliance.RED,
@@ -81,7 +72,6 @@ public class Auto_Main_ extends NextFTCOpMode {
                         new Far_9Ball()
                 ));
         prompter.onComplete(() -> {
-            isLiftAttached = prompter.get("lift");
             selectedAlliance = prompter.get("alliance");
             selectedAuto = prompter.get("auto");
             telemetry.update();
@@ -130,9 +120,7 @@ public class Auto_Main_ extends NextFTCOpMode {
         Robot.turret.updateFlywheel(0);
         MecanumDrivetrainClass.robotPose = Robot.drivetrain.follower.getPose();
         telemetry.update();
-        Drawing.drawRobot(Robot.drivetrain.follower.getPose());
-        Drawing.drawPoseHistory(Robot.drivetrain.follower.getPoseHistory());
-        Drawing.sendPacket();
+        Robot.updatePanelsDrawing();
     }
 
     @Override
@@ -365,44 +353,29 @@ public class Auto_Main_ extends NextFTCOpMode {
         @Override
         public Command runAuto(){
             return new SequentialGroup(
-                    new ParallelRaceGroup(
-                            new Delay(29),
-                            new SequentialGroup(
-                                    new InstantCommand(Commands.setFlywheelState(Turret.flywheelState.ON)),
-                                    Commands.runPath(paths.nearStart_to_midShoot, true, 1),
-                                    Commands.shootBalls(),
-                                    Commands.setIntakeMode(ON, ON),
-                                    Commands.runPath(paths.midShoot_to_midPreload, true, 1),
-                                    Commands.setIntakeMode(OFF, ON),
-                                    Commands.runPath(paths.midPreload_to_midShoot, true, 1),
-                                    Commands.shootBalls(),
-                                    Commands.setIntakeMode(ON, ON),
-                                    Commands.runPath(paths.midShoot_to_openGateIntake, true, 1),
-                                    Commands.waitForArtifacts(),
-                                    Commands.runPath(paths.openGateIntake_to_midShoot, true, 1),
-                                    Commands.shootBalls(),
-                                    Commands.setIntakeMode(ON, ON),
-                                    Commands.runPath(paths.midShoot_to_farPreload, true, 1),
-                                    Commands.setIntakeMode(OFF, ON),
-                                    Commands.runPath(paths.farPreload_to_midShoot, true, 1),
-                                    Commands.shootBalls(),
-                                    Commands.setIntakeMode(ON, ON),
-                                    Commands.runPath(paths.midShoot_to_nearPreload, true, 1),
-                                    Commands.setIntakeMode(OFF, ON),
-                                    Commands.runPath(paths.nearPreload_to_nearLeave, false, 1),
-                                    Commands.shootBalls()
-                            )
-                    ),
-                    Commands.runPath(
-                            Robot.drivetrain.follower.pathBuilder().addPath(
-                                    new BezierLine(
-                                            Robot.drivetrain.follower.getPose(),
-                                            paths.nearLeave
-                                    )
-                            ).setLinearHeadingInterpolation(
-                                    Robot.drivetrain.follower.getPose().getHeading(),
-                                    paths.farLeave.getHeading()
-                            ).build(), true, 1)
+                    new InstantCommand(Commands.setFlywheelState(Turret.flywheelState.ON)),
+                    Commands.runPath(paths.nearStart_to_midShoot, true, 1),
+                    Commands.shootBalls(),
+                    Commands.setIntakeMode(ON, ON),
+                    Commands.runPath(paths.midShoot_to_midPreload, true, 1),
+                    Commands.setIntakeMode(OFF, ON),
+                    Commands.runPath(paths.midPreload_to_midShoot, true, 1),
+                    Commands.shootBalls(),
+                    Commands.setIntakeMode(ON, ON),
+                    Commands.runPath(paths.midShoot_to_openGateIntake, true, 1),
+                    Commands.waitForArtifacts(),
+                    Commands.runPath(paths.openGateIntake_to_midShoot, true, 1),
+                    Commands.shootBalls(),
+                    Commands.setIntakeMode(ON, ON),
+                    Commands.runPath(paths.midShoot_to_farPreload, true, 1),
+                    Commands.setIntakeMode(OFF, ON),
+                    Commands.runPath(paths.farPreload_to_midShoot, true, 1),
+                    Commands.shootBalls(),
+                    Commands.setIntakeMode(ON, ON),
+                    Commands.runPath(paths.midShoot_to_nearPreload, true, 1),
+                    Commands.setIntakeMode(OFF, ON),
+                    Commands.runPath(paths.nearPreload_to_nearLeave, false, 1),
+                    Commands.shootBalls()
             );
         }
 
@@ -484,41 +457,26 @@ public class Auto_Main_ extends NextFTCOpMode {
         @Override
         public Command runAuto(){
             return new SequentialGroup(
-                    new ParallelRaceGroup(
-                            new Delay(29),
-                            new SequentialGroup(
-                                    Commands.setFlywheelState(Turret.flywheelState.ON),
-                                    Commands.runPath(paths.farStart_to_farShoot, true, 1),
-                                    Commands.shootBalls(),
-                                    Commands.setIntakeMode(ON, ON),
-                                    Commands.runPath(paths.farShoot_to_farPreload, true, 1),
-                                    Commands.runPath(paths.farPreload_to_farShoot, true, 1),
-                                    Commands.shootBalls(),
-                                    Commands.setIntakeMode(ON, ON),
-                                    Commands.runPath(paths.farShoot_to_rampIntake, true, 1),
-                                    Commands.runPath(paths.rampIntake_to_farShoot, true, 1),
-                                    Commands.shootBalls(),
-                                    Commands.setIntakeMode(ON, ON),
-                                    Commands.runPath(paths.farShoot_to_hpPreload, true, 1),
-                                    Commands.runPath(paths.hpPreload_to_farShoot, true, 1),
-                                    Commands.shootBalls(),
-                                    Commands.setIntakeMode(ON, ON),
-                                    Commands.runPath(paths.farShoot_to_hpPreload, true, 1),
-                                    Commands.runPath(paths.hpPreload_to_farShoot, true, 1),
-                                    Commands.shootBalls(),
-                                    Commands.runPath(paths.farShoot_to_farLeave, true, 1)
-                            )
-                    ),
-                    Commands.runPath(
-                            Robot.drivetrain.follower.pathBuilder().addPath(
-                                    new BezierLine(
-                                            Robot.drivetrain.follower.getPose(),
-                                            paths.farLeave
-                                    )
-                            ).setLinearHeadingInterpolation(
-                                    Robot.drivetrain.follower.getPose().getHeading(),
-                                    paths.farLeave.getHeading()
-                            ).build(), true, 1)
+                    Commands.setFlywheelState(Turret.flywheelState.ON),
+                    Commands.runPath(paths.farStart_to_farShoot, true, 1),
+                    Commands.shootBalls(),
+                    Commands.setIntakeMode(ON, ON),
+                    Commands.runPath(paths.farShoot_to_farPreload, true, 1),
+                    Commands.runPath(paths.farPreload_to_farShoot, true, 1),
+                    Commands.shootBalls(),
+                    Commands.setIntakeMode(ON, ON),
+                    Commands.runPath(paths.farShoot_to_rampIntake, true, 1),
+                    Commands.runPath(paths.rampIntake_to_farShoot, true, 1),
+                    Commands.shootBalls(),
+                    Commands.setIntakeMode(ON, ON),
+                    Commands.runPath(paths.farShoot_to_hpPreload, true, 1),
+                    Commands.runPath(paths.hpPreload_to_farShoot, true, 1),
+                    Commands.shootBalls(),
+                    Commands.setIntakeMode(ON, ON),
+                    Commands.runPath(paths.farShoot_to_hpPreload, true, 1),
+                    Commands.runPath(paths.hpPreload_to_farShoot, true, 1),
+                    Commands.shootBalls(),
+                    Commands.runPath(paths.farShoot_to_farLeave, true, 1)
             );
         }
 

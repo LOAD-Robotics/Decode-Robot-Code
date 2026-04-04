@@ -32,7 +32,6 @@ package org.firstinspires.ftc.teamcode.LOADCode.Main_.Teleop_;
 import static org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Intake.intakeMode.OFF;
 import static org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Intake.intakeMode.ON;
 import static org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Intake.intakeMode.REVERSE;
-import static org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.LoadHardwareClass.isLiftAttached;
 import static org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.LoadHardwareClass.selectedAlliance;
 
 import com.bylazar.configurables.annotations.Configurable;
@@ -49,12 +48,12 @@ import com.skeletonarmy.marrow.prompts.OptionPrompt;
 import com.skeletonarmy.marrow.prompts.Prompter;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Intake.intakeMode;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Intake.transferState;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Turret;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Turret.flywheelState;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Turret.gatestate;
-import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Drawing;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Drivetrain_.MecanumDrivetrainClass;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Drivetrain_.Pedro_Paths;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.LoadHardwareClass;
@@ -134,16 +133,6 @@ public class Teleop_Main_ extends LinearOpMode {
 
         // Create a new prompter for selecting alliance
         prompter = new Prompter(this);
-        prompter.prompt("lift", () -> {
-            if (isLiftAttached == null){
-                return new OptionPrompt<>("Is Lift Attached?",
-                        LoadHardwareClass.IsLiftAttached.NO,
-                        LoadHardwareClass.IsLiftAttached.YES
-                        );
-            }else{
-                return null;
-            }
-        });
         prompter.prompt("alliance", () -> {
             if (selectedAlliance == null){
                 return new OptionPrompt<>("Select Alliance", LoadHardwareClass.Alliance.RED, LoadHardwareClass.Alliance.BLUE);
@@ -165,9 +154,6 @@ public class Teleop_Main_ extends LinearOpMode {
         prompter.onComplete(() -> {
             if (selectedAlliance == null){
                 selectedAlliance = prompter.get("alliance");
-            }
-            if (isLiftAttached == null){
-                isLiftAttached = prompter.get("lift");
             }
             telemetry.addData("Selection", "Complete");
             telemetry.addData("Alliance", selectedAlliance);
@@ -263,13 +249,6 @@ public class Teleop_Main_ extends LinearOpMode {
             telemetry.addData("Angular Velocity (Deg/sec)", Math.toDegrees(Robot.drivetrain.follower.getAngularVelocity()));
             telemetry.addLine();
 
-            //Lift Telemetry
-            telemetry.addData("Lift Active", Robot.lift.liftIsActivated);
-            telemetry.addData("Lift Percent", Robot.lift.getLiftPercentage());
-            telemetry.addData("Lift1 Rotations", Robot.lift.getLift1Rotations());
-            telemetry.addData("Lift2 Rotations", Robot.lift.getLift2Rotations());
-            telemetry.addLine();
-
             // Turret Rotation Telemetry
             telemetry.addData("Camera Aim On", Robot.turret.cameraAimOn);
             telemetry.addData("Raw Camera Error", Robot.turret.limelight.result.getTx());
@@ -282,6 +261,7 @@ public class Teleop_Main_ extends LinearOpMode {
             telemetry.addData("Turret Rotation Offset", turretOffsetStep);
             telemetry.addData("Turret Set Power", Robot.turret.rotation.getPower());
             telemetry.addData("Turret Target [X, Y]", "[" + Robot.turret.calcGoalPose().getX() + ", " + Robot.turret.calcGoalPose().getY() + "]");
+            telemetry.addData("Turret Rotation Motor Current", Robot.turret.rotation.getCurrent(CurrentUnit.AMPS));
             telemetry.addLine();
 
             // Turret Hood Telemetry
@@ -303,11 +283,7 @@ public class Teleop_Main_ extends LinearOpMode {
             telemetry.addData("Version: ", "2/13/25");
             telemetry.update();
 
-            Drawing.ROBOT_RADIUS = 9;
-            Drawing.drawRobot(Robot.drivetrain.follower.getPose());
-            Drawing.ROBOT_RADIUS = 5;
-            Drawing.drawRobot(Robot.drivetrain.follower.getPose().setHeading(Robot.turret.rotation.getAngle()-(Math.PI/2)+Robot.drivetrain.follower.getHeading()), Drawing.turretLook);
-            Drawing.sendPacket();
+            Robot.updatePanelsDrawing();
 
             for (LynxModule hub : allHubs) {
                 hub.clearBulkCache();
@@ -315,7 +291,6 @@ public class Teleop_Main_ extends LinearOpMode {
         }
 
         selectedAlliance = null;
-        isLiftAttached = null;
         Turret.zeroed = false;
     }
 
@@ -412,14 +387,6 @@ public class Teleop_Main_ extends LinearOpMode {
 
         if (gamepad1.yWasPressed()){
             turretOn = !turretOn;
-        }
-
-        Robot.lift.update();
-        if (gamepad1.dpadUpWasPressed() && runtime.time(TimeUnit.SECONDS) > 0){
-            if (isLiftAttached == LoadHardwareClass.IsLiftAttached.YES){
-                Robot.lift.activate();
-                hoodOn = false;
-            }
         }
 
         if (gamepad1.dpadLeftWasPressed()){

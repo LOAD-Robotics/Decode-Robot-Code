@@ -41,7 +41,7 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDir
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.ExposureControl;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.GainControl;
-import org.firstinspires.ftc.teamcode.pedroPathing.Constants_NoLift_Predictive;
+import org.firstinspires.ftc.teamcode.pedroPathing.Constants_Predictive;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
@@ -133,7 +133,7 @@ public class PedroDriveToAprilTag extends LinearOpMode
         if (USE_WEBCAM)
             setManualExposure(6, 250);  // Use low exposure time to reduce motion blur
 
-        follower = Constants_NoLift_Predictive.createFollower(hardwareMap);
+        follower = Constants_Predictive.createFollower(hardwareMap);
         follower.setStartingPose(startPose);
         follower.update();
 

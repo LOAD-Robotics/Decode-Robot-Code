@@ -13,7 +13,7 @@ import com.skeletonarmy.marrow.prompts.OptionPrompt;
 import com.skeletonarmy.marrow.prompts.Prompter;
 
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.LoadHardwareClass;
-import org.firstinspires.ftc.teamcode.pedroPathing.Constants_NoLift_Predictive;
+import org.firstinspires.ftc.teamcode.pedroPathing.Constants_Predictive;
 
 @Disabled
 @Autonomous(name = "TestAutoR1", group = "TestAuto", preselectTeleOp="Teleop_Main_")
@@ -202,7 +202,7 @@ public class TestAuto extends OpMode {
         opmodeTimer = new Timer();
         opmodeTimer.resetTimer();
 
-        follower = Constants_NoLift_Predictive.createFollower(hardwareMap);
+        follower = Constants_Predictive.createFollower(hardwareMap);
         buildPaths();
         follower.setStartingPose(startPose);
 

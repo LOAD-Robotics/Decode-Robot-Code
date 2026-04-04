@@ -14,7 +14,7 @@ public class Pedro_Paths {
     // The variable to store PedroPathing's follower object for path building
     private Follower follower;
     private LoadHardwareClass.Alliance alliance = LoadHardwareClass.selectedAlliance;
-    private LoadHardwareClass.IsLiftAttached isUsingGarage = LoadHardwareClass.isLiftAttached;
+    private LoadHardwareClass.IsLiftAttached isUsingGarage = LoadHardwareClass.IsLiftAttached.NO;
 
     /**
      * Define primary poses to be used in paths

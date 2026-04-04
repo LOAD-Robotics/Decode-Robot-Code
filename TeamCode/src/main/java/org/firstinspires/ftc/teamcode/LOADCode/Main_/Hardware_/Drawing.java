@@ -21,10 +21,10 @@ public class Drawing {
     private static final FieldManager panelsField = PanelsField.INSTANCE.getField();
 
     public static final Style robotLook = new Style(
-            "", "#3F51B5", 0.75
+            "", "#2F4ADE", 0.75
     );
     public static final Style turretLook = new Style(
-            "", "#3F51B5", 0.75
+            "", "#DEBE2F", 0.75
     );
     public static final Style historyLook = new Style(
             "", "#4CAF50", 0.75
