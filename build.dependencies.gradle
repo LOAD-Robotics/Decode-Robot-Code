@@ -1,7 +1,9 @@
 repositories {
     mavenCentral()
     google() // Needed for androidx
+    maven { url = 'https://central.sonatype.com/repository/maven-snapshots/' }
     maven { url = "https://mymaven.bylazar.com/releases" }
+    mavenLocal()
 }
 
 dependencies {
@@ -15,7 +17,9 @@ dependencies {
     implementation 'org.firstinspires.ftc:Vision:11.1.0'
     implementation 'androidx.appcompat:appcompat:1.2.0'
 
-    implementation 'com.pedropathing:ftc:2.1.1'
+//    implementation 'com.pedropathing:ftc:LOCAL'
+    implementation 'com.pedropathing:ftc:2.1.0-SNAPSHOT'
+
     implementation 'com.pedropathing:telemetry:1.0.0'
 
     implementation 'dev.nextftc:control:1.0.0'

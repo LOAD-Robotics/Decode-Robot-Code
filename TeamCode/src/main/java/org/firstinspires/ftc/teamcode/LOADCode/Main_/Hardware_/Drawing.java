@@ -20,13 +20,13 @@ public class Drawing {
     public static double ROBOT_RADIUS = 9; // woah
     private static final FieldManager panelsField = PanelsField.INSTANCE.getField();
 
-    public static final Style robotLook = new Style(
+    public static final Style blue = new Style(
             "", "#2F4ADE", 0.75
     );
-    public static final Style turretLook = new Style(
+    public static final Style yellow = new Style(
             "", "#DEBE2F", 0.75
     );
-    public static final Style historyLook = new Style(
+    public static final Style green = new Style(
             "", "#4CAF50", 0.75
     );
 
@@ -45,12 +45,12 @@ public class Drawing {
      */
     public static void drawDebug(Follower follower) {
         if (follower.getCurrentPath() != null) {
-            drawPath(follower.getCurrentPath(), robotLook);
+            drawPath(follower.getCurrentPath(), blue);
             Pose closestPoint = follower.getPointFromPath(follower.getCurrentPath().getClosestPointTValue());
-            drawRobot(new Pose(closestPoint.getX(), closestPoint.getY(), follower.getCurrentPath().getHeadingGoal(follower.getCurrentPath().getClosestPointTValue())), robotLook);
+            drawRobot(new Pose(closestPoint.getX(), closestPoint.getY(), follower.getCurrentPath().getHeadingGoal(follower.getCurrentPath().getClosestPointTValue())), blue);
         }
-        drawPoseHistory(follower.getPoseHistory(), historyLook);
-        drawRobot(follower.getPose(), historyLook);
+        drawPoseHistory(follower.getPoseHistory(), green);
+        drawRobot(follower.getPose(), green);
 
         sendPacket();
     }
@@ -87,7 +87,7 @@ public class Drawing {
      * @param pose the Pose to draw the robot at
      */
     public static void drawRobot(Pose pose) {
-        drawRobot(pose, robotLook);
+        drawRobot(pose, blue);
     }
 
     /**
@@ -148,7 +148,7 @@ public class Drawing {
      * @param poseTracker the PoseHistory to get the pose history from
      */
     public static void drawPoseHistory(PoseHistory poseTracker) {
-        drawPoseHistory(poseTracker, historyLook);
+        drawPoseHistory(poseTracker, green);
     }
 
     /**

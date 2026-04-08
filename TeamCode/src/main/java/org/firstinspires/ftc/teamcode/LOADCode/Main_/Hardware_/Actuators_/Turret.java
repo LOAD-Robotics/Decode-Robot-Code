@@ -89,7 +89,7 @@ public class Turret {
      * Stores the zeroing state of the turret
      */
     public static boolean zeroed = false;
-    private int zeroingState = 0;
+    public static int zeroingState = 0;
     private TimerEx zeroingTimer = new TimerEx(0.25, TimeUnit.SECONDS);
     /**
      * Indicates which aiming system is in use.
@@ -245,43 +245,7 @@ public class Turret {
      * Must be called every loop to function properly.
      */
     private void updateRotationalAimbot(){
-        limelight.updateResult(Math.toDegrees(Robot.drivetrain.follower.getHeading()));
-
-        cameraPID.setGoal(new KineticState(0));
-
-        double maxPower = 1;
-        double minPower = -1;
-        if (Robot.turret.rotation.getAngleAbsolute() > 360){
-            maxPower = 0;
-        }
-        if (Robot.turret.rotation.getAngleAbsolute() < 0){
-            minPower = 0;
-        }
-
-        if (false && limelight.result != null && limelight.result.isValid()){
-            cameraAimOn = true;
-            double error = 0;
-            if (limelight.result != null && limelight.result.isValid()){
-                error = limelight.result.getTx();
-            }
-
-            double power = cameraPID.calculate(new KineticState(error, Robot.turret.rotation.getDegreesPerSecond()));
-
-            if (Math.abs(error) > 0.5){
-                Robot.turret.rotation.setPower(Math.min(Math.max(power, minPower), maxPower));
-            }else{
-                Robot.turret.rotation.setPower(0);
-            }
-        }else{
-            cameraAimOn = false;
-            rotation.setAngle(Math.min(Math.max(0, rotationalAimbotLocalizer()), 360));
-        }
-
-        if (selectedAlliance == LoadHardwareClass.Alliance.RED){
-            limelight.setPipeline(0);
-        }else{
-            limelight.setPipeline(1);
-        }
+        rotation.setAngle(Math.min(Math.max(0, rotationalAimbotLocalizer()), 360));
     }
 
     /**
@@ -442,7 +406,7 @@ public class Turret {
                     if (hall.getTriggered()){
                         rotation.setPower(0);
                         rotation.resetEncoder();
-                        zeroed = true;
+                        zeroingState = 3;
                     }
                     if (rotation.getCurrent(CurrentUnit.AMPS) > 7){
                         zeroingState = 1;

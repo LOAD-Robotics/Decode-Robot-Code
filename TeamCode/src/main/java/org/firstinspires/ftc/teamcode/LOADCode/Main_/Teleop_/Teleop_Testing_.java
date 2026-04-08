@@ -52,6 +52,7 @@ import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Turret
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Drawing;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Drivetrain_.Pedro_Paths;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.LoadHardwareClass;
+import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 import java.util.concurrent.TimeUnit;
 
@@ -69,13 +70,14 @@ public class Teleop_Testing_ extends LinearOpMode {
     public Pedro_Paths paths = new Pedro_Paths();
     public static final double llOffset = 6.496063; // INCHES
     public static final double turretOffset = -1.094488;
+    public static double varianceMult = 16;
 
     int turretTarget = 90;
 
     @Override
     public void runOpMode() {
 
-        Robot.init(new Pose(72, 24, Math.toRadians(90)));
+        Robot.init(new Pose(72, 7.8, Math.toRadians(90)));
         //Robot.init(paths.farStart);
         Drawing.init();
 
@@ -139,21 +141,41 @@ public class Teleop_Testing_ extends LinearOpMode {
                 pedroPose = new Pose(pedroPose.getX() - robotCenterOffsetX,
                         pedroPose.getY()- robotCenterOffsetY,
                         pedroPose.getHeading());
-
                 Drawing.drawRobot(pedroPose);
 
+                long timestampNanos = System.nanoTime() - result.getStaleness() * 1_000_000L;
 
-                telemetry.addData("MT2 PosX", botPose.getX(DistanceUnit.INCH));
-                telemetry.addData("MT2 PosY", botPose.getY(DistanceUnit.INCH));
-                telemetry.addData("MT2 Heading", botPose.getHeading(AngleUnit.DEGREES));
+                double[] measurementStdDevs = result.getStddevMt2();
 
-                telemetry.addData("Pedro MT2 PosX", pedroPose.getX());
-                telemetry.addData("Pedro MT2 PosY", pedroPose.getY());
-                telemetry.addData("Pedro MT2 Heading", Math.toDegrees(pedroPose.getHeading()));
+                double stdX_in = measurementStdDevs[0] * 39.3701;
+                double stdY_in = measurementStdDevs[1] * 39.3701;
+                double stdYaw_rad = Math.toRadians(measurementStdDevs[5]);
+
+                Pose measurementVariance = new Pose(
+                        stdX_in * stdX_in * varianceMult,
+                        stdY_in * stdY_in * varianceMult,
+                        stdYaw_rad * stdYaw_rad * varianceMult
+                );
+
+
+                Constants.getFusionLocalizer().addMeasurement(
+                        pedroPose,
+                        timestampNanos,
+                        measurementVariance
+                );
+
+                telemetry.addData("LL MT2 PosX", pedroPose.getX());
+                telemetry.addData("LL MT2 PosY", pedroPose.getY());
+                telemetry.addData("LL MT2 Heading", Math.toDegrees(pedroPose.getHeading()));
             }
 
-            Drawing.drawRobot(Robot.drivetrain.follower.getPose(), Drawing.turretLook);
+            Drawing.drawRobot(Robot.drivetrain.follower.getPose(), Drawing.yellow);
+            Drawing.drawRobot(Constants.getPinpointLocalizer().getPose(), Drawing.green);
             Drawing.sendPacket();
+
+            telemetry.addData("LL MT2 PosX", Robot.drivetrain.follower.getPose().getX());
+            telemetry.addData("LL MT2 PosY", Robot.drivetrain.follower.getPose().getY());
+            telemetry.addData("LL MT2 Heading", Math.toDegrees(Robot.drivetrain.follower.getPose().getHeading()));
 
             telemetry.addData("Loop Time (ms)", loopTimer.time(TimeUnit.MILLISECONDS));
             telemetry.update();

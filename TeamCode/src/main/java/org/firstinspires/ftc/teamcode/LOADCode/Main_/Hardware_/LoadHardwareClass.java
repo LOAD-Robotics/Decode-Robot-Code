@@ -39,6 +39,7 @@ import com.skeletonarmy.marrow.zones.PolygonZone;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Devices;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Intake;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Turret;
+import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Drivetrain_.LimeLight_Localizer;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Drivetrain_.MecanumDrivetrainClass;
 
 /*
@@ -56,6 +57,7 @@ public class LoadHardwareClass {
     public final Turret turret;
     public final Intake intake;
     public final Devices.GoBildaPrismBarClass lights;
+    public final LimeLight_Localizer limelightLocalizer;
 
     // Declare various enums & other variables that are useful across files
     public static Alliance selectedAlliance = null;
@@ -105,6 +107,7 @@ public class LoadHardwareClass {
         this.turret     = new Turret();
         this.intake     = new Intake();
         this.lights     = new Devices.GoBildaPrismBarClass();
+        this.limelightLocalizer = new LimeLight_Localizer();
     }
 
     /**
@@ -130,6 +133,7 @@ public class LoadHardwareClass {
         turret.init(myOpMode, this);
         intake.init(myOpMode);
         lights.init(myOpMode, 36);
+        limelightLocalizer.init(this);
 
         // Misc telemetry
         myOpMode.telemetry.addData(">", "Hardware Initialized");

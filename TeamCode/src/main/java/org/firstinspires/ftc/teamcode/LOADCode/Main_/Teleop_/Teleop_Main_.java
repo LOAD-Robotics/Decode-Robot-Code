@@ -54,9 +54,11 @@ import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Intake
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Turret;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Turret.flywheelState;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Turret.gatestate;
+import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Drawing;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Drivetrain_.MecanumDrivetrainClass;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Drivetrain_.Pedro_Paths;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.LoadHardwareClass;
+import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -283,7 +285,10 @@ public class Teleop_Main_ extends LinearOpMode {
             telemetry.addData("Version: ", "2/13/25");
             telemetry.update();
 
-            Robot.updatePanelsDrawing();
+            Drawing.drawRobot(Robot.drivetrain.follower.getPose(), Drawing.blue);
+            Drawing.drawRobot(Robot.limelightLocalizer.updateLLPose(), Drawing.green);
+            Drawing.drawRobot(Constants.getPinpointLocalizer().getPose(), Drawing.yellow);
+            Drawing.sendPacket();
 
             for (LynxModule hub : allHubs) {
                 hub.clearBulkCache();
@@ -368,14 +373,15 @@ public class Teleop_Main_ extends LinearOpMode {
 
         if (gamepad1.bWasPressed()){
             if (selectedAlliance == LoadHardwareClass.Alliance.RED){
-                Robot.drivetrain.follower.setPose(new Pose(9.6, 7.1, Math.toRadians(90)));
+                Constants.getPinpointLocalizer().setPose(new Pose(9.6, 7.1, Math.toRadians(90)));
             }else if (selectedAlliance == LoadHardwareClass.Alliance.BLUE){
-                Robot.drivetrain.follower.setPose(new Pose(144-9.6, 7.1, Math.toRadians(90)));
+                Constants.getPinpointLocalizer().setPose(new Pose(144-9.6, 7.1, Math.toRadians(90)));
             }
-            Turret.zeroed = false;
-            while (!isStopRequested() && Robot.turret.zeroTurret()){
-                Robot.sleep(0);
-            }
+//            Turret.zeroed = false;
+//            Turret.zeroingState = 0;
+//            while (!isStopRequested() && Robot.turret.zeroTurret()){
+//                Robot.sleep(0);
+//            }
         }
 
         Robot.drivetrain.pedroMecanumDrive(

@@ -7,6 +7,9 @@ import com.pedropathing.follower.FollowerConstants;
 import com.pedropathing.ftc.FollowerBuilder;
 import com.pedropathing.ftc.drivetrains.MecanumConstants;
 import com.pedropathing.ftc.localization.constants.PinpointConstants;
+import com.pedropathing.ftc.localization.localizers.PinpointLocalizer;
+import com.pedropathing.geometry.Pose;
+import com.pedropathing.localization.FusionLocalizer;
 import com.pedropathing.paths.PathConstraints;
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -61,11 +64,35 @@ public class Constants {
             .forwardEncoderDirection(GoBildaPinpointDriver.EncoderDirection.REVERSED)
             .strafeEncoderDirection(GoBildaPinpointDriver.EncoderDirection.FORWARD);
 
+    private static FusionLocalizer fusionLocalizer = null;
+
+    private static PinpointLocalizer pinpointLocalizer = null;
+
     public static Follower createFollower(HardwareMap hardwareMap) {
+        pinpointLocalizer= new PinpointLocalizer(hardwareMap, localizerConstants);
+
+        fusionLocalizer = new FusionLocalizer(
+                pinpointLocalizer,
+                new Pose(0.5, 0.5, 0.05), // P: initial covariance
+                new Pose(1.0, 1.0, 0.1), // Q : process variance
+                new Pose(4.0, 4.0, 0.04), // R: measurement variance
+                100 // bufferSize
+        );
+
+
         return new FollowerBuilder(followerConstants, hardwareMap)
                 .pathConstraints(pathConstraints)
                 .mecanumDrivetrain(driveConstants)
-                .pinpointLocalizer(localizerConstants)
+                .setLocalizer(fusionLocalizer)
                 .build();
+    }
+
+
+    public static PinpointLocalizer getPinpointLocalizer() {
+        return pinpointLocalizer;
+    }
+
+    public static FusionLocalizer getFusionLocalizer() {
+        return fusionLocalizer;
     }
 }
