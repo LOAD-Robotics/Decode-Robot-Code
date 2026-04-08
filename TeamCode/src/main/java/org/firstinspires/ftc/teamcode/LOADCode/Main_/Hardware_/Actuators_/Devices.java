@@ -323,23 +323,9 @@ public class Devices {
             buildPIDs();
             KineticState currentKineticState = new KineticState(getAngleAbsolute(), getDegreesPerSecond());
             posPID.setGoal(new KineticState(target, velocity));
-//            if (!posPID.isWithinTolerance(maxAcceptableError)){
             double pidPower = posPID.calculate(currentKineticState);
-            setPower(pidPower + fancySignum(pidPower) * constantFFparameter);
-//            }else{
-//                setPower(0);
-//            }
+            setPower(pidPower + Math.signum(pidPower) * constantFFparameter);
         }
-
-        private double fancySignum(double in){
-            if (in >= 0){
-                return 1;
-            } else {
-                return -fancySigMult;
-            }
-        }
-
-        public static double fancySigMult = 1;
 
         /**
          * Uses a PID controller to accelerate the motor to the desired RPM.<br>
@@ -546,10 +532,10 @@ public class Devices {
         /**
          * Updates the current result of the limelight camera. <br>
          * Must be called every loop.
-         * @param robotHeading the current heading of the robot, used for more accurate 3D tracking
+         * @param robotHeading the current heading of the robot in Pedropathing Radians, used for more accurate 3D tracking
          */
         public void updateResult(double robotHeading){
-            device.updateRobotOrientation(robotHeading);
+            device.updateRobotOrientation(Math.toDegrees(robotHeading) + 90);
             result = device.getLatestResult();
         }
 

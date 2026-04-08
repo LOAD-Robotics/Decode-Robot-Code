@@ -42,7 +42,7 @@ public class Turret {
 
     // Turret PID coefficients
     public static PIDCoefficients turretCoefficients = new PIDCoefficients(0.035, 0, 0.001); // 223RPM Motor
-    public static double turretConstantFF = 0.003;
+    public static double turretConstantFF = 0.0045;
 
     // Flywheel PID coefficients for various speeds
     //public static PIDCoefficients flywheelCoefficients = new PIDCoefficients(0.0002, 0, 0); // 4500 RPM
@@ -84,7 +84,7 @@ public class Turret {
     /**
      * Stores the offset of the turret's rotation
      */
-    public static double turretOffset = 116;
+    public static double turretOffset = 117 ;
     /**
      * Stores the zeroing state of the turret
      */
@@ -121,7 +121,7 @@ public class Turret {
         }
 
         // Initialize hardware objects
-        rotation.init(opmode, "turret", 384.5 * ((double) 131 / 36));
+        rotation.init(opmode, "turret", 537.7 * ((double) 131 / 36));
         flywheel.init(opmode, "flywheel", 28);
         flywheel2.init(opmode, "flywheel2", 28);
         hood.init(opmode, "hood");
@@ -444,7 +444,7 @@ public class Turret {
                         rotation.resetEncoder();
                         zeroed = true;
                     }
-                    if (rotation.getCurrent(CurrentUnit.AMPS) > 8){
+                    if (rotation.getCurrent(CurrentUnit.AMPS) > 7){
                         zeroingState = 1;
                         zeroingTimer.restart();
                     }

@@ -85,7 +85,7 @@ public class Teleop_Main_ extends LinearOpMode {
     public boolean rightTrigOldState = false;
     public double hoodOffset = 0;
     public double turretOffsetStep = 10;
-    public boolean turretOn = true;
+    public boolean turretOn = false;
     public boolean hoodOn = true;
     public Pose holdPoint = new Pose(72, 72, 90);
     public Boolean holdJustTriggered = false;
@@ -250,10 +250,10 @@ public class Teleop_Main_ extends LinearOpMode {
             telemetry.addLine();
 
             // Turret Rotation Telemetry
-            telemetry.addData("Camera Aim On", Robot.turret.cameraAimOn);
-            telemetry.addData("Raw Camera Error", Robot.turret.limelight.result.getTx());
-            telemetry.addData("Smoothed Camera Error", Robot.turret.smoothedCameraError);
-            panelsTelemetry.addData("0 Line", 0);
+//            telemetry.addData("Camera Aim On", Robot.turret.cameraAimOn);
+//            telemetry.addData("Raw Camera Error", Robot.turret.limelight.result.getTx());
+//            telemetry.addData("Smoothed Camera Error", Robot.turret.smoothedCameraError);
+//            panelsTelemetry.addData("0 Line", 0);
             telemetry.addData("TurretState", teleopTurretState);
             telemetry.addData("Turret Target Angle", Robot.turret.rotation.target);
             telemetry.addData("Turret Actual Angle", Robot.turret.rotation.getAngleAbsolute());

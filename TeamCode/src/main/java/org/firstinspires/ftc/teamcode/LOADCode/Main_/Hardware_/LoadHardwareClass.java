@@ -139,8 +139,6 @@ public class LoadHardwareClass {
     public void updatePanelsDrawing(){
         Drawing.ROBOT_RADIUS = 9;
         Drawing.drawRobot(drivetrain.follower.getPose());
-        Drawing.ROBOT_RADIUS = 4;
-        Drawing.drawRobot(drivetrain.follower.getPose().setHeading(turret.rotation.getAngle()-(Math.PI/2)+drivetrain.follower.getHeading()), Drawing.turretLook);
         Drawing.sendPacket();
     }
 }

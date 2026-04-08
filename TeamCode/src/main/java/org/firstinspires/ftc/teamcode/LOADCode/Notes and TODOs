@@ -37,3 +37,8 @@
 // TODO: create a custom Pose class that automirrors internally
 
 // TODO: Revamp Teleop_Outreach!!!
+
+
+
+// Distance from limelight center to turret rotation center: 165
+// Distance from turret rotation center to robot rotation center: -27.8

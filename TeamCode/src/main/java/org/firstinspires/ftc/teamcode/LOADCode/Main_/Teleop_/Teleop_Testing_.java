@@ -33,14 +33,24 @@ import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.JoinedTelemetry;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
+import com.pedropathing.ftc.FTCCoordinates;
+import com.pedropathing.ftc.PoseConverter;
+import com.pedropathing.geometry.PedroCoordinates;
 import com.pedropathing.geometry.Pose;
+import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Turret;
+import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Drawing;
+import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Drivetrain_.Pedro_Paths;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.LoadHardwareClass;
 
 import java.util.concurrent.TimeUnit;
@@ -56,13 +66,18 @@ public class Teleop_Testing_ extends LinearOpMode {
     private final Telemetry ftcTelemetry = super.telemetry;
     private final JoinedTelemetry telemetry = new JoinedTelemetry(ftcTelemetry, panelsTelemetry);
     public LoadHardwareClass Robot = new LoadHardwareClass(this);
+    public Pedro_Paths paths = new Pedro_Paths();
+    public static final double llOffset = 6.496063; // INCHES
+    public static final double turretOffset = -1.094488;
 
-    double target = 90;
+    int turretTarget = 90;
 
     @Override
     public void runOpMode() {
 
-        Robot.init(new Pose(0,0,0));
+        Robot.init(new Pose(72, 24, Math.toRadians(90)));
+        //Robot.init(paths.farStart);
+        Drawing.init();
 
         Turret.zeroed = false;
 
@@ -75,32 +90,70 @@ public class Teleop_Testing_ extends LinearOpMode {
         // Wait for the game to start (driver presses START)
         waitForStart();
         runtime.reset();
+        Robot.drivetrain.startTeleOpDrive();
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
 
+            Robot.turret.limelight.setPipeline(2);
+
+            Robot.drivetrain.pedroMecanumDrive(
+                    gamepad1.left_stick_y,
+                    gamepad1.left_stick_x,
+                    gamepad1.right_stick_x / 2,
+                    true
+            );
             Robot.turret.updatePIDs();
-
+            Robot.turret.rotation.setAngle(turretTarget);
+            int change = 10;
             if (gamepad1.dpadLeftWasPressed()){
-                target = 180;
-            }
-            if (gamepad1.dpadRightWasPressed()){
-                target = 0;
-            }
-            if (gamepad1.dpadUpWasPressed()){
-                target = 93;
-            }
-            if (gamepad1.dpadDownWasPressed()){
-                target = 90;
+                turretTarget += change;
+            }else if (gamepad1.dpadRightWasPressed()){
+                turretTarget -= change;
             }
 
-            Robot.turret.rotation.setAngle(target);
+            Robot.turret.limelight.updateResult(Robot.drivetrain.follower.getHeading()
+                +  Math.toRadians(Robot.turret.rotation.getAngle() - 90));
+            LLResult result = Robot.turret.limelight.result;
 
-            telemetry.addData("Target", target);
-            telemetry.addData("Actual", Robot.turret.rotation.getAngleAbsolute());
-            telemetry.addData("Power", Robot.turret.rotation.getPower());
-            telemetry.addData("Current", Robot.turret.rotation.getCurrent(CurrentUnit.AMPS));
-            telemetry.addData("FF", Robot.turret.rotation.constantFFparameter);
+            Pose2D botPose = null;
+            if (result != null && result.isValid()){
+                Pose3D pose = result.getBotpose_MT2();
+                botPose = new Pose2D(DistanceUnit.METER, pose.getPosition().x, pose.getPosition().y, AngleUnit.DEGREES, pose.getOrientation().getYaw());
+            }
+            Pose pedroPose = null;
+            if (botPose != null) {
+                pedroPose = PoseConverter.pose2DToPose(botPose, FTCCoordinates.INSTANCE)
+                        .getAsCoordinateSystem(PedroCoordinates.INSTANCE);
+
+                double turretOffsetX = llOffset * Math.cos(pedroPose.getHeading());
+                double turretOffsetY = llOffset * Math.sin(pedroPose.getHeading());
+
+                pedroPose = new Pose(pedroPose.getX() - turretOffsetX,
+                        pedroPose.getY()- turretOffsetY,
+                        Robot.drivetrain.follower.getHeading());
+
+                double robotCenterOffsetX = turretOffset * Math.cos(pedroPose.getHeading());
+                double robotCenterOffsetY = turretOffset * Math.sin(pedroPose.getHeading());
+
+                pedroPose = new Pose(pedroPose.getX() - robotCenterOffsetX,
+                        pedroPose.getY()- robotCenterOffsetY,
+                        pedroPose.getHeading());
+
+                Drawing.drawRobot(pedroPose);
+
+
+                telemetry.addData("MT2 PosX", botPose.getX(DistanceUnit.INCH));
+                telemetry.addData("MT2 PosY", botPose.getY(DistanceUnit.INCH));
+                telemetry.addData("MT2 Heading", botPose.getHeading(AngleUnit.DEGREES));
+
+                telemetry.addData("Pedro MT2 PosX", pedroPose.getX());
+                telemetry.addData("Pedro MT2 PosY", pedroPose.getY());
+                telemetry.addData("Pedro MT2 Heading", Math.toDegrees(pedroPose.getHeading()));
+            }
+
+            Drawing.drawRobot(Robot.drivetrain.follower.getPose(), Drawing.turretLook);
+            Drawing.sendPacket();
 
             telemetry.addData("Loop Time (ms)", loopTimer.time(TimeUnit.MILLISECONDS));
             telemetry.update();

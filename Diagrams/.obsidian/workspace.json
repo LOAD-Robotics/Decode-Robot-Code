@@ -1,79 +1,44 @@
 {
   "main": {
-    "id": "d1bcf6a441f1ffa0",
+    "id": "95870dc9c775ed4d",
     "type": "split",
     "children": [
       {
-        "id": "93d2aa7072c111d2",
+        "id": "f0c09962ccaa88b1",
         "type": "tabs",
         "children": [
           {
-            "id": "d3b4cee07f48b93b",
-            "type": "leaf",
-            "state": {
-              "type": "canvas",
-              "state": {
-                "file": "File Structure.canvas",
-                "viewState": {
-                  "x": -670,
-                  "y": 70,
-                  "zoom": -0.6381710945544748
-                }
-              },
-              "icon": "lucide-layout-dashboard",
-              "title": "File Structure"
-            }
-          },
-          {
-            "id": "3c98fecc6f5ddbb9",
+            "id": "241cf01803ba3b15",
             "type": "leaf",
             "state": {
               "type": "canvas",
               "state": {
                 "file": "Robot Wiring.canvas",
                 "viewState": {
-                  "x": 172.01440458960963,
-                  "y": 198.39842255593908,
-                  "zoom": -0.39938423496735836
+                  "x": 0,
+                  "y": 80,
+                  "zoom": -0.6665278528772338
                 }
               },
               "icon": "lucide-layout-dashboard",
               "title": "Robot Wiring"
             }
-          },
-          {
-            "id": "f3ed0e91d6b359a1",
-            "type": "leaf",
-            "state": {
-              "type": "canvas",
-              "state": {
-                "file": "Servo Cable Diagram.canvas",
-                "viewState": {
-                  "x": -90,
-                  "y": 80,
-                  "zoom": 0
-                }
-              },
-              "icon": "lucide-layout-dashboard",
-              "title": "Servo Cable Diagram"
-            }
           }
-        ],
-        "currentTab": 2
+        ]
       }
     ],
     "direction": "vertical"
   },
   "left": {
-    "id": "4ccc105dc4fded54",
+    "id": "c7a699fd3401748f",
     "type": "split",
     "children": [
       {
-        "id": "675dba12eead9ff0",
+        "id": "5a00f7d470d977a9",
         "type": "tabs",
         "children": [
           {
-            "id": "a02f912852c9ffc1",
+            "id": "dfc06caedf5d88d3",
             "type": "leaf",
             "state": {
               "type": "file-explorer",
@@ -86,7 +51,7 @@
             }
           },
           {
-            "id": "12123966e35c994f",
+            "id": "ca6f4b72a649243d",
             "type": "leaf",
             "state": {
               "type": "search",
@@ -103,7 +68,7 @@
             }
           },
           {
-            "id": "a919e2ce8b41c36e",
+            "id": "99644cff9d64a1e9",
             "type": "leaf",
             "state": {
               "type": "bookmarks",
@@ -119,19 +84,20 @@
     "width": 300
   },
   "right": {
-    "id": "de8ad46ed00c92ec",
+    "id": "141ee834c3232840",
     "type": "split",
     "children": [
       {
-        "id": "33d21acae245f288",
+        "id": "0e12f5aa37c419f1",
         "type": "tabs",
         "children": [
           {
-            "id": "e24d0618d6282398",
+            "id": "ed2ae5509bd553e7",
             "type": "leaf",
             "state": {
               "type": "backlink",
               "state": {
+                "file": "Robot Wiring.canvas",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -141,24 +107,25 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks"
+              "title": "Backlinks for Robot Wiring"
             }
           },
           {
-            "id": "b1433e36081cfd0c",
+            "id": "27d22d4278f068c6",
             "type": "leaf",
             "state": {
               "type": "outgoing-link",
               "state": {
+                "file": "Robot Wiring.canvas",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Outgoing links"
+              "title": "Outgoing links from Robot Wiring"
             }
           },
           {
-            "id": "23f001e7431040ef",
+            "id": "6f2eeea56376ca49",
             "type": "leaf",
             "state": {
               "type": "tag",
@@ -173,7 +140,7 @@
             }
           },
           {
-            "id": "9cc1240dcfab34d9",
+            "id": "8e7b9a97c81d674b",
             "type": "leaf",
             "state": {
               "type": "all-properties",
@@ -187,17 +154,18 @@
             }
           },
           {
-            "id": "61df8a47ce9eeec7",
+            "id": "84dd375356ab222f",
             "type": "leaf",
             "state": {
               "type": "outline",
               "state": {
+                "file": "Robot Wiring.canvas",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline"
+              "title": "Outline of Robot Wiring"
             }
           }
         ]
@@ -219,21 +187,6 @@
       "theme-toggle:Toggle to dark mode": false
     }
   },
-  "active": "f3ed0e91d6b359a1",
-  "lastOpenFiles": [
-    "Servo Cable Diagram.png",
-    "Servo Cable Color.canvas",
-    "Servo Cable Diagram.canvas",
-    "Untitled.md",
-    "Robot Wiring.canvas",
-    "File Structure.canvas",
-    "File Structure Dark.png",
-    "File Structure Light.png",
-    "Robot Wiring Light.png",
-    "Robot Wiring Dark.png",
-    "File Structure_Light.png",
-    "Robot_Wiring.png",
-    "File Structure.png",
-    "Robot Controls.png"
-  ]
+  "active": "241cf01803ba3b15",
+  "lastOpenFiles": []
 }
