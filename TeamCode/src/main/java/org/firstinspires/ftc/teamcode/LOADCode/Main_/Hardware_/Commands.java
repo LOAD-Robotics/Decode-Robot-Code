@@ -58,6 +58,10 @@ public class Commands {
         return new LambdaCommand("resetShootingTimer5sec").setStart(shootingTimer2sec::restart);
     }
 
+    public Command runPath(PathChain path){
+        return runPath(path, true, 1);
+    }
+
     public Command runPath(PathChain path, boolean holdEnd, double maxPower) {
         return new ParallelRaceGroup(
                 new FollowPath(path, holdEnd, maxPower),
@@ -163,7 +167,7 @@ public class Commands {
                                 new Delay(0.25),
                                 setIntakeMode(ON, ON),
                                 new ParallelGroup(
-                                        new Delay(0.7),
+                                        new Delay(0.5),
                                         new WaitUntil(() -> (Robot.intake.getTopSensorState() && !Robot.intake.getBottomSensorState()))
                                 ),
 

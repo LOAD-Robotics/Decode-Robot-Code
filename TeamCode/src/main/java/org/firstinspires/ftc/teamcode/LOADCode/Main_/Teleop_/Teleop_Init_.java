@@ -73,6 +73,7 @@ public class Teleop_Init_ extends LinearOpMode {
         Robot.lights.setStripRainbow();
 
         Turret.zeroed = false;
+        Turret.zeroingState = 0;
 
         while (!isStopRequested() && Robot.turret.zeroTurret()){
             Robot.sleep(0);

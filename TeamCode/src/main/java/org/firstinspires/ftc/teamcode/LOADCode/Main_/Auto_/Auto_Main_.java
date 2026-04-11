@@ -15,6 +15,7 @@ import com.skeletonarmy.marrow.prompts.Prompter;
 
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Turret;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Commands;
+import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Drawing;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Drivetrain_.MecanumDrivetrainClass;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Drivetrain_.Pedro_Paths;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.LoadHardwareClass;
@@ -62,7 +63,7 @@ public class Auto_Main_ extends NextFTCOpMode {
                 ));
         prompter.prompt("auto",
                 new OptionPrompt<>("Select Auto",
-                        //new testAuto(),
+                        new testAuto(),
                         new MOE_365_FAR(),
                         new Near_15Ball(),
                         new Near_15Ball2(),
@@ -120,7 +121,7 @@ public class Auto_Main_ extends NextFTCOpMode {
         Robot.turret.updateFlywheel(0);
         MecanumDrivetrainClass.robotPose = Robot.drivetrain.follower.getPose();
         telemetry.update();
-        Robot.updatePanelsDrawing();
+        Drawing.drawRobot(Robot.drivetrain.follower.getPose());
     }
 
     @Override
@@ -506,10 +507,14 @@ public class Auto_Main_ extends NextFTCOpMode {
         @Override
         public Command runAuto(){
             return new SequentialGroup(
-                    Commands.setIntakeMode(ON, ON),
-                    Commands.setFlywheelState(Turret.flywheelState.ON),
+                    Commands.runPath(paths.farStart_to_farShoot),
+                    Commands.runPath(paths.farShoot_to_farPreload),
                     new WaitUntil(() -> gamepad1.bWasPressed()),
-                    Commands.shootBalls()
+                    Commands.runPath(paths.farPreload_to_farShoot),
+                    Commands.runPath(paths.farShoot_to_midPreload),
+                    new WaitUntil(() -> gamepad1.bWasPressed()),
+                    Commands.runPath(paths.midPreload_to_farShoot),
+                    Commands.runPath(paths.farShoot_to_nearPreload)
             );
         }
 

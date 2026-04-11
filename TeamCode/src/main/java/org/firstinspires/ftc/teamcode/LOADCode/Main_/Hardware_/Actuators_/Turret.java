@@ -18,7 +18,6 @@ import org.firstinspires.ftc.teamcode.LOADCode.Main_.Utils_;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
-import dev.nextftc.control.ControlSystem;
 import dev.nextftc.control.KineticState;
 import dev.nextftc.control.feedback.PIDCoefficients;
 import dev.nextftc.control.feedforward.BasicFeedforwardParameters;
@@ -35,14 +34,10 @@ public class Turret {
     private final Devices.ServoClass gate = new Devices.ServoClass();
     public final Devices.REVHallEffectSensorClass hall = new Devices.REVHallEffectSensorClass();
 
-    // Camera PID stuff
-    public static PIDCoefficients cameraCoefficients = new PIDCoefficients(2, 0, 0);
-    private static PIDCoefficients oldCameraCoefficients = new PIDCoefficients(0, 0, 0);
-    public ControlSystem cameraPID = ControlSystem.builder().posPid(cameraCoefficients).build();
-
     // Turret PID coefficients
-    public static PIDCoefficients turretCoefficients = new PIDCoefficients(0.035, 0, 0.001); // 223RPM Motor
-    public static double turretConstantFF = 0.0045;
+    public static PIDCoefficients turretCoefficients = new PIDCoefficients(0.05, 0, 0.001); // 223RPM Motor
+    public static double turretConstantFF = 0.03;
+    public static KineticState maxAcceptableError = new KineticState(1, 5);
 
     // Flywheel PID coefficients for various speeds
     //public static PIDCoefficients flywheelCoefficients = new PIDCoefficients(0.0002, 0, 0); // 4500 RPM
@@ -147,7 +142,6 @@ public class Turret {
         rotation.setDirection(DcMotorSimple.Direction.REVERSE);
         rotation.setOffsetDegrees(turretOffset);
         rotation.constantFFparameter = turretConstantFF;
-        rotation.maxAcceptableError = new KineticState(0.5, 2);
 
         // Pass PID pidCoefficients to motor classes
         rotation.setPidCoefficients(turretCoefficients);
@@ -200,18 +194,12 @@ public class Turret {
         // Pass PID pidCoefficients to motor classes
         rotation.setPidCoefficients(turretCoefficients);
         rotation.constantFFparameter = turretConstantFF;
+        rotation.maxAcceptableError = maxAcceptableError;
         flywheel.setPidCoefficients(actualFlywheelCoefficients);
         flywheel.setFFCoefficients(actualFlywheelFFCoefficients);
         flywheel2.setPidCoefficients(actualFlywheelCoefficients);
         flywheel2.setFFCoefficients(actualFlywheelFFCoefficients);
         rotation.setOffsetDegrees(turretOffset);
-
-        if (oldCameraCoefficients != cameraCoefficients){
-            oldCameraCoefficients = cameraCoefficients;
-            cameraPID = ControlSystem.builder()
-                    .posPid(cameraCoefficients)
-                    .build();
-        }
     }
 
     /**
@@ -272,10 +260,16 @@ public class Turret {
     public double rotationalAimbotLocalizer (){
         Pose goalPose = calcGoalPose();
 
-        return (Math.toDegrees(Math.atan2(
+        double angle = (Math.toDegrees(Math.atan2(
                 goalPose.getY()-Robot.drivetrain.follower.getPose().getY(),
                 goalPose.getX()-Robot.drivetrain.follower.getPose().getX())
         ) - Math.toDegrees(Robot.drivetrain.follower.getPose().getHeading()) + 90)%360;
+
+        if (angle < 0){
+            return 360 + angle;
+        }else{
+            return angle;
+        }
     }
 
     public static Pose rotationalNearGoalPoseBlue = new Pose(8, 136);
@@ -399,31 +393,32 @@ public class Turret {
     }
 
     public boolean zeroTurret(){
+        double power = 0.4;
         if (!zeroed){
             switch (zeroingState){
                 case 0:
-                    rotation.setPower(1);
+                    rotation.setPower(power);
                     if (hall.getTriggered()){
                         rotation.setPower(0);
                         rotation.resetEncoder();
                         zeroingState = 3;
                     }
                     if (rotation.getCurrent(CurrentUnit.AMPS) > 7){
-                        zeroingState = 1;
+                        zeroingState++;
                         zeroingTimer.restart();
                     }
                     break;
                 case 1:
-                    rotation.setPower(-1);
+                    rotation.setPower(-power);
                     if (hall.getTriggered()){
-                        zeroingState = 2;
+                        zeroingState++;
                     }
-                    if (rotation.getCurrent(CurrentUnit.AMPS) > 7 && zeroingTimer.isDone()){
+                    if (rotation.getCurrent(CurrentUnit.AMPS) > 6 && zeroingTimer.isDone()){
                         zeroingState = 3;
                     }
                     break;
                 case 2:
-                    rotation.setPower(-1);
+                    rotation.setPower(-power);
                     if (!hall.getTriggered()){
                         zeroingState = 0;
                     }
