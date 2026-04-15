@@ -27,12 +27,12 @@ public class Pedro_Paths {
     public Pose midPreload = new Pose(132.000, 59.500, Math.toRadians(0));
     public Pose farPreload = new Pose(132.000, 35.500, Math.toRadians(0));
     public Pose hpPreload = new Pose(136, 9, Math.toRadians(-90));
-    public Pose rampIntake = new Pose(135, 40, Math.toRadians(80));
+    public Pose rampIntake = new Pose(132, 40, Math.toRadians(75));
     public Pose hpIntake = null;
     // Shooting Poses
     public Pose nearShoot = new Pose(115, 120, Math.toRadians(-35));
     public Pose midShoot = new Pose(88, 87, Math.toRadians(-15));
-    public Pose farShoot = new Pose(85, 15, Math.toRadians(60));
+    public Pose farShoot = new Pose(90, 12, Math.toRadians(70));
     public Pose noTurretMidShoot = new Pose(85, 85, Math.toRadians(45));
     public Pose noTurretFarShoot = new Pose(85, 15, Math.toRadians(67.3));
     // Leave Poses
@@ -264,6 +264,7 @@ public class Pedro_Paths {
                         nearLeave
                 ))
                 .setTangentHeadingInterpolation()
+                .setReversed()
                 .build();
     }
     public void buildPreload2ToShootings(){
@@ -562,14 +563,14 @@ public class Pedro_Paths {
                 .addPath(new BezierCurve(
                     farShoot,
                     autoMirror(new Pose(120, 60)),
-                    autoMirror(new Pose(136, 20))
+                    autoMirror(new Pose(hpPreload.getX(), 20))
                 ))
-                .setLinearHeadingInterpolation(farShoot.getHeading(), hpPreload.getHeading())
+                .setLinearHeadingInterpolation(farShoot.getHeading(), hpPreload.getHeading()-Math.toRadians(10))
                 .addPath(new BezierLine(
-                    autoMirror(new Pose(136, 20)),
+                    autoMirror(new Pose(hpPreload.getX(), 20)),
                     hpPreload
                 ))
-                .setConstantHeadingInterpolation(hpPreload.getHeading())
+                .setLinearHeadingInterpolation(hpPreload.getHeading()-Math.toRadians(10), hpPreload.getHeading())
                 .build();
         midShoot_to_hpPreload = follower.pathBuilder()
                 .addPath(new BezierCurve(
@@ -599,12 +600,12 @@ public class Pedro_Paths {
         farShoot_to_rampIntake = follower.pathBuilder()
                 .addPath(new BezierCurve(
                         farShoot,
-                        autoMirror(new Pose(137, 2)),
-                        autoMirror(new Pose(135, 30))
+                        autoMirror(new Pose(133, 2)),
+                        autoMirror(new Pose(rampIntake.getX()-1, 30))
                 ))
                 .setLinearHeadingInterpolation(farShoot.getHeading(), rampIntake.getHeading()-Math.toRadians(10))
                 .addPath(new BezierLine(
-                        autoMirror(new Pose(135, 30)),
+                        autoMirror(new Pose(rampIntake.getX()-1, 30)),
                         rampIntake
                 ))
                 .setLinearHeadingInterpolation(rampIntake.getHeading()-Math.toRadians(10), rampIntake.getHeading())
@@ -612,12 +613,22 @@ public class Pedro_Paths {
     }
     public void buildHPPreloadToShootings(){
         hpPreload_to_farShoot = follower.pathBuilder()
-                .addPath(new BezierCurve(
+                .addPath(new BezierLine(
                         hpPreload,
-                        autoMirror(new Pose(110, 40)),
+                        autoMirror(new Pose(hpPreload.getX()-8, 15))
+                ))
+                .setLinearHeadingInterpolation(hpPreload.getHeading(), Math.toRadians(0))
+                .addPath(new BezierLine(
+                        autoMirror(new Pose(hpPreload.getX()-8, 15)),
+                        farShoot.withX(farShoot.getX()+8)
+                ))
+                .setTangentHeadingInterpolation()
+                .setReversed()
+                .addPath(new BezierLine(
+                        farShoot.withX(farShoot.getX()+8),
                         farShoot
                 ))
-                .setLinearHeadingInterpolation(hpPreload.getHeading(), farShoot.getHeading())
+                .setLinearHeadingInterpolation(Math.toRadians(0), farShoot.getHeading())
                 .build();
     }
     public void buildRampIntakeToShootings(){

@@ -7,12 +7,16 @@ import static dev.nextftc.extensions.pedro.PedroComponent.follower;
 
 import androidx.annotation.NonNull;
 
+import com.bylazar.telemetry.JoinedTelemetry;
+import com.bylazar.telemetry.PanelsTelemetry;
+import com.bylazar.telemetry.TelemetryManager;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.skeletonarmy.marrow.TimerEx;
 import com.skeletonarmy.marrow.prompts.OptionPrompt;
 import com.skeletonarmy.marrow.prompts.Prompter;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Turret;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Commands;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Drawing;
@@ -30,6 +34,10 @@ import dev.nextftc.ftc.NextFTCOpMode;
 
 @Autonomous(name = "Auto_Main_", group = "Main", preselectTeleOp="Teleop_Main_")
 public class Auto_Main_ extends NextFTCOpMode {
+
+    private final TelemetryManager.TelemetryWrapper panelsTelemetry = PanelsTelemetry.INSTANCE.getFtcTelemetry();
+    private final Telemetry ftcTelemetry = super.telemetry;
+    private final JoinedTelemetry telemetry = new JoinedTelemetry(ftcTelemetry, panelsTelemetry);
 
     TimerEx timer25Sec = new TimerEx(25);
     // Variable to store the selected auto program
@@ -121,6 +129,8 @@ public class Auto_Main_ extends NextFTCOpMode {
     public void onUpdate() {
         telemetry.addData("Running Auto", selectedAuto.toString());
         telemetry.addData("Alliance", selectedAlliance);
+        panelsTelemetry.addData("Turret Target Pos", Robot.turret.rotation.target);
+        panelsTelemetry.addData("Turret Actual Pos", Robot.turret.rotation.getAngleAbsolute());
         Robot.turret.updateAimbot(turretOn, true, selectedAuto.getHoodOffset());
         Robot.turret.updateFlywheel(0);
         MecanumDrivetrainClass.robotPose = Robot.drivetrain.follower.getPose();
@@ -182,7 +192,7 @@ public class Auto_Main_ extends NextFTCOpMode {
         }
         @Override
         double getHoodOffset() {
-            return 10;
+            return 0;
         }
         @Override
         public boolean getTurretEnabled(){
@@ -199,11 +209,11 @@ public class Auto_Main_ extends NextFTCOpMode {
                     new InstantCommand(Commands.setFlywheelState(Turret.flywheelState.ON)),
                     Commands.runPath(paths.farStart_to_farShoot, true, 1),
                     Commands.shootBalls(),
-                    Commands.setIntakeMode(ON, ON),
+                    Commands.setIntakeMode(ON),
                     Commands.runPath(paths.farShoot_to_farPreload, true, 1),
                     Commands.runPath(paths.farPreload_to_farShoot, true, 1),
                     Commands.shootBalls(),
-                    Commands.setIntakeMode(ON, ON),
+                    Commands.setIntakeMode(ON),
                     Commands.runPath(paths.farShoot_to_hpPreload, true, 1),
                     Commands.runPath(paths.hpPreload_to_farShoot, true, 1),
                     Commands.shootBalls(),
@@ -243,15 +253,15 @@ public class Auto_Main_ extends NextFTCOpMode {
                     new InstantCommand(Commands.setFlywheelState(Turret.flywheelState.ON)),
                     Commands.runPath(paths.farStart_to_farShoot, true, 1),
                     Commands.shootBalls(),
-                    Commands.setIntakeMode(ON, ON),
+                    Commands.setIntakeMode(ON),
                     Commands.runPath(paths.farShoot_to_midPreload, true, 1),
                     Commands.runPath(paths.midPreload_to_farShoot, true, 1),
                     Commands.shootBalls(),
-                    Commands.setIntakeMode(ON, ON),
+                    Commands.setIntakeMode(ON),
                     Commands.runPath(paths.farShoot_to_farPreload, true, 1),
                     Commands.runPath(paths.farPreload_to_farShoot, true, 1),
                     Commands.shootBalls(),
-                    Commands.setIntakeMode(ON, ON),
+                    Commands.setIntakeMode(ON),
                     Commands.runPath(paths.farShoot_to_hpPreload, true, 1),
                     Commands.runPath(paths.hpPreload_to_farShoot, true, 1),
                     Commands.shootBalls(),
@@ -293,12 +303,12 @@ public class Auto_Main_ extends NextFTCOpMode {
                     Commands.runPath(paths.nearStart_to_midShoot, true, 1),
                     Commands.shootBalls(),
                     Commands.setFlywheelState(Turret.flywheelState.ON),
-                    Commands.setIntakeMode(ON, ON),
+                    Commands.setIntakeMode(ON),
                     Commands.runPath(paths.midShoot_to_nearPreload, true, 1),
                     Commands.runPath(paths.nearPreload_to_midShoot, true, 1),
                     Commands.shootBalls(),
                     Commands.setFlywheelState(Turret.flywheelState.ON),
-                    Commands.setIntakeMode(ON, ON),
+                    Commands.setIntakeMode(ON),
                     Commands.runPath(paths.midShoot_to_midPreload, true, 1),
                     Commands.runPath(paths.midPreload_to_nearLeave, true, 1),
                     Commands.shootBalls()
@@ -337,15 +347,15 @@ public class Auto_Main_ extends NextFTCOpMode {
                     new InstantCommand(Commands.setFlywheelState(Turret.flywheelState.ON)),
                     Commands.runPath(paths.nearStart_to_midShoot, true, 1),
                     Commands.shootBalls(),
-                    Commands.setIntakeMode(ON, ON),
+                    Commands.setIntakeMode(ON),
                     Commands.runPath(paths.midShoot_to_nearPreload, true, 1),
                     Commands.runPath(paths.nearPreload_to_midShoot, true, 1),
                     Commands.shootBalls(),
-                    Commands.setIntakeMode(ON, ON),
+                    Commands.setIntakeMode(ON),
                     Commands.runPath(paths.midShoot_to_midPreload, true, 1),
                     Commands.runPath(paths.midPreload_to_midShoot, true, 1),
                     Commands.shootBalls(),
-                    Commands.setIntakeMode(ON, ON),
+                    Commands.setIntakeMode(ON),
                     Commands.runPath(paths.midShoot_to_farPreload, true, 1),
                     Commands.runPath(paths.farPreload_to_nearLeave, true, 1),
                     Commands.shootBalls()
@@ -371,7 +381,7 @@ public class Auto_Main_ extends NextFTCOpMode {
         }
         @Override
         double getHoodOffset() {
-            return -25;
+            return 0;
         }
         @Override
         boolean autoLeave() {
@@ -384,24 +394,24 @@ public class Auto_Main_ extends NextFTCOpMode {
                     new InstantCommand(Commands.setFlywheelState(Turret.flywheelState.ON)),
                     Commands.runPath(paths.nearStart_to_midShoot, true, 1),
                     Commands.shootBalls(),
-                    Commands.setIntakeMode(ON, ON),
+                    Commands.setIntakeMode(ON),
                     Commands.runPath(paths.midShoot_to_midPreload, true, 1),
-                    Commands.setIntakeMode(OFF, ON),
+                    Commands.setIntakeMode(ON),
                     Commands.runPath(paths.midPreload_to_midShoot, true, 1),
                     Commands.shootBalls(),
-                    Commands.setIntakeMode(ON, ON),
+                    Commands.setIntakeMode(ON),
                     Commands.runPath(paths.midShoot_to_openGateIntake, true, 1),
                     Commands.waitForArtifacts(),
                     Commands.runPath(paths.openGateIntake_to_midShoot, true, 1),
                     Commands.shootBalls(),
-                    Commands.setIntakeMode(ON, ON),
+                    Commands.setIntakeMode(ON),
                     Commands.runPath(paths.midShoot_to_farPreload, true, 1),
-                    Commands.setIntakeMode(OFF, ON),
+                    Commands.setIntakeMode(ON),
                     Commands.runPath(paths.farPreload_to_midShoot, true, 1),
                     Commands.shootBalls(),
-                    Commands.setIntakeMode(ON, ON),
+                    Commands.setIntakeMode(ON),
                     Commands.runPath(paths.midShoot_to_nearPreload, true, 1),
-                    Commands.setIntakeMode(OFF, ON),
+                    Commands.setIntakeMode(ON),
                     Commands.runPath(paths.nearPreload_to_nearLeave, false, 1),
                     Commands.shootBalls()
             );
@@ -441,21 +451,21 @@ public class Auto_Main_ extends NextFTCOpMode {
                     new InstantCommand(Commands.setFlywheelState(Turret.flywheelState.ON)),
                     Commands.runPath(paths.nearStart_to_midShoot, true, 1),
                     Commands.shootBalls(),
-                    Commands.setIntakeMode(ON, ON),
+                    Commands.setIntakeMode(ON),
                     Commands.runPath(paths.midShoot_to_midPreload, true, 1),
                     Commands.runPath(paths.midPreload_to_midShoot, true, 1),
                     Commands.shootBalls(),
-                    Commands.setIntakeMode(ON, ON),
+                    Commands.setIntakeMode(ON),
                     Commands.runPath(paths.midShoot_to_openGateIntake, true, 1),
                     Commands.waitForArtifacts(),
                     Commands.runPath(paths.openGateIntake_to_midShoot, true, 1),
                     Commands.shootBalls(),
-                    Commands.setIntakeMode(ON, ON),
+                    Commands.setIntakeMode(ON),
                     Commands.runPath(paths.midShoot_to_openGateIntake, true, 1),
                     Commands.waitForArtifacts(),
                     Commands.runPath(paths.openGateIntake_to_midShoot, true, 1),
                     Commands.shootBalls(),
-                    Commands.setIntakeMode(ON, ON),
+                    Commands.setIntakeMode(ON),
                     Commands.runPath(paths.midShoot_to_nearPreload, true, 1),
                     Commands.runPath(paths.nearPreload_to_nearLeave, false, 1),
                     Commands.shootBalls()
@@ -496,19 +506,19 @@ public class Auto_Main_ extends NextFTCOpMode {
                     Commands.setFlywheelState(Turret.flywheelState.ON),
                     Commands.runPath(paths.farStart_to_farShoot, true, 1),
                     Commands.shootBalls(),
-                    Commands.setIntakeMode(ON, ON),
+                    Commands.setIntakeMode(ON),
                     Commands.runPath(paths.farShoot_to_farPreload, true, 1),
                     Commands.runPath(paths.farPreload_to_farShoot, true, 1),
                     Commands.shootBalls(),
-                    Commands.setIntakeMode(ON, ON),
+                    Commands.setIntakeMode(ON),
                     Commands.runPath(paths.farShoot_to_rampIntake, true, 1),
                     Commands.runPath(paths.rampIntake_to_farShoot, true, 1),
                     Commands.shootBalls(),
-                    Commands.setIntakeMode(ON, ON),
+                    Commands.setIntakeMode(ON),
                     Commands.runPath(paths.farShoot_to_hpPreload, true, 1),
                     Commands.runPath(paths.hpPreload_to_farShoot, true, 1),
                     Commands.shootBalls(),
-                    Commands.setIntakeMode(ON, ON),
+                    Commands.setIntakeMode(ON),
                     Commands.runPath(paths.farShoot_to_hpPreload, true, 1),
                     Commands.runPath(paths.hpPreload_to_farShoot, true, 1),
                     Commands.shootBalls(),
@@ -524,7 +534,7 @@ public class Auto_Main_ extends NextFTCOpMode {
     private class testAuto extends Auto{
         @Override
         Pose getStartPose() {
-            return paths.nearStart;
+            return paths.farStart;
         }
         @Override
         public Pose getEndPose(){
@@ -546,28 +556,14 @@ public class Auto_Main_ extends NextFTCOpMode {
         @Override
         public Command runAuto(){
             return new SequentialGroup(
-                    Commands.runPath(paths.nearStart_to_midShoot),
+                    Commands.runPath(paths.farStart_to_farShoot),
                     new WaitUntil(() -> gamepad1.bWasReleased()),
-                    new WaitUntil(() -> gamepad1.bWasPressed()),
-                    Commands.setIntakeMode(ON, ON),
-                    Commands.runPath(paths.midShoot_to_openGateIntake),
-                    Commands.waitForArtifacts(),
-                    Commands.runPath(paths.openGateIntake_to_midShoot),
-                    Commands.shootBalls(),
+                    Commands.setIntakeMode(ON),
+                    Commands.runPath(paths.farShoot_to_hpPreload),
                     new WaitUntil(() -> gamepad1.bWasReleased()),
-                    new WaitUntil(() -> gamepad1.bWasPressed()),
-                    Commands.setIntakeMode(ON, ON),
-                    Commands.runPath(paths.midShoot_to_openGateIntake),
-                    Commands.waitForArtifacts(),
-                    Commands.runPath(paths.openGateIntake_to_midShoot),
-                    Commands.shootBalls(),
-                    new WaitUntil(() -> gamepad1.bWasReleased()),
-                    new WaitUntil(() -> gamepad1.bWasPressed()),
-                    Commands.setIntakeMode(ON, ON),
-                    Commands.runPath(paths.midShoot_to_openGateIntake),
-                    Commands.waitForArtifacts(),
-                    Commands.runPath(paths.openGateIntake_to_midShoot),
-                    Commands.shootBalls()
+                    Commands.setIntakeMode(OFF),
+                    Commands.runPath(paths.hpPreload_to_farShoot),
+                    new WaitUntil(() -> gamepad1.bWasReleased())
             );
         }
 

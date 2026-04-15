@@ -92,9 +92,9 @@ public class Commands {
         );
     }
 
-    public Command setIntakeMode(Intake.intakeMode intake, Intake.intakeMode belt) {
+    public Command setIntakeMode(Intake.intakeMode intake) {
         return new InstantCommand(new LambdaCommand("setIntakeMode()")
-                .setStart(() -> Robot.intake.setMode(intake, belt))
+                .setStart(() -> Robot.intake.setMode(intake, ON))
         );
     }
 
@@ -118,7 +118,7 @@ public class Commands {
         return new ParallelRaceGroup(
                 new Delay(1.5),
                 new ParallelGroup(
-                        new Delay(0.85),
+                        new Delay(1),
                         new WaitUntil(() -> (Robot.intake.getTopSensorState()))
                 )
         );
@@ -165,24 +165,23 @@ public class Commands {
                 new ParallelRaceGroup(
                         new SequentialGroup(
                                 // Shoot the first two balls
-                                waitForTurret(2, 4),
+                                waitForTurret(1, 4),
                                 setGateState(Turret.gatestate.OPEN),
-                                new Delay(0.25),
-                                setIntakeMode(ON, ON),
+                                new Delay(0.1),
+                                setIntakeMode(ON),
                                 new ParallelGroup(
-                                        new Delay(0.3),
+                                        new Delay(0.5),
                                         new WaitUntil(() -> (Robot.intake.getTopSensorState() && !Robot.intake.getBottomSensorState()))
                                 ),
 
                                 // Shoot the last ball
-                                setIntakeMode(OFF, ON),
                                 setTransferState(Intake.transferState.UP),
-                                new Delay(0.3)
+                                new Delay(0.2)
                         ),
                         new Delay(3)
                 ),
                 new ParallelGroup(
-                        setIntakeMode(OFF, OFF),
+                        setIntakeMode(OFF),
                         setGateState(Turret.gatestate.CLOSED),
                         setTransferState(Intake.transferState.DOWN)
                 )
