@@ -29,30 +29,25 @@
 
 package org.firstinspires.ftc.teamcode.LOADCode.Main_.Teleop_;
 
+import static org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Intake.intakeMode.OFF;
+import static org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Intake.intakeMode.ON;
+
 import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.JoinedTelemetry;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
-import com.pedropathing.ftc.FTCCoordinates;
-import com.pedropathing.ftc.PoseConverter;
-import com.pedropathing.geometry.PedroCoordinates;
-import com.pedropathing.geometry.Pose;
-import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.skeletonarmy.marrow.TimerEx;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
-import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
+import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Intake;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Turret;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Drawing;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Drivetrain_.Pedro_Paths;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.LoadHardwareClass;
-import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 import java.util.concurrent.TimeUnit;
 
@@ -68,20 +63,21 @@ public class Teleop_Testing_ extends LinearOpMode {
     private final JoinedTelemetry telemetry = new JoinedTelemetry(ftcTelemetry, panelsTelemetry);
     public LoadHardwareClass Robot = new LoadHardwareClass(this);
     public Pedro_Paths paths = new Pedro_Paths();
-    public static final double llOffset = 6.496063; // INCHES
-    public static final double turretOffset = -1.094488;
-    public static double varianceMult = 16;
 
-    int turretTarget = 90;
+    public int shootingState = 0;
+    public TimerEx stateTimer = new TimerEx();
+
+    int hood = 0;
 
     @Override
     public void runOpMode() {
 
-        Robot.init(new Pose(72, 7.8, Math.toRadians(90)));
-        //Robot.init(paths.farStart);
+        Robot.init(paths.farStart);
+        LoadHardwareClass.selectedAlliance = LoadHardwareClass.Alliance.RED;
         Drawing.init();
 
         Turret.zeroed = false;
+        Turret.zeroingState = 0;
 
         while (!isStopRequested() && Robot.turret.zeroTurret()){
             Robot.sleep(0);
@@ -97,85 +93,93 @@ public class Teleop_Testing_ extends LinearOpMode {
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
 
-            Robot.turret.limelight.setPipeline(2);
-
             Robot.drivetrain.pedroMecanumDrive(
-                    gamepad1.left_stick_y,
-                    gamepad1.left_stick_x,
-                    gamepad1.right_stick_x / 2,
+                    gamepad1.left_stick_y/3,
+                    gamepad1.left_stick_x/3,
+                    gamepad1.right_stick_x / 4,
                     true
             );
-            Robot.turret.updatePIDs();
-            Robot.turret.rotation.setAngle(turretTarget);
+
             int change = 10;
-            if (gamepad1.dpadLeftWasPressed()){
-                turretTarget += change;
-            }else if (gamepad1.dpadRightWasPressed()){
-                turretTarget -= change;
+
+            if (gamepad1.dpadUpWasPressed()){
+                hood += change;
+            }
+            if (gamepad1.dpadDownWasPressed()){
+                hood -= change;
             }
 
-            Robot.turret.limelight.updateResult(Robot.drivetrain.follower.getHeading()
-                +  Math.toRadians(Robot.turret.rotation.getAngle() - 90));
-            LLResult result = Robot.turret.limelight.result;
+            telemetry.addData("Hood Angle", hood);
+            telemetry.addData("Distance", Robot.drivetrain.distanceFromGoal());
+            telemetry.addData("Speed", Robot.turret.getFlywheelCurrentMaxSpeed());
 
-            Pose2D botPose = null;
-            if (result != null && result.isValid()){
-                Pose3D pose = result.getBotpose_MT2();
-                botPose = new Pose2D(DistanceUnit.METER, pose.getPosition().x, pose.getPosition().y, AngleUnit.DEGREES, pose.getOrientation().getYaw());
-            }
-            Pose pedroPose = null;
-            if (botPose != null) {
-                pedroPose = PoseConverter.pose2DToPose(botPose, FTCCoordinates.INSTANCE)
-                        .getAsCoordinateSystem(PedroCoordinates.INSTANCE);
-
-                double turretOffsetX = llOffset * Math.cos(pedroPose.getHeading());
-                double turretOffsetY = llOffset * Math.sin(pedroPose.getHeading());
-
-                pedroPose = new Pose(pedroPose.getX() - turretOffsetX,
-                        pedroPose.getY()- turretOffsetY,
-                        Robot.drivetrain.follower.getHeading());
-
-                double robotCenterOffsetX = turretOffset * Math.cos(pedroPose.getHeading());
-                double robotCenterOffsetY = turretOffset * Math.sin(pedroPose.getHeading());
-
-                pedroPose = new Pose(pedroPose.getX() - robotCenterOffsetX,
-                        pedroPose.getY()- robotCenterOffsetY,
-                        pedroPose.getHeading());
-                Drawing.drawRobot(pedroPose);
-
-                long timestampNanos = System.nanoTime() - result.getStaleness() * 1_000_000L;
-
-                double[] measurementStdDevs = result.getStddevMt2();
-
-                double stdX_in = measurementStdDevs[0] * 39.3701;
-                double stdY_in = measurementStdDevs[1] * 39.3701;
-                double stdYaw_rad = Math.toRadians(measurementStdDevs[5]);
-
-                Pose measurementVariance = new Pose(
-                        stdX_in * stdX_in * varianceMult,
-                        stdY_in * stdY_in * varianceMult,
-                        stdYaw_rad * stdYaw_rad * varianceMult
-                );
-
-
-                Constants.getFusionLocalizer().addMeasurement(
-                        pedroPose,
-                        timestampNanos,
-                        measurementVariance
-                );
-
-                telemetry.addData("LL MT2 PosX", pedroPose.getX());
-                telemetry.addData("LL MT2 PosY", pedroPose.getY());
-                telemetry.addData("LL MT2 Heading", Math.toDegrees(pedroPose.getHeading()));
+            if (gamepad1.left_trigger > 0.5){
+                Robot.intake.setMode(ON, ON);
+            }else{
+                Robot.intake.setMode(OFF, OFF);
             }
 
-            Drawing.drawRobot(Robot.drivetrain.follower.getPose(), Drawing.yellow);
-            Drawing.drawRobot(Constants.getPinpointLocalizer().getPose(), Drawing.green);
-            Drawing.sendPacket();
+            if (gamepad1.yWasPressed()){
+                Robot.turret.setFlywheelState(Turret.flywheelState.ON);
+            }else if (gamepad1.aWasPressed()){
+                Robot.turret.setFlywheelState(Turret.flywheelState.OFF);
+            }
+            Robot.turret.updateFlywheel(0);
 
-            telemetry.addData("LL MT2 PosX", Robot.drivetrain.follower.getPose().getX());
-            telemetry.addData("LL MT2 PosY", Robot.drivetrain.follower.getPose().getY());
-            telemetry.addData("LL MT2 Heading", Math.toDegrees(Robot.drivetrain.follower.getPose().getHeading()));
+            if (gamepad1.bWasPressed() && shootingState < 1 && Robot.turret.getFlywheelRPM() > Robot.turret.getFlywheelCurrentMaxSpeed()-100) {
+                shootingState++;
+            }
+            if (gamepad1.xWasPressed()){
+                shootingState = 4;
+            }
+            boolean forceGateOpen = false;
+            switch (shootingState) {
+                case 0:
+                    telemetry.addData("Shooting State", "OFF");
+                    break;
+                case 1:
+                    Robot.turret.setFlywheelState(Turret.flywheelState.ON);
+                    if (Robot.turret.getGate() == Turret.gatestate.CLOSED){
+                        stateTimer.restart();
+                    }
+                    if (!forceGateOpen){
+                        Robot.turret.setGateState(Turret.gatestate.OPEN);
+                    }
+                    telemetry.addData("Shooting State", "GATE OPENING");
+                    if (stateTimer.getElapsed() > 0.2){
+                        shootingState = 2;
+                        stateTimer.restart();
+                    }
+                    break;
+                case 2:
+                    Robot.intake.setMode(ON, ON);
+                    telemetry.addData("Shooting State", "INTAKE_NOINTAKE FIRST TWO");
+                    if (stateTimer.getElapsed() > 0.7 && Robot.intake.getTopSensorState() && !Robot.intake.getBottomSensorState()){
+                        shootingState = 3;
+                        stateTimer.restart();
+                    }
+                    break;
+                case 3:
+                    Robot.intake.setMode(OFF, ON);
+                    Robot.intake.setTransfer(Intake.transferState.UP);
+                    telemetry.addData("Shooting State", "INTAKE_NOINTAKE FINAL");
+                    if (stateTimer.getElapsed() > 0.5) {
+                        shootingState = 4;
+                    }
+                    break;
+                case 4:
+                    if (!forceGateOpen){
+                        Robot.turret.setGateState(Turret.gatestate.CLOSED);
+                    }
+                    Robot.intake.setMode(OFF, OFF);
+                    Robot.intake.setTransfer(Intake.transferState.DOWN);
+                    telemetry.addData("Shooting State", "RESET");
+                    shootingState = 0;
+            }
+
+            Robot.turret.rotation.setAngle(90);
+            Robot.turret.setHood(Math.max(0, Math.min(hood, Turret.upperHoodLimit)));
+            Robot.turret.updatePIDs();
 
             telemetry.addData("Loop Time (ms)", loopTimer.time(TimeUnit.MILLISECONDS));
             telemetry.update();

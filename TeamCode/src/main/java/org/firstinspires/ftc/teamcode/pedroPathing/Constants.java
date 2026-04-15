@@ -69,7 +69,7 @@ public class Constants {
     private static PinpointLocalizer pinpointLocalizer = null;
 
     public static Follower createFollower(HardwareMap hardwareMap) {
-        pinpointLocalizer= new PinpointLocalizer(hardwareMap, localizerConstants);
+        pinpointLocalizer = new PinpointLocalizer(hardwareMap, localizerConstants);
 
         fusionLocalizer = new FusionLocalizer(
                 pinpointLocalizer,

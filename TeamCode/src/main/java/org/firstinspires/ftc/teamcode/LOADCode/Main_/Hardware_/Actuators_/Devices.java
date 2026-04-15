@@ -324,7 +324,7 @@ public class Devices {
             KineticState currentKineticState = new KineticState(getAngleAbsolute(), getDegreesPerSecond());
             posPID.setGoal(new KineticState(target, velocity));
             double pidPower = posPID.calculate(currentKineticState);
-            if (!posPID.isWithinTolerance(maxAcceptableError)){
+            if (!isWithinMaxError()){
                 setPower(pidPower + Math.signum(pidPower) * constantFFparameter);
             }else{
                 setPower(0);

@@ -28,6 +28,9 @@ public class LimeLight_Localizer {
     }
 
     public Pose updateLLPose(){
+        if (Robot.turret.limelight.getPipeline() != 2){
+            Robot.turret.limelight.setPipeline(2);
+        }
         Robot.turret.limelight.updateResult(Robot.drivetrain.follower.getHeading()
                 +  Math.toRadians(Robot.turret.rotation.getAngle() - 90));
         LLResult result = Robot.turret.limelight.result;

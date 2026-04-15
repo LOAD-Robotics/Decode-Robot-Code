@@ -15,7 +15,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.LoadHardwareClass;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Utils_;
 
-import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
 import dev.nextftc.control.KineticState;
@@ -37,7 +36,7 @@ public class Turret {
     // Turret PID coefficients
     public static PIDCoefficients turretCoefficients = new PIDCoefficients(0.05, 0, 0.001); // 223RPM Motor
     public static double turretConstantFF = 0.03;
-    public static KineticState maxAcceptableError = new KineticState(1, 5);
+    public static KineticState maxAcceptableError = new KineticState(2, 1);
 
     // Flywheel PID coefficients for various speeds
     //public static PIDCoefficients flywheelCoefficients = new PIDCoefficients(0.0002, 0, 0); // 4500 RPM
@@ -86,16 +85,6 @@ public class Turret {
     public static boolean zeroed = false;
     public static int zeroingState = 0;
     private TimerEx zeroingTimer = new TimerEx(0.25, TimeUnit.SECONDS);
-    /**
-     * Indicates which aiming system is in use.
-     */
-    public boolean cameraAimOn = false;
-
-    public ArrayList<Double> errorList = new ArrayList<>();
-    public ArrayList<Boolean> llValidList = new ArrayList<>();
-    private double rawCameraError = 0;
-    public double smoothedCameraError = 0;
-    public static int averageErrorDatasetSize = 8;
 
     // Stores important objects for later access
     OpMode opMode = null;
@@ -150,38 +139,31 @@ public class Turret {
         flywheel2.setPidCoefficients(actualFlywheelCoefficients);
         flywheel2.setFFCoefficients(actualFlywheelFFCoefficients);
 
-        // hood old ratio: 264/28, 1.00%
-        // hood current ratio: 264/30, 0.93%
+        // hood old ratio: 264/28, 1.07%
+        // hood current ratio: 264/30, 1.00%
 
-        double hoodRatio = 0.97;
+        double hoodRatio = 1;
 
         // Safety points for LUTs
         hoodLUTnear.add(0, 0);
-        hoodLUTfar.add(0, 190);
+        hoodLUTfar.add(0, 200);
 
         // --------------------------------------------------------
 
-        // Near zone measurements
-        hoodLUTnear.add(60 * hoodRatio, 0);
-        hoodLUTnear.add(68.5 * hoodRatio, 140.5);
-        hoodLUTnear.add(71 * hoodRatio, 182);
-        hoodLUTnear.add(84.5 * hoodRatio, 175);
-        hoodLUTnear.add(88 * hoodRatio, 145);
-        hoodLUTnear.add(90 * hoodRatio, 145);
-        hoodLUTnear.add(97.5 * hoodRatio, 200);
-        hoodLUTnear.add(102 * hoodRatio, 187);
-        hoodLUTnear.add(114 * hoodRatio, 165);
+        hoodLUTnear.add(69 * hoodRatio, 0);
+        hoodLUTnear.add(82 * hoodRatio, 80);
+        hoodLUTnear.add(91 * hoodRatio, 170);
+        hoodLUTnear.add(121 * hoodRatio, 170);
 
-        // Far zone measurements
-        hoodLUTfar.add(139.5 * hoodRatio, 190);
-        hoodLUTfar.add(150 * hoodRatio, 190);
-        hoodLUTfar.add(160 * hoodRatio, 160);
+        hoodLUTfar.add(141 * hoodRatio, 200);
+        hoodLUTfar.add(147 * hoodRatio, 180);
+        hoodLUTfar.add(165 * hoodRatio, 130);
 
         // --------------------------------------------------------
 
         // Safety points for LUTs
-        hoodLUTnear.add(300, 165);
-        hoodLUTfar.add(300, 160);
+        hoodLUTnear.add(300, 170);
+        hoodLUTfar.add(300, 130);
 
         // Generate Lookup Table & Initialize servo position
         hoodLUTnear.createLUT();
@@ -245,10 +227,11 @@ public class Turret {
         // Set the hood angle
         Pose goalPose = new Pose(0,144,0);
         if (selectedAlliance == LoadHardwareClass.Alliance.RED) {goalPose = new Pose(144, 144, 0);}
+        double distance = Math.max(0, Math.min(Robot.drivetrain.follower.getPose().distanceFrom(goalPose), 300));
         if (robotZone.isInside(LoadHardwareClass.FarLaunchZone)){
-            setHood(hoodLUTfar.get(Robot.drivetrain.follower.getPose().distanceFrom(goalPose)));
+            setHood(hoodLUTfar.get(distance));
         }else{
-            setHood(hoodLUTnear.get(Robot.drivetrain.follower.getPose().distanceFrom(goalPose)));
+            setHood(hoodLUTnear.get(distance));
         }
         setHood(getHood() + offset);
     }
@@ -413,7 +396,7 @@ public class Turret {
                     if (hall.getTriggered()){
                         zeroingState++;
                     }
-                    if (rotation.getCurrent(CurrentUnit.AMPS) > 6 && zeroingTimer.isDone()){
+                    if (rotation.getCurrent(CurrentUnit.AMPS) > 7 && zeroingTimer.isDone()){
                         zeroingState = 3;
                     }
                     break;
@@ -450,7 +433,7 @@ public class Turret {
                     targetRPM = flywheelFarSpeed;
                     actualFlywheelCoefficients = flywheelCoefficients4200;
                     actualFlywheelFFCoefficients = flywheelFFCoefficients4200;
-                }else if (Robot.drivetrain.distanceFromGoal() < 65){
+                }else if (Robot.drivetrain.distanceFromGoal() < 70){
                     targetRPM = flywheelReallyNearSpeed;
                     actualFlywheelCoefficients = flywheelCoefficients3000;
                     actualFlywheelFFCoefficients = flywheelFFCoefficients3000;

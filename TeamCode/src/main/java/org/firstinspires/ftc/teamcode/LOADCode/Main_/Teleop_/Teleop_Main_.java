@@ -39,7 +39,6 @@ import com.bylazar.telemetry.JoinedTelemetry;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
 import com.pedropathing.geometry.Pose;
-import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -60,7 +59,6 @@ import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Drivetrain_.Pedro
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.LoadHardwareClass;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 
@@ -126,11 +124,11 @@ public class Teleop_Main_ extends LinearOpMode {
     @Override
     public void runOpMode() {
 
-        List<LynxModule> allHubs = hardwareMap.getAll(LynxModule.class);
-
-        for (LynxModule hub : allHubs) {
-            hub.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
-        }
+//        List<LynxModule> allHubs = hardwareMap.getAll(LynxModule.class);
+//
+//        for (LynxModule hub : allHubs) {
+//            hub.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
+//        }
 
         // Create a new prompter for selecting alliance
         prompter = new Prompter(this);
@@ -191,9 +189,9 @@ public class Teleop_Main_ extends LinearOpMode {
         if (!Turret.zeroed){
             while (!isStopRequested() && Robot.turret.zeroTurret()){
                 Robot.sleep(0);
-                for (LynxModule hub : allHubs) {
-                    hub.clearBulkCache();
-                }
+//                for (LynxModule hub : allHubs) {
+//                    hub.clearBulkCache();
+//                }
                 telemetry.addData("Looptime", looptime.time(TimeUnit.MILLISECONDS));
                 looptime.reset();
             }
@@ -257,10 +255,11 @@ public class Teleop_Main_ extends LinearOpMode {
             // Turret Rotation Telemetry
             telemetry.addData("TurretState", teleopTurretState);
             telemetry.addData("Turret Target Angle", Robot.turret.rotationalAimbotLocalizer());
+            telemetry.addData("Turret Motor Target", Robot.turret.rotation.target);
             telemetry.addData("Turret Actual Angle", Robot.turret.rotation.getAngleAbsolute());
             telemetry.addData("Turret Angular Velocity (Deg/sec)", Robot.turret.rotation.getDegreesPerSecond());
             telemetry.addData("Turret Rotation Offset", turretOffsetStep);
-            telemetry.addData("Turret Set Power", Robot.turret.rotation.getPower());
+            telemetry.addData("Turret Set Power %", Robot.turret.rotation.getPower()*100);
             telemetry.addData("Turret Target [X, Y]", "[" + Robot.turret.calcGoalPose().getX() + ", " + Robot.turret.calcGoalPose().getY() + "]");
             telemetry.addData("Turret Rotation Motor Current", Robot.turret.rotation.getCurrent(CurrentUnit.AMPS));
             telemetry.addLine();
@@ -290,9 +289,9 @@ public class Teleop_Main_ extends LinearOpMode {
             Drawing.drawRobot(Constants.getPinpointLocalizer().getPose(), Drawing.yellow);
             Drawing.sendPacket();
 
-            for (LynxModule hub : allHubs) {
-                hub.clearBulkCache();
-            }
+//            for (LynxModule hub : allHubs) {
+//                hub.clearBulkCache();
+//            }
         }
 
         selectedAlliance = null;
@@ -372,18 +371,19 @@ public class Teleop_Main_ extends LinearOpMode {
             Robot.drivetrain.speedMultiplier = 0.66;
         }
 
-        if (gamepad1.bWasPressed()){
-            if (selectedAlliance == LoadHardwareClass.Alliance.RED){
-                Constants.getPinpointLocalizer().setPose(new Pose(9.6, 7.1, Math.toRadians(90)));
-            }else if (selectedAlliance == LoadHardwareClass.Alliance.BLUE){
-                Constants.getPinpointLocalizer().setPose(new Pose(144-9.6, 7.1, Math.toRadians(90)));
-            }
-//            Turret.zeroed = false;
-//            Turret.zeroingState = 0;
-//            while (!isStopRequested() && Robot.turret.zeroTurret()){
-//                Robot.sleep(0);
+//        if (gamepad1.bWasPressed()){
+//            if (selectedAlliance == LoadHardwareClass.Alliance.RED){
+//                Robot.drivetrain.follower.setPose(new Pose(9.6, 7.1, Math.toRadians(90)));
+//            }else if (selectedAlliance == LoadHardwareClass.Alliance.BLUE){
+//                Robot.drivetrain.follower.setPose(new Pose(144-9.6, 7.1, Math.toRadians(90)));
+//                Robot.drivetrain.follower.getPoseTracker().setPose();
 //            }
-        }
+////            Turret.zeroed = false;
+////            Turret.zeroingState = 0;
+////            while (!isStopRequested() && Robot.turret.zeroTurret()){
+////                Robot.sleep(0);
+////            }
+//        }
 
         Robot.drivetrain.pedroMecanumDrive(
                 gamepad1.left_stick_y,
@@ -477,7 +477,7 @@ public class Teleop_Main_ extends LinearOpMode {
                 }
             }
 
-            if (gamepad2.rightStickButtonWasPressed()){
+            if (gamepad2.rightStickButtonWasPressed() && zeroState == 0){
                 zeroState = 1;
             }
             switch (zeroState){
@@ -531,11 +531,11 @@ public class Teleop_Main_ extends LinearOpMode {
         }else if (gamepad2.dpadDownWasPressed()){
             hoodOffset -= 10;
         }
-        if (gamepad2.dpadLeftWasPressed()){
-            Turret.turretOffset += turretOffsetStep;
-        }else if (gamepad2.dpadRightWasPressed()){
-            Turret.turretOffset -= turretOffsetStep;
-        }
+//        if (gamepad2.dpadLeftWasPressed()){
+//            Turret.turretOffset += turretOffsetStep;
+//        }else if (gamepad2.dpadRightWasPressed()){
+//            Turret.turretOffset -= turretOffsetStep;
+//        }
 
         if (gamepad2.backWasPressed()){
             forceGateOpen = !forceGateOpen;
@@ -551,7 +551,7 @@ public class Teleop_Main_ extends LinearOpMode {
         }
         switch (shootingState) {
             case 0:
-                telemetry.addData("Shooting State", "OFF");
+                telemetry.addData("Shooting State", "Idle");
                 return;
             case 1:
                 Robot.turret.setFlywheelState(flywheelState.ON);
@@ -561,7 +561,7 @@ public class Teleop_Main_ extends LinearOpMode {
                 if (!forceGateOpen){
                     Robot.turret.setGateState(gatestate.OPEN);
                 }
-                telemetry.addData("Shooting State", "GATE OPENING");
+                telemetry.addData("Shooting State", "Open Gate");
                 if (stateTimer.getElapsed() > 0.2){
                     shootingState = 2;
                     stateTimer.restart();
@@ -569,8 +569,8 @@ public class Teleop_Main_ extends LinearOpMode {
                 return;
             case 2:
                 Robot.intake.setMode(ON, ON);
-                telemetry.addData("Shooting State", "INTAKE_NOINTAKE FIRST TWO");
-                if (stateTimer.getElapsed() > 0.35 && Robot.intake.getTopSensorState() && !Robot.intake.getBottomSensorState()){
+                telemetry.addData("Shooting State", "Shoot First Two");
+                if (stateTimer.getElapsed() > 0.3 && Robot.intake.getTopSensorState() && !Robot.intake.getBottomSensorState()){
                     shootingState = 3;
                     stateTimer.restart();
                 }
@@ -578,7 +578,7 @@ public class Teleop_Main_ extends LinearOpMode {
             case 3:
                 Robot.intake.setMode(OFF, ON);
                 Robot.intake.setTransfer(transferState.UP);
-                telemetry.addData("Shooting State", "INTAKE_NOINTAKE FINAL");
+                telemetry.addData("Shooting State", "Shoot Final");
                 if (stateTimer.getElapsed() > 0.5) {
                     shootingState = 4;
                 }
@@ -589,7 +589,7 @@ public class Teleop_Main_ extends LinearOpMode {
                 }
                 Robot.intake.setMode(OFF, OFF);
                 Robot.intake.setTransfer(transferState.DOWN);
-                telemetry.addData("Shooting State", "RESET");
+                telemetry.addData("Shooting State", "Reset");
                 shootingState = 0;
         }
     }

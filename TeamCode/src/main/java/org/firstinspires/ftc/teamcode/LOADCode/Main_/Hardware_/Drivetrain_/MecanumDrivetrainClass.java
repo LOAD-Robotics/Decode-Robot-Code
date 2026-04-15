@@ -28,7 +28,7 @@ public class MecanumDrivetrainClass {
     public void init (@NonNull OpMode myOpMode, Pose initialPose){
         // PedroPathing initialization
         follower = Constants.createFollower(myOpMode.hardwareMap);  // Initializes the PedroPathing path follower
-        Constants.getPinpointLocalizer().setPose(initialPose);                      // Sets the initial position of the robot on the field
+        follower.setStartingPose(initialPose);
         follower.update(); // Applies the initialization
     }
 
@@ -42,7 +42,7 @@ public class MecanumDrivetrainClass {
     public void init (@NonNull OpMode myOpMode, Pose initialPose, Follower follow){
         // PedroPathing initialization
         follower = follow;  // Initializes the PedroPathing path follower
-        Constants.getPinpointLocalizer().setPose(initialPose);                      // Sets the initial position of the robot on the field
+        follower.setStartingPose(initialPose);
         follower.update(); // Applies the initialization
     }
 

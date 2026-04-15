@@ -20,12 +20,12 @@ public class Pedro_Paths {
      * Define primary poses to be used in paths
       */
     // Start Poses
-    public Pose nearStart = new Pose(118, 132, Math.toRadians(306));
+    public Pose nearStart = new Pose(118, 132, Math.toRadians(36.5));
     public Pose farStart = new Pose(88, 7.1, Math.toRadians(90));
     // Preload Poses
     public Pose nearPreload = new Pose(124.000, 83.500, Math.toRadians(0));
-    public Pose midPreload = new Pose(130.000, 59.500, Math.toRadians(0));
-    public Pose farPreload = new Pose(130.000, 35.500, Math.toRadians(0));
+    public Pose midPreload = new Pose(132.000, 59.500, Math.toRadians(0));
+    public Pose farPreload = new Pose(132.000, 35.500, Math.toRadians(0));
     public Pose hpPreload = new Pose(136, 9, Math.toRadians(-90));
     public Pose rampIntake = new Pose(135, 40, Math.toRadians(80));
     public Pose hpIntake = null;
@@ -270,7 +270,7 @@ public class Pedro_Paths {
         midPreload_to_nearShoot = follower.pathBuilder()
                 .addPath(new BezierCurve(
                         midPreload,
-                        autoMirror(new Pose(65,59.5)),
+                        autoMirror(new Pose(80,59.5)),
                         nearShoot
                 ))
                 .setLinearHeadingInterpolation(midPreload.getHeading(), nearShoot.getHeading())
@@ -278,7 +278,7 @@ public class Pedro_Paths {
         midPreload_to_midShoot = follower.pathBuilder()
                 .addPath(new BezierCurve(
                         midPreload,
-                        autoMirror(new Pose(65,59.5)),
+                        autoMirror(new Pose(85,59.5)),
                         midShoot
                 ))
                 .setLinearHeadingInterpolation(midPreload.getHeading(), midShoot.getHeading())
@@ -376,7 +376,7 @@ public class Pedro_Paths {
         midShoot_to_farPreload = follower.pathBuilder()
                 .addPath(new BezierCurve(
                         midShoot,
-                        autoMirror(new Pose(68, 30)),
+                        autoMirror(new Pose(75, 30)),
                         farPreload
                 ))
                 .setLinearHeadingInterpolation(midShoot.getHeading(), farPreload.getHeading())

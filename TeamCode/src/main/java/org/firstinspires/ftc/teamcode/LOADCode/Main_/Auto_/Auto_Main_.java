@@ -101,10 +101,14 @@ public class Auto_Main_ extends NextFTCOpMode {
     public void onStartButtonPressed() {
         Robot.lights.setSolidAllianceDisplay(selectedAlliance);
         // Schedule the proper auto
-        Commands.leaveAtEnd(
-                selectedAuto.runAuto(),
-                selectedAuto.getEndPose()
-        ).schedule();
+        if (selectedAuto.autoLeave()){
+            Commands.leaveAtEnd(
+                    selectedAuto.runAuto(),
+                    selectedAuto.getEndPose()
+            ).schedule();
+        }else{
+            selectedAuto.runAuto().schedule();
+        }
         turretOn = selectedAuto.getTurretEnabled();
         timer25Sec.restart();
 
@@ -122,6 +126,7 @@ public class Auto_Main_ extends NextFTCOpMode {
         MecanumDrivetrainClass.robotPose = Robot.drivetrain.follower.getPose();
         telemetry.update();
         Drawing.drawRobot(Robot.drivetrain.follower.getPose());
+        Drawing.sendPacket();
     }
 
     @Override
@@ -156,6 +161,8 @@ public class Auto_Main_ extends NextFTCOpMode {
          */
         abstract boolean getTurretEnabled();
 
+        abstract boolean autoLeave();
+
         /** Override this to schedule the auto command*/
         abstract Command runAuto();
         /** Override this to rename the auto*/
@@ -179,6 +186,10 @@ public class Auto_Main_ extends NextFTCOpMode {
         }
         @Override
         public boolean getTurretEnabled(){
+            return true;
+        }
+        @Override
+        boolean autoLeave() {
             return true;
         }
 
@@ -220,6 +231,10 @@ public class Auto_Main_ extends NextFTCOpMode {
         @Override
         double getHoodOffset() {
             return 10;
+        }
+        @Override
+        boolean autoLeave() {
+            return true;
         }
 
         @Override
@@ -266,6 +281,10 @@ public class Auto_Main_ extends NextFTCOpMode {
         double getHoodOffset() {
             return -25;
         }
+        @Override
+        boolean autoLeave() {
+            return true;
+        }
 
         @Override
         public Command runAuto(){
@@ -306,6 +325,10 @@ public class Auto_Main_ extends NextFTCOpMode {
         @Override
         double getHoodOffset() {
             return -25;
+        }
+        @Override
+        boolean autoLeave() {
+            return true;
         }
 
         @Override
@@ -349,6 +372,10 @@ public class Auto_Main_ extends NextFTCOpMode {
         @Override
         double getHoodOffset() {
             return -25;
+        }
+        @Override
+        boolean autoLeave() {
+            return true;
         }
 
         @Override
@@ -403,6 +430,10 @@ public class Auto_Main_ extends NextFTCOpMode {
         double getHoodOffset() {
             return -25;
         }
+        @Override
+        boolean autoLeave() {
+            return true;
+        }
 
         @Override
         public Command runAuto(){
@@ -454,6 +485,10 @@ public class Auto_Main_ extends NextFTCOpMode {
         double getHoodOffset() {
             return -25;
         }
+        @Override
+        boolean autoLeave() {
+            return true;
+        }
 
         @Override
         public Command runAuto(){
@@ -489,32 +524,50 @@ public class Auto_Main_ extends NextFTCOpMode {
     private class testAuto extends Auto{
         @Override
         Pose getStartPose() {
-            return paths.farStart;
+            return paths.nearStart;
         }
         @Override
         public Pose getEndPose(){
-            return paths.farLeave;
+            return paths.midShoot;
         }
         @Override
         boolean getTurretEnabled() {
+            return true;
+        }
+        @Override
+        boolean autoLeave() {
             return false;
         }
         @Override
         double getHoodOffset() {
-            return -25;
+            return 0;
         }
 
         @Override
         public Command runAuto(){
             return new SequentialGroup(
-                    Commands.runPath(paths.farStart_to_farShoot),
-                    Commands.runPath(paths.farShoot_to_farPreload),
+                    Commands.runPath(paths.nearStart_to_midShoot),
+                    new WaitUntil(() -> gamepad1.bWasReleased()),
                     new WaitUntil(() -> gamepad1.bWasPressed()),
-                    Commands.runPath(paths.farPreload_to_farShoot),
-                    Commands.runPath(paths.farShoot_to_midPreload),
+                    Commands.setIntakeMode(ON, ON),
+                    Commands.runPath(paths.midShoot_to_openGateIntake),
+                    Commands.waitForArtifacts(),
+                    Commands.runPath(paths.openGateIntake_to_midShoot),
+                    Commands.shootBalls(),
+                    new WaitUntil(() -> gamepad1.bWasReleased()),
                     new WaitUntil(() -> gamepad1.bWasPressed()),
-                    Commands.runPath(paths.midPreload_to_farShoot),
-                    Commands.runPath(paths.farShoot_to_nearPreload)
+                    Commands.setIntakeMode(ON, ON),
+                    Commands.runPath(paths.midShoot_to_openGateIntake),
+                    Commands.waitForArtifacts(),
+                    Commands.runPath(paths.openGateIntake_to_midShoot),
+                    Commands.shootBalls(),
+                    new WaitUntil(() -> gamepad1.bWasReleased()),
+                    new WaitUntil(() -> gamepad1.bWasPressed()),
+                    Commands.setIntakeMode(ON, ON),
+                    Commands.runPath(paths.midShoot_to_openGateIntake),
+                    Commands.waitForArtifacts(),
+                    Commands.runPath(paths.openGateIntake_to_midShoot),
+                    Commands.shootBalls()
             );
         }
 

@@ -116,8 +116,11 @@ public class Commands {
      */
     public Command waitForArtifacts(){
         return new ParallelRaceGroup(
-                new Delay(0.7),
-                new WaitUntil(() -> (Robot.intake.getTopSensorState()))
+                new Delay(1.5),
+                new ParallelGroup(
+                        new Delay(0.85),
+                        new WaitUntil(() -> (Robot.intake.getTopSensorState()))
+                )
         );
     }
 
@@ -167,7 +170,7 @@ public class Commands {
                                 new Delay(0.25),
                                 setIntakeMode(ON, ON),
                                 new ParallelGroup(
-                                        new Delay(0.5),
+                                        new Delay(0.3),
                                         new WaitUntil(() -> (Robot.intake.getTopSensorState() && !Robot.intake.getBottomSensorState()))
                                 ),
 
