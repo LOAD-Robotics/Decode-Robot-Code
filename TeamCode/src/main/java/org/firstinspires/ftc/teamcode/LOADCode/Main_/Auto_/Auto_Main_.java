@@ -26,7 +26,6 @@ import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.LoadHardwareClass
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 import dev.nextftc.core.commands.Command;
-import dev.nextftc.core.commands.delays.WaitUntil;
 import dev.nextftc.core.commands.groups.SequentialGroup;
 import dev.nextftc.core.commands.utility.InstantCommand;
 import dev.nextftc.extensions.pedro.PedroComponent;
@@ -381,7 +380,7 @@ public class Auto_Main_ extends NextFTCOpMode {
         }
         @Override
         double getHoodOffset() {
-            return 0;
+            return 25;
         }
         @Override
         boolean autoLeave() {
@@ -402,6 +401,7 @@ public class Auto_Main_ extends NextFTCOpMode {
                     Commands.setIntakeMode(ON),
                     Commands.runPath(paths.midShoot_to_openGateIntake, true, 1),
                     Commands.waitForArtifacts(),
+                    Commands.setIntakeMode(OFF),
                     Commands.runPath(paths.openGateIntake_to_midShoot, true, 1),
                     Commands.shootBalls(),
                     Commands.setIntakeMode(ON),
@@ -534,7 +534,7 @@ public class Auto_Main_ extends NextFTCOpMode {
     private class testAuto extends Auto{
         @Override
         Pose getStartPose() {
-            return paths.farStart;
+            return paths.nearStart;
         }
         @Override
         public Pose getEndPose(){
@@ -556,14 +556,11 @@ public class Auto_Main_ extends NextFTCOpMode {
         @Override
         public Command runAuto(){
             return new SequentialGroup(
-                    Commands.runPath(paths.farStart_to_farShoot),
-                    new WaitUntil(() -> gamepad1.bWasReleased()),
+                    Commands.runPath(paths.nearStart_to_midShoot),
                     Commands.setIntakeMode(ON),
-                    Commands.runPath(paths.farShoot_to_hpPreload),
-                    new WaitUntil(() -> gamepad1.bWasReleased()),
-                    Commands.setIntakeMode(OFF),
-                    Commands.runPath(paths.hpPreload_to_farShoot),
-                    new WaitUntil(() -> gamepad1.bWasReleased())
+                    Commands.runPath(paths.midShoot_to_openGateIntake),
+                    Commands.waitForArtifacts(),
+                    Commands.runPath(paths.openGateIntake_to_midShoot)
             );
         }
 

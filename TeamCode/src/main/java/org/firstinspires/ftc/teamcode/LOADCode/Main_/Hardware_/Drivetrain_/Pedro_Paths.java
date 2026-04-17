@@ -24,8 +24,8 @@ public class Pedro_Paths {
     public Pose farStart = new Pose(88, 7.1, Math.toRadians(90));
     // Preload Poses
     public Pose nearPreload = new Pose(124.000, 83.500, Math.toRadians(0));
-    public Pose midPreload = new Pose(132.000, 59.500, Math.toRadians(0));
-    public Pose farPreload = new Pose(132.000, 35.500, Math.toRadians(0));
+    public Pose midPreload = new Pose(131.000, 59.500, Math.toRadians(0));
+    public Pose farPreload = new Pose(131.000, 35.500, Math.toRadians(0));
     public Pose hpPreload = new Pose(136, 9, Math.toRadians(-90));
     public Pose rampIntake = new Pose(132, 40, Math.toRadians(75));
     public Pose hpIntake = null;
@@ -42,7 +42,7 @@ public class Pedro_Paths {
     // Open Gate Pose
     public Pose openGateBasic = new Pose(127.5, 72, Math.toRadians(90));
     public Pose openGateBasicReversed = new Pose(127.5, 72, Math.toRadians(-90));
-    public Pose openGateIntakeGate = new Pose(128, 62, Math.toRadians(20));
+    public Pose openGateIntakeGate = new Pose(123, 68, Math.toRadians(0));
     public Pose openGateIntakeRamp = new Pose(127, 55, Math.toRadians(40));
 
     /**
@@ -472,12 +472,13 @@ public class Pedro_Paths {
                         autoMirror(new Pose(96, 66.5)),
                         openGateIntakeGate
                 ))
-                .setLinearHeadingInterpolation(midShoot.getHeading(), openGateIntakeRamp.getHeading())
-                .addPath(new BezierLine(
+                .setLinearHeadingInterpolation(midShoot.getHeading(), openGateIntakeGate.getHeading())
+                .addPath(new BezierCurve(
                         openGateIntakeGate,
+                        autoMirror(new Pose(127, 55)),
                         openGateIntakeRamp
                 ))
-                .setLinearHeadingInterpolation(openGateIntakeGate.getHeading(), openGateIntakeRamp.getHeading())
+                .setLinearHeadingInterpolation(openGateIntakeGate.getHeading(), openGateIntakeRamp.getHeading(), 1, 0.35)
                 .build();
     }
     public void buildFarShootToOpenGates(){

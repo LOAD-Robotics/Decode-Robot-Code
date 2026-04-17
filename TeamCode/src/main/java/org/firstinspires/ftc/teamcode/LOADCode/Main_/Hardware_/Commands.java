@@ -33,9 +33,6 @@ public class Commands {
         Robot = robot;
     }
 
-    public static int shootingState = 0;
-    public static boolean isDoneShooting = false;
-
     // Delay timer for shooting sequence
     private static final TimerEx shootingTimerFifthSec = new TimerEx(0.2);
     private static final TimerEx shootingTimerHalfSec = new TimerEx(0.5);
@@ -104,10 +101,10 @@ public class Commands {
         );
     }
 
-    public Command waitForTurret(double posErrorThreshold, double velErrorThreshold){
-        return new ParallelGroup(
-                new WaitUntil(() -> Robot.turret.rotation.getAngleAbsolute() < Robot.turret.rotation.target + posErrorThreshold || Robot.turret.rotation.getAngleAbsolute() > Robot.turret.rotation.target - posErrorThreshold),
-                new WaitUntil(() -> Robot.turret.rotation.getDegreesPerSecond() < velErrorThreshold)
+    public Command waitForTurret(){
+        return new ParallelRaceGroup(
+                new WaitUntil(() -> Robot.turret.rotation.isWithinMaxError()),
+                new Delay(1)
         );
     }
 
@@ -127,7 +124,10 @@ public class Commands {
     public Command leaveAtEnd(Command auto, Pose leavePose){
         return new SequentialGroup(
                 new ParallelRaceGroup(
-                        new Delay(29),
+                        new SequentialGroup(
+                                new Delay(29),
+                                new WaitUntil(() -> !Robot.drivetrain.isFullyInNearZone())
+                        ),
                         auto
                 ),
                 runPath(
@@ -136,7 +136,7 @@ public class Commands {
                                         Robot.drivetrain.follower.getPose(),
                                         leavePose
                                 )
-                        ).setTangentHeadingInterpolation().build(), true, 1)
+                        ).setConstantHeadingInterpolation(Robot.drivetrain.follower.getHeading()).build(), true, 1)
         );
     }
 
@@ -162,23 +162,23 @@ public class Commands {
     public Command shootBalls(){
         return new SequentialGroup(
                 setFlywheelState(Turret.flywheelState.ON),
+                waitForTurret(),
                 new ParallelRaceGroup(
                         new SequentialGroup(
                                 // Shoot the first two balls
-                                waitForTurret(1, 4),
                                 setGateState(Turret.gatestate.OPEN),
                                 new Delay(0.1),
                                 setIntakeMode(ON),
                                 new ParallelGroup(
-                                        new Delay(0.5),
+                                        new Delay(0.4),
                                         new WaitUntil(() -> (Robot.intake.getTopSensorState() && !Robot.intake.getBottomSensorState()))
                                 ),
 
                                 // Shoot the last ball
                                 setTransferState(Intake.transferState.UP),
-                                new Delay(0.2)
+                                new Delay(0.4)
                         ),
-                        new Delay(3)
+                        new Delay(1.5)
                 ),
                 new ParallelGroup(
                         setIntakeMode(OFF),

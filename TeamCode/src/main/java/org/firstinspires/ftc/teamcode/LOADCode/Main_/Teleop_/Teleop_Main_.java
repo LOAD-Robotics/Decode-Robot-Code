@@ -531,11 +531,11 @@ public class Teleop_Main_ extends LinearOpMode {
         }else if (gamepad2.dpadDownWasPressed()){
             hoodOffset -= 10;
         }
-//        if (gamepad2.dpadLeftWasPressed()){
-//            Turret.turretOffset += turretOffsetStep;
-//        }else if (gamepad2.dpadRightWasPressed()){
-//            Turret.turretOffset -= turretOffsetStep;
-//        }
+        if (gamepad2.dpadLeftWasPressed()){
+            Turret.turretOffset += turretOffsetStep;
+        }else if (gamepad2.dpadRightWasPressed()){
+            Turret.turretOffset -= turretOffsetStep;
+        }
 
         if (gamepad2.backWasPressed()){
             forceGateOpen = !forceGateOpen;

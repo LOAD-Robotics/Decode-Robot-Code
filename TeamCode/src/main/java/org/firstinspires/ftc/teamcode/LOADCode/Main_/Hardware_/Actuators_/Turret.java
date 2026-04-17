@@ -35,8 +35,8 @@ public class Turret {
 
     // Turret PID coefficients
     public static PIDCoefficients turretCoefficients = new PIDCoefficients(0.05, 0, 0.001); // 223RPM Motor
-    public static double turretConstantFF = 0.03;
-    public static KineticState maxAcceptableError = new KineticState(2, 1);
+    public static double turretConstantFF = 0.035;
+    public static KineticState maxAcceptableError = new KineticState(1, 1);
 
     // Flywheel PID coefficients for various speeds
     //public static PIDCoefficients flywheelCoefficients = new PIDCoefficients(0.0002, 0, 0); // 4500 RPM
@@ -69,7 +69,7 @@ public class Turret {
     public flywheelState flywheelMode = flywheelState.OFF;
     double targetRPM = 0;
     /** Controls the target speed of the flywheel when it is on.*/
-    public static double flywheelReallyNearSpeed = 2700;
+    public static double flywheelReallyNearSpeed = 2800;
     public static double flywheelNearSpeed = 3300;
     public static double flywheelFarNearSpeed = 3600;
     public static double flywheelFarSpeed = 4200;
@@ -89,7 +89,7 @@ public class Turret {
     // Stores important objects for later access
     OpMode opMode = null;
     LoadHardwareClass Robot = null;
-    PolygonZone robotZone = new PolygonZone(15, 15);
+    PolygonZone robotZone = new PolygonZone(15, 16);
 
     // The variable to store the InterpLUT table for turret hood aimbot
     public Utils_.InterpLUT hoodLUTnear = new Utils_.InterpLUT();
@@ -246,7 +246,7 @@ public class Turret {
         double angle = (Math.toDegrees(Math.atan2(
                 goalPose.getY()-Robot.drivetrain.follower.getPose().getY(),
                 goalPose.getX()-Robot.drivetrain.follower.getPose().getX())
-        ) - Math.toDegrees(Robot.drivetrain.follower.getPose().getHeading()) + 90)%360;
+        ) - Math.toDegrees(Robot.drivetrain.follower.getHeading()) + 90)%360;
 
         if (angle < 0){
             return 360 + angle;
@@ -425,7 +425,7 @@ public class Turret {
         if (selectedAlliance == LoadHardwareClass.Alliance.RED) {goalPose = new Pose(144, 144, 0);}
 
         opMode.telemetry.addData("In Far Zone", robotZone.isInside(LoadHardwareClass.FarLaunchZone));
-        opMode.telemetry.addData("In Near Zone", robotZone.isInside(LoadHardwareClass.ReallyNearLaunchZoneRed));
+        opMode.telemetry.addData("In Near Zone", robotZone.isInside(LoadHardwareClass.NearLaunchZone));
 
         switch (mode) {
             case 0:
