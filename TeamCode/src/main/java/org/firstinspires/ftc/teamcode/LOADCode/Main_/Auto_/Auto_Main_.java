@@ -191,7 +191,7 @@ public class Auto_Main_ extends NextFTCOpMode {
         }
         @Override
         double getHoodOffset() {
-            return 0;
+            return 10;
         }
         @Override
         public boolean getTurretEnabled(){
@@ -288,7 +288,7 @@ public class Auto_Main_ extends NextFTCOpMode {
         }
         @Override
         double getHoodOffset() {
-            return -25;
+            return 10;
         }
         @Override
         boolean autoLeave() {
@@ -438,7 +438,7 @@ public class Auto_Main_ extends NextFTCOpMode {
         }
         @Override
         double getHoodOffset() {
-            return -25;
+            return 10;
         }
         @Override
         boolean autoLeave() {
@@ -493,7 +493,7 @@ public class Auto_Main_ extends NextFTCOpMode {
         }
         @Override
         double getHoodOffset() {
-            return -25;
+            return 0;
         }
         @Override
         boolean autoLeave() {
@@ -503,7 +503,7 @@ public class Auto_Main_ extends NextFTCOpMode {
         @Override
         public Command runAuto(){
             return new SequentialGroup(
-                    Commands.setFlywheelState(Turret.flywheelState.ON),
+                    new InstantCommand(Commands.setFlywheelState(Turret.flywheelState.ON)),
                     Commands.runPath(paths.farStart_to_farShoot, true, 1),
                     Commands.shootBalls(),
                     Commands.setIntakeMode(ON),

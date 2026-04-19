@@ -82,7 +82,7 @@ public class Teleop_Main_ extends LinearOpMode {
     public boolean leftTrigOldState = false;
     public boolean rightTrigOldState = false;
     public double hoodOffset = 0;
-    public double turretOffsetStep = 10;
+    public double turretOffsetStep = 5;
     public boolean turretOn = false;
     public int zeroState = 0;
     public boolean hoodOn = true;
@@ -481,9 +481,6 @@ public class Teleop_Main_ extends LinearOpMode {
                 zeroState = 1;
             }
             switch (zeroState){
-                case 0:
-                    Robot.turret.updateAimbot(teleopTurretState==turretState.ON, hoodOn, hoodOffset);
-                    break;
                 case 1:
                     Robot.turret.rotation.setAngle(90);
                     if (Robot.turret.rotation.isWithinMaxError()){
@@ -506,6 +503,10 @@ public class Teleop_Main_ extends LinearOpMode {
             }else{
                 Robot.turret.setGateState(gatestate.CLOSED);
             }
+        }
+
+        if (zeroState == 0){
+            Robot.turret.updateAimbot(teleopTurretState==turretState.ON, hoodOn, hoodOffset);
         }
 
         if (gamepad2.left_trigger > 0.8 && !leftTrigOldState && manualFlywheelState > 1){
@@ -532,9 +533,9 @@ public class Teleop_Main_ extends LinearOpMode {
             hoodOffset -= 10;
         }
         if (gamepad2.dpadLeftWasPressed()){
-            Turret.turretOffset += turretOffsetStep;
-        }else if (gamepad2.dpadRightWasPressed()){
             Turret.turretOffset -= turretOffsetStep;
+        }else if (gamepad2.dpadRightWasPressed()){
+            Turret.turretOffset += turretOffsetStep;
         }
 
         if (gamepad2.backWasPressed()){

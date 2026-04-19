@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Drivetrain_;
 
+import static org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.LoadHardwareClass.Alliance.BLUE;
+
 import androidx.annotation.NonNull;
 
 import com.pedropathing.follower.Follower;
@@ -135,7 +137,7 @@ public class Pedro_Paths {
 
 
     public Pose autoMirror(Pose pose){
-        if (alliance == LoadHardwareClass.Alliance.BLUE){
+        if (alliance == BLUE){
             return new Pose(
                     144 - pose.getX(),
                     pose.getY(),
@@ -146,7 +148,7 @@ public class Pedro_Paths {
         }
     }
     private double mirrorHeading(double heading, LoadHardwareClass.Alliance alliance){
-        if (alliance == LoadHardwareClass.Alliance.BLUE){
+        if (alliance == BLUE){
             final double v = Math.toDegrees(Math.atan2(Math.sin(heading), Math.cos(heading)));
             if (Math.cos(heading) >= 0){
                 return Math.toRadians((180 - v));
@@ -560,18 +562,20 @@ public class Pedro_Paths {
                 .build();
     }
     public void buildShootingsToHPPreload(){
+        double headingOff = -Math.toRadians(10);
+        if (alliance == BLUE){headingOff = -headingOff;}
         farShoot_to_hpPreload = follower.pathBuilder()
                 .addPath(new BezierCurve(
                     farShoot,
                     autoMirror(new Pose(120, 60)),
-                    autoMirror(new Pose(hpPreload.getX(), 20))
+                    hpPreload.withY(20)
                 ))
-                .setLinearHeadingInterpolation(farShoot.getHeading(), hpPreload.getHeading()-Math.toRadians(10))
+                .setLinearHeadingInterpolation(farShoot.getHeading(), hpPreload.getHeading()+headingOff)
                 .addPath(new BezierLine(
-                    autoMirror(new Pose(hpPreload.getX(), 20)),
+                    hpPreload.withY(20),
                     hpPreload
                 ))
-                .setLinearHeadingInterpolation(hpPreload.getHeading()-Math.toRadians(10), hpPreload.getHeading())
+                .setLinearHeadingInterpolation(hpPreload.getHeading()+headingOff, hpPreload.getHeading())
                 .build();
         midShoot_to_hpPreload = follower.pathBuilder()
                 .addPath(new BezierCurve(
@@ -602,31 +606,35 @@ public class Pedro_Paths {
                 .addPath(new BezierCurve(
                         farShoot,
                         autoMirror(new Pose(133, 2)),
-                        autoMirror(new Pose(rampIntake.getX()-1, 30))
+                        autoMirror(new Pose(autoMirror(rampIntake).getX()-1, 30))
                 ))
                 .setLinearHeadingInterpolation(farShoot.getHeading(), rampIntake.getHeading()-Math.toRadians(10))
                 .addPath(new BezierLine(
-                        autoMirror(new Pose(rampIntake.getX()-1, 30)),
+                        autoMirror(new Pose(autoMirror(rampIntake).getX()-1, 30)),
                         rampIntake
                 ))
                 .setLinearHeadingInterpolation(rampIntake.getHeading()-Math.toRadians(10), rampIntake.getHeading())
                 .build();
     }
     public void buildHPPreloadToShootings(){
+        int angle = 0;
+        if (alliance == BLUE){
+            angle = 180;
+        }
         hpPreload_to_farShoot = follower.pathBuilder()
                 .addPath(new BezierLine(
                         hpPreload,
-                        autoMirror(new Pose(hpPreload.getX()-8, 15))
+                        autoMirror(new Pose(autoMirror(hpPreload).getX()-8, 15))
                 ))
-                .setLinearHeadingInterpolation(hpPreload.getHeading(), Math.toRadians(0))
+                .setLinearHeadingInterpolation(hpPreload.getHeading(), angle)
                 .addPath(new BezierLine(
-                        autoMirror(new Pose(hpPreload.getX()-8, 15)),
-                        farShoot.withX(farShoot.getX()+8)
+                        autoMirror(new Pose(autoMirror(hpPreload).getX()-8, 15)),
+                        autoMirror(autoMirror(farShoot).withX(autoMirror(farShoot).getX()+8))
                 ))
                 .setTangentHeadingInterpolation()
                 .setReversed()
                 .addPath(new BezierLine(
-                        farShoot.withX(farShoot.getX()+8),
+                        autoMirror(autoMirror(farShoot).withX(autoMirror(farShoot).getX()+8)),
                         farShoot
                 ))
                 .setLinearHeadingInterpolation(Math.toRadians(0), farShoot.getHeading())
