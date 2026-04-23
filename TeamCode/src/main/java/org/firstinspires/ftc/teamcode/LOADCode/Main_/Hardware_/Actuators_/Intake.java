@@ -111,10 +111,10 @@ public class Intake {
     public void setTransfer(transferState state) {
         switch (state){
             case UP:
-                transfer.setAngle(0);
+                transfer.setAngle(0.2);
                 return;
             case DOWN:
-                transfer.setAngle(.05);
+                transfer.setAngle(.475);
         }
     }
 

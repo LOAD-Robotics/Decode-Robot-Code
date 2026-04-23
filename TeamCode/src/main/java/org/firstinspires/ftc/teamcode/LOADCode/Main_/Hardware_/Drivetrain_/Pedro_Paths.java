@@ -9,6 +9,7 @@ import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
+import com.skeletonarmy.marrow.TimerEx;
 
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.LoadHardwareClass;
 
@@ -16,7 +17,9 @@ public class Pedro_Paths {
     // The variable to store PedroPathing's follower object for path building
     private Follower follower;
     private LoadHardwareClass.Alliance alliance = LoadHardwareClass.selectedAlliance;
-    private LoadHardwareClass.IsLiftAttached isUsingGarage = LoadHardwareClass.IsLiftAttached.NO;
+    private final LoadHardwareClass.IsLiftAttached isUsingGarage = LoadHardwareClass.IsLiftAttached.NO;
+
+    private TimerEx timer = new TimerEx();
 
     /**
      * Define primary poses to be used in paths
@@ -29,8 +32,8 @@ public class Pedro_Paths {
     public Pose midPreload = new Pose(131.000, 59.500, Math.toRadians(0));
     public Pose farPreload = new Pose(131.000, 35.500, Math.toRadians(0));
     public Pose hpPreload = new Pose(136, 9, Math.toRadians(-90));
-    public Pose rampIntake = new Pose(132, 40, Math.toRadians(75));
-    public Pose hpIntake = null;
+    public Pose rampIntake = new Pose(134, 20, 0);
+    public Pose hpPreloadLine = new Pose(134, 8, 0);
     // Shooting Poses
     public Pose nearShoot = new Pose(115, 120, Math.toRadians(-35));
     public Pose midShoot = new Pose(88, 87, Math.toRadians(-15));
@@ -45,7 +48,7 @@ public class Pedro_Paths {
     public Pose openGateBasic = new Pose(127.5, 72, Math.toRadians(90));
     public Pose openGateBasicReversed = new Pose(127.5, 72, Math.toRadians(-90));
     public Pose openGateIntakeGate = new Pose(123, 68, Math.toRadians(0));
-    public Pose openGateIntakeRamp = new Pose(127, 55, Math.toRadians(40));
+    public Pose openGateIntakeRamp = new Pose(128, 63, Math.toRadians(30));
 
     /**
      * <h4>Define all path variables.</h4></br>
@@ -86,6 +89,7 @@ public class Pedro_Paths {
      * <h4>Human Player Preload Pose</h4>
      */
     public PathChain hpPreload_to_nearShoot, hpPreload_to_midShoot, hpPreload_to_farShoot;
+    public PathChain hpPreloadLine_to_farShoot;
     /**
      * <hr></br>
      * <h4>Ramp Intake Pose</h4>
@@ -117,7 +121,7 @@ public class Pedro_Paths {
      * <h4>Far Shooting Pose</h4>
      */
     public PathChain farShoot_to_nearPreload, farShoot_to_midPreload, farShoot_to_farPreload;
-    public PathChain farShoot_to_hpPreload, farShoot_to_hpIntake;
+    public PathChain farShoot_to_hpPreload, farShoot_to_hpPreloadLine;
     public PathChain farShoot_to_midLeave, farShoot_to_farLeave;
     public PathChain farShoot_to_openGateIntake, farShoot_to_openGateBasic;
     public PathChain farShoot_to_rampIntake;
@@ -468,19 +472,27 @@ public class Pedro_Paths {
                 ))
                 .setLinearHeadingInterpolation(midShoot.getHeading(), openGateBasic.getHeading())
                 .build();
+        Pose subPose2 = openGateIntakeRamp.withY(openGateIntakeRamp.getY()-1);
+        if (alliance == BLUE){
+            openGateIntakeRamp = openGateIntakeRamp.plus(new Pose(-2, -1));
+        }
         midShoot_to_openGateIntake = follower.pathBuilder()
                 .addPath(new BezierCurve(
                         midShoot,
                         autoMirror(new Pose(96, 66.5)),
-                        openGateIntakeGate
-                ))
-                .setLinearHeadingInterpolation(midShoot.getHeading(), openGateIntakeGate.getHeading())
-                .addPath(new BezierCurve(
-                        openGateIntakeGate,
-                        autoMirror(new Pose(127, 55)),
                         openGateIntakeRamp
                 ))
-                .setLinearHeadingInterpolation(openGateIntakeGate.getHeading(), openGateIntakeRamp.getHeading(), 1, 0.35)
+//                .setLinearHeadingInterpolation(midShoot.getHeading(), openGateIntakeRamp.getHeading())
+//                .addPath(new BezierLine(
+//                        openGateIntakeRamp,
+//                        subPose2
+//                ))
+//                .setConstantHeadingInterpolation(openGateIntakeRamp.getHeading())
+//                .addPath(new BezierLine(
+//                        subPose2,
+//                        openGateIntakeRamp
+//                ))
+                .setConstantHeadingInterpolation(openGateIntakeRamp.getHeading())
                 .build();
     }
     public void buildFarShootToOpenGates(){
@@ -562,20 +574,33 @@ public class Pedro_Paths {
                 .build();
     }
     public void buildShootingsToHPPreload(){
-        double headingOff = -Math.toRadians(10);
-        if (alliance == BLUE){headingOff = -headingOff;}
+
+        Pose redHpPreload = autoMirror(hpPreload);
+        Pose subPose1 = autoMirror(redHpPreload
+                .withY(25)
+                .withX(redHpPreload.getX()-10)
+                .withHeading(0));
+        Pose subPose2 = autoMirror(redHpPreload
+                .withY(25)
+                .withX(redHpPreload.getX()-4)
+                .withHeading(0));
+
         farShoot_to_hpPreload = follower.pathBuilder()
-                .addPath(new BezierCurve(
-                    farShoot,
-                    autoMirror(new Pose(120, 60)),
-                    hpPreload.withY(20)
-                ))
-                .setLinearHeadingInterpolation(farShoot.getHeading(), hpPreload.getHeading()+headingOff)
                 .addPath(new BezierLine(
-                    hpPreload.withY(20),
-                    hpPreload
+                    farShoot,
+                    subPose1
                 ))
-                .setLinearHeadingInterpolation(hpPreload.getHeading()+headingOff, hpPreload.getHeading())
+                .setConstantHeadingInterpolation(subPose1.getHeading())
+                .addPath(new BezierLine(
+                    subPose1,
+                    subPose2
+                ))
+                .setConstantHeadingInterpolation(hpPreload.getHeading())
+                .addPath(new BezierLine(
+                        subPose2,
+                        hpPreload
+                ))
+                .setConstantHeadingInterpolation(hpPreload.getHeading())
                 .build();
         midShoot_to_hpPreload = follower.pathBuilder()
                 .addPath(new BezierCurve(
@@ -586,58 +611,61 @@ public class Pedro_Paths {
                 ))
                 .setLinearHeadingInterpolation(midShoot.getHeading(), hpPreload.getHeading())
                 .build();
+
+        farShoot_to_hpPreloadLine = follower.pathBuilder()
+                .addPath(new BezierLine(
+                    farShoot,
+                    hpPreloadLine
+                ))
+                .setConstantHeadingInterpolation(hpPreloadLine.getHeading())
+                .build();
+
     }
     public void buildShootingsToRampIntake(){
-        midShoot_to_rampIntake = follower.pathBuilder()
-                .addPath(new BezierCurve(
-                        midShoot,
-                        autoMirror(new Pose(85, 40)),
-                        autoMirror(new Pose(137, 2)),
-                        autoMirror(new Pose(135, 30))
-                ))
-                .setLinearHeadingInterpolation(midShoot.getHeading(), rampIntake.getHeading())
-                .addPath(new BezierLine(
-                        autoMirror(new Pose(135, 30)),
-                        rampIntake
-                ))
-                .setConstantHeadingInterpolation(rampIntake.getHeading())
-                .build();
         farShoot_to_rampIntake = follower.pathBuilder()
-                .addPath(new BezierCurve(
-                        farShoot,
-                        autoMirror(new Pose(133, 2)),
-                        autoMirror(new Pose(autoMirror(rampIntake).getX()-1, 30))
-                ))
-                .setLinearHeadingInterpolation(farShoot.getHeading(), rampIntake.getHeading()-Math.toRadians(10))
                 .addPath(new BezierLine(
-                        autoMirror(new Pose(autoMirror(rampIntake).getX()-1, 30)),
+                        farShoot,
                         rampIntake
                 ))
-                .setLinearHeadingInterpolation(rampIntake.getHeading()-Math.toRadians(10), rampIntake.getHeading())
+                .setConstantHeadingInterpolation(hpPreloadLine.getHeading())
                 .build();
     }
     public void buildHPPreloadToShootings(){
-        int angle = 0;
+
+        Pose redHpPreload = autoMirror(hpPreload);
+        Pose redFarShoot = autoMirror(farShoot);
+        Pose subPose1 = autoMirror(new Pose(redHpPreload.getX()-8, 15, redHpPreload.getHeading()));
+        Pose subPose2 = autoMirror(new Pose(redFarShoot.getX()+8, redFarShoot.getY(), redFarShoot.getHeading()));
+
+        int endTangentAngle = 0;
         if (alliance == BLUE){
-            angle = 180;
+            endTangentAngle = 180;
         }
+
         hpPreload_to_farShoot = follower.pathBuilder()
                 .addPath(new BezierLine(
                         hpPreload,
-                        autoMirror(new Pose(autoMirror(hpPreload).getX()-8, 15))
+                        subPose1
                 ))
-                .setLinearHeadingInterpolation(hpPreload.getHeading(), angle)
+                .setConstantHeadingInterpolation(hpPreload.getHeading())
                 .addPath(new BezierLine(
-                        autoMirror(new Pose(autoMirror(hpPreload).getX()-8, 15)),
-                        autoMirror(autoMirror(farShoot).withX(autoMirror(farShoot).getX()+8))
+                        subPose1,
+                        subPose2
                 ))
                 .setTangentHeadingInterpolation()
                 .setReversed()
                 .addPath(new BezierLine(
-                        autoMirror(autoMirror(farShoot).withX(autoMirror(farShoot).getX()+8)),
+                        subPose2,
                         farShoot
                 ))
-                .setLinearHeadingInterpolation(Math.toRadians(0), farShoot.getHeading())
+                .setLinearHeadingInterpolation(endTangentAngle, farShoot.getHeading())
+                .build();
+        hpPreloadLine_to_farShoot = follower.pathBuilder()
+                .addPath(new BezierLine(
+                        hpPreloadLine,
+                        farShoot
+                ))
+                .setLinearHeadingInterpolation(hpPreloadLine.getHeading(), farShoot.getHeading())
                 .build();
     }
     public void buildRampIntakeToShootings(){
@@ -666,6 +694,7 @@ public class Pedro_Paths {
         farPreload = autoMirror(farPreload);
         rampIntake = autoMirror(rampIntake);
         hpPreload = autoMirror(hpPreload);
+        hpPreloadLine = autoMirror(hpPreloadLine);
 
         nearShoot = autoMirror(nearShoot);
         midShoot = autoMirror(midShoot);

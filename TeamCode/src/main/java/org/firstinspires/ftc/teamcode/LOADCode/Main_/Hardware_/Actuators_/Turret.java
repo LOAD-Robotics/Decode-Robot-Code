@@ -35,8 +35,8 @@ public class Turret {
 
     // Turret PID coefficients
     public static PIDCoefficients turretCoefficients = new PIDCoefficients(0.05, 0, 0.001); // 223RPM Motor
-    public static double turretConstantFF = 0.035;
-    public static KineticState maxAcceptableError = new KineticState(1, 1);
+    public static double turretConstantFF = 0.045;
+    public static KineticState maxAcceptableError = new KineticState(1.3, 1);
 
     // Flywheel PID coefficients for various speeds
     //public static PIDCoefficients flywheelCoefficients = new PIDCoefficients(0.0002, 0, 0); // 4500 RPM
@@ -150,10 +150,11 @@ public class Turret {
 
         // --------------------------------------------------------
 
-        hoodLUTnear.add(69 * hoodRatio, 0);
-        hoodLUTnear.add(82 * hoodRatio, 80);
-        hoodLUTnear.add(91 * hoodRatio, 170);
-        hoodLUTnear.add(121 * hoodRatio, 170);
+        hoodLUTnear.add(65.9 * hoodRatio, 0);
+        hoodLUTnear.add(66.1 * hoodRatio, 120);
+        hoodLUTnear.add(89.9 * hoodRatio, 100);
+        hoodLUTnear.add(90.1 * hoodRatio, 180);
+        hoodLUTnear.add(106 * hoodRatio, 150);
 
         hoodLUTfar.add(141 * hoodRatio, 200);
         hoodLUTfar.add(147 * hoodRatio, 180);
@@ -162,7 +163,7 @@ public class Turret {
         // --------------------------------------------------------
 
         // Safety points for LUTs
-        hoodLUTnear.add(300, 170);
+        hoodLUTnear.add(300, 150);
         hoodLUTfar.add(300, 130);
 
         // Generate Lookup Table & Initialize servo position
@@ -256,9 +257,9 @@ public class Turret {
     }
 
     public static Pose rotationalNearGoalPoseBlue = new Pose(8, 136);
-    public static Pose rotationalFarGoalPoseBlue = new Pose(11, 136);
+    public static Pose rotationalFarGoalPoseBlue = new Pose(0, 144);
     public static Pose rotationalNearGoalPoseRed = new Pose(136, 136);
-    public static Pose rotationalFarGoalPoseRed = new Pose(133, 136);
+    public static Pose rotationalFarGoalPoseRed = new Pose(130, 144);
 
     /**
      * Calculates the proper goal pose for the odometry-based turret auto-aim.
@@ -433,7 +434,7 @@ public class Turret {
                     targetRPM = flywheelFarSpeed;
                     actualFlywheelCoefficients = flywheelCoefficients4200;
                     actualFlywheelFFCoefficients = flywheelFFCoefficients4200;
-                }else if (Robot.drivetrain.distanceFromGoal() < 70){
+                }else if (Robot.drivetrain.distanceFromGoal() < 66){
                     targetRPM = flywheelReallyNearSpeed;
                     actualFlywheelCoefficients = flywheelCoefficients3000;
                     actualFlywheelFFCoefficients = flywheelFFCoefficients3000;

@@ -13,18 +13,59 @@
 			"color":"2"
 		},
 		{
-			"id":"c8decba00b0187c8",
+			"id":"b7514b6ae54e27cf",
 			"type":"text",
-			"text":"Transfer Servo\nConfiguration Name: \"lift1\"\nConfiguration Type: CRServo\nPort 4 on Control Hub\nPort 5 on Servo Power Injector\n4th Wire -> Orange Analog Plug",
-			"styleAttributes":{
-				"textAlign":"center",
-				"border":null
-			},
-			"x":-680,
-			"y":-80,
-			"width":280,
-			"height":180,
+			"text":"Digital/Analog Devices",
+			"styleAttributes":{"textAlign":"center"},
+			"x":-780,
+			"y":380,
+			"width":340,
+			"height":60,
+			"color":"1"
+		},
+		{
+			"id":"48faa728dd92705d",
+			"type":"text",
+			"text":"Motors",
+			"styleAttributes":{"textAlign":"center"},
+			"x":-600,
+			"y":460,
+			"width":160,
+			"height":60,
+			"color":"5"
+		},
+		{
+			"id":"2cad408dc2aae848",
+			"type":"text",
+			"text":"I2C Devices",
+			"styleAttributes":{"textAlign":"center"},
+			"x":-600,
+			"y":540,
+			"width":160,
+			"height":60,
+			"color":"6"
+		},
+		{
+			"id":"f9a634b23b5064c5",
+			"type":"text",
+			"text":"Servos",
+			"styleAttributes":{"textAlign":"center"},
+			"x":-780,
+			"y":460,
+			"width":160,
+			"height":60,
 			"color":"4"
+		},
+		{
+			"id":"26e535ad3414017c",
+			"type":"text",
+			"text":"Control System",
+			"styleAttributes":{"textAlign":"center"},
+			"x":-780,
+			"y":540,
+			"width":160,
+			"height":60,
+			"color":"2"
 		},
 		{
 			"id":"c2eee2656a3ddfa1",
@@ -60,20 +101,6 @@
 			"color":"6"
 		},
 		{
-			"id":"c0d0b8f7da631d38",
-			"type":"text",
-			"text":"Transfer Servo\nConfiguration Name: \"lift2\"\nConfiguration Type: CRServo\nPort 5 on Control Hub\nPort 6 on Servo Power Injector\n4th Wire -> Blue Analog Plug",
-			"styleAttributes":{
-				"textAlign":"center",
-				"border":null
-			},
-			"x":-680,
-			"y":120,
-			"width":280,
-			"height":180,
-			"color":"4"
-		},
-		{
 			"id":"7a1b2108fa3bc30e",
 			"type":"text",
 			"text":"Hall Effect Sensor\nConfiguration Name: \"hall\"\nPort 0",
@@ -85,28 +112,6 @@
 			"color":"1"
 		},
 		{
-			"id":"1c97878ebafa8ef3",
-			"type":"text",
-			"text":"Axon 4th Wire Combiner\nOrange Plug -> Analog Port 0\nConfiguration Name: lift1-encoder\nBlue Plug -> Analog Port 1\nConfiguration Name: lift2-encoder",
-			"styleAttributes":{"textAlign":"center"},
-			"x":-860,
-			"y":-460,
-			"width":320,
-			"height":160,
-			"color":"1"
-		},
-		{
-			"id":"bfb02b2a92b84ad2",
-			"type":"text",
-			"text":"Belt Servo\nConfiguration Name: \"belt\"\nConfiguration Type: CRServo\nPort 0 on Control Hub\nPort 1 on Servo Power Injector",
-			"styleAttributes":{"textAlign":"center"},
-			"x":-300,
-			"y":-80,
-			"width":280,
-			"height":140,
-			"color":"4"
-		},
-		{
 			"id":"41c5560b3c8edc13",
 			"type":"text",
 			"text":"Hood Servo\nConfiguration Name: \"hood\"\nConfiguration Type: Servo\nPort 1 on Control Hub\nPort 2 on Servo Power Injector",
@@ -116,6 +121,61 @@
 			"width":280,
 			"height":139,
 			"color":"4"
+		},
+		{
+			"id":"b2918b70ae0b4303",
+			"type":"text",
+			"text":"Gate Servo\nConfiguration Name: \"gate\"\nConfiguration Type: Servo\nPort 2 on Control Hub\nPort 3 on Servo Power Injector",
+			"styleAttributes":{"textAlign":"center"},
+			"x":-300,
+			"y":240,
+			"width":280,
+			"height":140,
+			"color":"4"
+		},
+		{
+			"id":"8c94376760075734",
+			"type":"text",
+			"text":"Transfer Servo\nConfiguration Name: \"transfer\"\nConfiguration Type: Servo\nPort 3 on Control Hub\nPort 4 on Servo Power Injector",
+			"styleAttributes":{"textAlign":"center"},
+			"x":-300,
+			"y":400,
+			"width":280,
+			"height":139,
+			"color":"4"
+		},
+		{
+			"id":"440a120e5375c485",
+			"type":"text",
+			"text":"Front Left Drive Motor\nConfiguration Name: \"FL\"\nConfiguration Type: \"\"\nPort 2 - No Encoder",
+			"styleAttributes":{"textAlign":"center"},
+			"x":80,
+			"y":240,
+			"width":320,
+			"height":140,
+			"color":"5"
+		},
+		{
+			"id":"336d50b5d4cb968f",
+			"type":"text",
+			"text":"Flywheel Motor 1\nConfiguration Name: \"flywheel\"\nConfiguration Type: \"\"\nPort 0 - With Encoder",
+			"styleAttributes":{"textAlign":"center"},
+			"x":80,
+			"y":-80,
+			"width":320,
+			"height":140,
+			"color":"5"
+		},
+		{
+			"id":"76edd4abcf05a2a3",
+			"type":"text",
+			"text":"Back Left Drive Motor\nConfiguration Name: \"BL\"\nConfiguration Type: \"\"\nPort 3 - No Encoder",
+			"styleAttributes":{"textAlign":"center"},
+			"x":80,
+			"y":400,
+			"width":320,
+			"height":140,
+			"color":"5"
 		},
 		{
 			"id":"a0abe0901b65ac56",
@@ -184,72 +244,6 @@
 			"color":"5"
 		},
 		{
-			"id":"440a120e5375c485",
-			"type":"text",
-			"text":"Front Left Drive Motor\nConfiguration Name: \"FL\"\nConfiguration Type: \"\"\nPort 2 - No Encoder",
-			"styleAttributes":{"textAlign":"center"},
-			"x":80,
-			"y":240,
-			"width":320,
-			"height":140,
-			"color":"5"
-		},
-		{
-			"id":"336d50b5d4cb968f",
-			"type":"text",
-			"text":"Flywheel Motor 1\nConfiguration Name: \"flywheel\"\nConfiguration Type: \"\"\nPort 0 - With Encoder",
-			"styleAttributes":{"textAlign":"center"},
-			"x":80,
-			"y":-80,
-			"width":320,
-			"height":140,
-			"color":"5"
-		},
-		{
-			"id":"b2918b70ae0b4303",
-			"type":"text",
-			"text":"Gate Servo\nConfiguration Name: \"gate\"\nConfiguration Type: Servo\nPort 2 on Control Hub\nPort 3 on Servo Power Injector",
-			"styleAttributes":{"textAlign":"center"},
-			"x":-300,
-			"y":240,
-			"width":280,
-			"height":140,
-			"color":"4"
-		},
-		{
-			"id":"8c94376760075734",
-			"type":"text",
-			"text":"Transfer Servo\nConfiguration Name: \"transfer\"\nConfiguration Type: Servo\nPort 3 on Control Hub\nPort 4 on Servo Power Injector",
-			"styleAttributes":{"textAlign":"center"},
-			"x":-300,
-			"y":400,
-			"width":280,
-			"height":139,
-			"color":"4"
-		},
-		{
-			"id":"b7514b6ae54e27cf",
-			"type":"text",
-			"text":"Digital/Analog Devices",
-			"styleAttributes":{"textAlign":"center"},
-			"x":-780,
-			"y":380,
-			"width":340,
-			"height":60,
-			"color":"1"
-		},
-		{
-			"id":"76edd4abcf05a2a3",
-			"type":"text",
-			"text":"Back Left Drive Motor\nConfiguration Name: \"BL\"\nConfiguration Type: \"\"\nPort 3 - No Encoder",
-			"styleAttributes":{"textAlign":"center"},
-			"x":80,
-			"y":400,
-			"width":320,
-			"height":140,
-			"color":"5"
-		},
-		{
 			"id":"c6d790ec667c829f",
 			"type":"text",
 			"text":"Turret Rotation Motor\nConfiguration Name: \"turret\"\nConfiguration Type: \"\"\nPort 3 - With Encoder",
@@ -270,50 +264,6 @@
 			"width":320,
 			"height":140,
 			"color":"5"
-		},
-		{
-			"id":"48faa728dd92705d",
-			"type":"text",
-			"text":"Motors",
-			"styleAttributes":{"textAlign":"center"},
-			"x":-600,
-			"y":460,
-			"width":160,
-			"height":60,
-			"color":"5"
-		},
-		{
-			"id":"2cad408dc2aae848",
-			"type":"text",
-			"text":"I2C Devices",
-			"styleAttributes":{"textAlign":"center"},
-			"x":-600,
-			"y":540,
-			"width":160,
-			"height":60,
-			"color":"6"
-		},
-		{
-			"id":"f9a634b23b5064c5",
-			"type":"text",
-			"text":"Servos",
-			"styleAttributes":{"textAlign":"center"},
-			"x":-780,
-			"y":460,
-			"width":160,
-			"height":60,
-			"color":"4"
-		},
-		{
-			"id":"26e535ad3414017c",
-			"type":"text",
-			"text":"Control System",
-			"styleAttributes":{"textAlign":"center"},
-			"x":-780,
-			"y":540,
-			"width":160,
-			"height":60,
-			"color":"2"
 		}
 	],
 	"edges":[
@@ -411,15 +361,6 @@
 			"toSide":"right"
 		},
 		{
-			"id":"2994660c601b60c7",
-			"styleAttributes":{"pathfindingMethod":"square"},
-			"toFloating":false,
-			"fromNode":"86792695c78b2d59",
-			"fromSide":"bottom",
-			"toNode":"bfb02b2a92b84ad2",
-			"toSide":"left"
-		},
-		{
 			"id":"489912cd2dc5605d",
 			"styleAttributes":{"pathfindingMethod":"square"},
 			"toFloating":false,
@@ -490,54 +431,6 @@
 			"fromSide":"top",
 			"toNode":"a0abe0901b65ac56",
 			"toSide":"left"
-		},
-		{
-			"id":"70ce2e1e16c0baf5",
-			"styleAttributes":{"pathfindingMethod":"square"},
-			"toFloating":false,
-			"fromNode":"86792695c78b2d59",
-			"fromSide":"bottom",
-			"toNode":"c8decba00b0187c8",
-			"toSide":"right"
-		},
-		{
-			"id":"f6b9a05985a97924",
-			"styleAttributes":{"pathfindingMethod":"square"},
-			"toFloating":false,
-			"fromNode":"86792695c78b2d59",
-			"fromSide":"bottom",
-			"toNode":"c0d0b8f7da631d38",
-			"toSide":"right"
-		},
-		{
-			"id":"db8756c2e0fb6ad7",
-			"styleAttributes":{"pathfindingMethod":"square"},
-			"toFloating":false,
-			"fromFloating":false,
-			"fromNode":"c8decba00b0187c8",
-			"fromSide":"left",
-			"toNode":"1c97878ebafa8ef3",
-			"toSide":"bottom"
-		},
-		{
-			"id":"fcac94ab4e311e90",
-			"styleAttributes":{"pathfindingMethod":"square"},
-			"toFloating":false,
-			"fromFloating":false,
-			"fromNode":"c0d0b8f7da631d38",
-			"fromSide":"left",
-			"toNode":"1c97878ebafa8ef3",
-			"toSide":"bottom"
-		},
-		{
-			"id":"67297f2c1150afea",
-			"styleAttributes":{"pathfindingMethod":"square"},
-			"toFloating":false,
-			"fromFloating":false,
-			"fromNode":"1c97878ebafa8ef3",
-			"fromSide":"right",
-			"toNode":"d9c005396002882a",
-			"toSide":"top"
 		}
 	],
 	"metadata":{

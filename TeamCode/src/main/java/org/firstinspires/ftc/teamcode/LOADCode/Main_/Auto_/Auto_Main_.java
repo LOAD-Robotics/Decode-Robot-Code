@@ -26,6 +26,7 @@ import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.LoadHardwareClass
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 import dev.nextftc.core.commands.Command;
+import dev.nextftc.core.commands.delays.WaitUntil;
 import dev.nextftc.core.commands.groups.SequentialGroup;
 import dev.nextftc.core.commands.utility.InstantCommand;
 import dev.nextftc.extensions.pedro.PedroComponent;
@@ -458,11 +459,13 @@ public class Auto_Main_ extends NextFTCOpMode {
                     Commands.setIntakeMode(ON),
                     Commands.runPath(paths.midShoot_to_openGateIntake, true, 1),
                     Commands.waitForArtifacts(),
+                    Commands.setIntakeMode(OFF),
                     Commands.runPath(paths.openGateIntake_to_midShoot, true, 1),
                     Commands.shootBalls(),
                     Commands.setIntakeMode(ON),
                     Commands.runPath(paths.midShoot_to_openGateIntake, true, 1),
                     Commands.waitForArtifacts(),
+                    Commands.setIntakeMode(OFF),
                     Commands.runPath(paths.openGateIntake_to_midShoot, true, 1),
                     Commands.shootBalls(),
                     Commands.setIntakeMode(ON),
@@ -519,8 +522,8 @@ public class Auto_Main_ extends NextFTCOpMode {
                     Commands.runPath(paths.hpPreload_to_farShoot, true, 1),
                     Commands.shootBalls(),
                     Commands.setIntakeMode(ON),
-                    Commands.runPath(paths.farShoot_to_hpPreload, true, 1),
-                    Commands.runPath(paths.hpPreload_to_farShoot, true, 1),
+                    Commands.runPath(paths.farShoot_to_hpPreloadLine, true, 1),
+                    Commands.runPath(paths.hpPreloadLine_to_farShoot, true, 1),
                     Commands.shootBalls(),
                     Commands.runPath(paths.farShoot_to_farLeave, true, 1)
             );
@@ -560,7 +563,10 @@ public class Auto_Main_ extends NextFTCOpMode {
                     Commands.setIntakeMode(ON),
                     Commands.runPath(paths.midShoot_to_openGateIntake),
                     Commands.waitForArtifacts(),
-                    Commands.runPath(paths.openGateIntake_to_midShoot)
+                    new WaitUntil(() -> gamepad1.bWasPressed()),
+                    new WaitUntil(() -> gamepad1.bWasReleased()),
+                    Commands.runPath(paths.openGateIntake_to_midShoot),
+                    Commands.setIntakeMode(OFF)
             );
         }
 

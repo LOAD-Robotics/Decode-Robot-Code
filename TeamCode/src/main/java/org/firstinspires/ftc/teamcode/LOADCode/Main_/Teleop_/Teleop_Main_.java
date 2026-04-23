@@ -273,8 +273,6 @@ public class Teleop_Main_ extends LinearOpMode {
             telemetry.addData("Flywheel Target Speed", Robot.turret.getFlywheelCurrentMaxSpeed());
             telemetry.addData("Flywheel Actual Speed", Robot.turret.getFlywheelRPM());
 
-            telemetry.addData("Top Prox Sensor", Robot.intake.getTopSensorState());
-            telemetry.addData("Bottom Prox Sensor", Robot.intake.getBottomSensorState());
             telemetry.addData("Hall Sensor", Robot.turret.hall.getTriggered());
 
             // System-related Telemetry
@@ -523,6 +521,7 @@ public class Teleop_Main_ extends LinearOpMode {
         }
         if (gamepad2.aWasPressed()){
             manualFlywheelState = 0;
+            hoodOffset = 0;
         }
         Robot.turret.updateFlywheel(manualFlywheelState);
 
@@ -540,6 +539,10 @@ public class Teleop_Main_ extends LinearOpMode {
 
         if (gamepad2.backWasPressed()){
             forceGateOpen = !forceGateOpen;
+        }
+
+        if (Robot.turret.getFlywheelRPM() > Robot.turret.getFlywheelCurrentMaxSpeed()-100){
+            gamepad2.rumble(10);
         }
 
         //Shoot (B Button Press)
@@ -563,7 +566,7 @@ public class Teleop_Main_ extends LinearOpMode {
                     Robot.turret.setGateState(gatestate.OPEN);
                 }
                 telemetry.addData("Shooting State", "Open Gate");
-                if (stateTimer.getElapsed() > 0.2){
+                if (stateTimer.getElapsed() > 0.1){
                     shootingState = 2;
                     stateTimer.restart();
                 }
@@ -571,7 +574,7 @@ public class Teleop_Main_ extends LinearOpMode {
             case 2:
                 Robot.intake.setMode(ON, ON);
                 telemetry.addData("Shooting State", "Shoot First Two");
-                if (stateTimer.getElapsed() > 0.3 && Robot.intake.getTopSensorState() && !Robot.intake.getBottomSensorState()){
+                if (stateTimer.getElapsed() > 0.2 && Robot.intake.getTopSensorState() && !Robot.intake.getBottomSensorState()){
                     shootingState = 3;
                     stateTimer.restart();
                 }
@@ -580,7 +583,7 @@ public class Teleop_Main_ extends LinearOpMode {
                 Robot.intake.setMode(OFF, ON);
                 Robot.intake.setTransfer(transferState.UP);
                 telemetry.addData("Shooting State", "Shoot Final");
-                if (stateTimer.getElapsed() > 0.5) {
+                if (stateTimer.getElapsed() > 0.4) {
                     shootingState = 4;
                 }
                 return;

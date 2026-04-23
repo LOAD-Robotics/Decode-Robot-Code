@@ -108,10 +108,16 @@ public class Teleop_Testing_ extends LinearOpMode {
             if (gamepad1.dpadDownWasPressed()){
                 hood -= change;
             }
+            if (gamepad1.guide){
+                Robot.intake.setTransfer(Intake.transferState.UP);
+            }else{
+                Robot.intake.setTransfer(Intake.transferState.DOWN);
+            }
 
             telemetry.addData("Hood Angle", hood);
             telemetry.addData("Distance", Robot.drivetrain.distanceFromGoal());
             telemetry.addData("Speed", Robot.turret.getFlywheelCurrentMaxSpeed());
+            telemetry.addData("Intake Current", Robot.intake.getCurrent());
 
             if (gamepad1.left_trigger > 0.5){
                 Robot.intake.setMode(ON, ON);

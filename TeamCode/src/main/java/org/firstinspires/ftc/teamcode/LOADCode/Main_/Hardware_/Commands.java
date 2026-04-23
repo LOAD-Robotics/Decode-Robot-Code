@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_;
 
 import static org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Intake.intakeMode.OFF;
 import static org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Intake.intakeMode.ON;
+import static org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Intake.intakeMode.REVERSE;
 
 import androidx.annotation.NonNull;
 
@@ -15,6 +16,7 @@ import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Turret
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Drivetrain_.Pedro_Paths;
 
 import dev.nextftc.core.commands.Command;
+import dev.nextftc.core.commands.conditionals.IfElseCommand;
 import dev.nextftc.core.commands.delays.Delay;
 import dev.nextftc.core.commands.delays.WaitUntil;
 import dev.nextftc.core.commands.groups.ParallelGroup;
@@ -22,6 +24,7 @@ import dev.nextftc.core.commands.groups.ParallelRaceGroup;
 import dev.nextftc.core.commands.groups.SequentialGroup;
 import dev.nextftc.core.commands.utility.InstantCommand;
 import dev.nextftc.core.commands.utility.LambdaCommand;
+import dev.nextftc.core.commands.utility.NullCommand;
 import dev.nextftc.extensions.pedro.FollowPath;
 
 public class Commands {
@@ -109,15 +112,21 @@ public class Commands {
     }
 
     /**
-     * Waits until both proximity sensors are activated at the same time or until 0.7 seconds have passed
+     * Waits until both proximity sensors are activated at the same time or until 1.5 seconds have passed
      */
     public Command waitForArtifacts(){
         return new ParallelRaceGroup(
-                new Delay(1.5),
+                new Delay(4),
                 new ParallelGroup(
-                        new Delay(1),
+                        new Delay(2),
                         new WaitUntil(() -> (Robot.intake.getTopSensorState()))
                 )
+        );
+    }
+
+    public Command resumePathFollowing() {
+        return new InstantCommand(new LambdaCommand("resumePathFollowing()")
+                .setStart(() -> Robot.drivetrain.follower.resumePathFollowing())
         );
     }
 
@@ -169,8 +178,17 @@ public class Commands {
                                 setGateState(Turret.gatestate.OPEN),
                                 new Delay(0.1),
                                 setIntakeMode(ON),
+                                new IfElseCommand(
+                                        () -> Robot.intake.getCurrent() > 7,
+                                        new SequentialGroup(
+                                                setIntakeMode(REVERSE),
+                                                new Delay(0.1),
+                                                setIntakeMode(ON)
+                                        ),
+                                        new NullCommand()
+                                ),
                                 new ParallelGroup(
-                                        new Delay(0.4),
+                                        new Delay(0.3),
                                         new WaitUntil(() -> (Robot.intake.getTopSensorState() && !Robot.intake.getBottomSensorState()))
                                 ),
 
