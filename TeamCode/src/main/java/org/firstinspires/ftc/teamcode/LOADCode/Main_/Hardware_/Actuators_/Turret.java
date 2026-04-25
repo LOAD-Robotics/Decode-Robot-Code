@@ -34,9 +34,9 @@ public class Turret {
     public final Devices.REVHallEffectSensorClass hall = new Devices.REVHallEffectSensorClass();
 
     // Turret PID coefficients
-    public static PIDCoefficients turretCoefficients = new PIDCoefficients(0.05, 0, 0.001); // 223RPM Motor
+    public static PIDCoefficients turretCoefficients = new PIDCoefficients(0.06, 0, 0.001); // 223RPM Motor
     public static double turretConstantFF = 0.045;
-    public static KineticState maxAcceptableError = new KineticState(1.3, 1);
+    public static KineticState maxAcceptableError = new KineticState(1.1, 1);
 
     // Flywheel PID coefficients for various speeds
     //public static PIDCoefficients flywheelCoefficients = new PIDCoefficients(0.0002, 0, 0); // 4500 RPM
@@ -256,10 +256,10 @@ public class Turret {
         }
     }
 
-    public static Pose rotationalNearGoalPoseBlue = new Pose(8, 136);
-    public static Pose rotationalFarGoalPoseBlue = new Pose(0, 144);
-    public static Pose rotationalNearGoalPoseRed = new Pose(136, 136);
-    public static Pose rotationalFarGoalPoseRed = new Pose(130, 144);
+    public static Pose rotationalNearGoalPoseBlue = new Pose(6, 138);
+    public static Pose rotationalFarGoalPoseBlue = new Pose(6, 144);
+    public static Pose rotationalNearGoalPoseRed = new Pose(130, 146);
+    public static Pose rotationalFarGoalPoseRed = new Pose(138, 144);
 
     /**
      * Calculates the proper goal pose for the odometry-based turret auto-aim.

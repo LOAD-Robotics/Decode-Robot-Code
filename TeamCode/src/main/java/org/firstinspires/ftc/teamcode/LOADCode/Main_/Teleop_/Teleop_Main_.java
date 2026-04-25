@@ -82,7 +82,7 @@ public class Teleop_Main_ extends LinearOpMode {
     public boolean leftTrigOldState = false;
     public boolean rightTrigOldState = false;
     public double hoodOffset = 0;
-    public double turretOffsetStep = 5;
+    public double turretOffsetStep = 3;
     public boolean turretOn = false;
     public int zeroState = 0;
     public boolean hoodOn = true;
@@ -258,7 +258,7 @@ public class Teleop_Main_ extends LinearOpMode {
             telemetry.addData("Turret Motor Target", Robot.turret.rotation.target);
             telemetry.addData("Turret Actual Angle", Robot.turret.rotation.getAngleAbsolute());
             telemetry.addData("Turret Angular Velocity (Deg/sec)", Robot.turret.rotation.getDegreesPerSecond());
-            telemetry.addData("Turret Rotation Offset", turretOffsetStep);
+            telemetry.addData("Turret Rotation Offset", Turret.turretOffset-117);
             telemetry.addData("Turret Set Power %", Robot.turret.rotation.getPower()*100);
             telemetry.addData("Turret Target [X, Y]", "[" + Robot.turret.calcGoalPose().getX() + ", " + Robot.turret.calcGoalPose().getY() + "]");
             telemetry.addData("Turret Rotation Motor Current", Robot.turret.rotation.getCurrent(CurrentUnit.AMPS));
@@ -574,13 +574,16 @@ public class Teleop_Main_ extends LinearOpMode {
             case 2:
                 Robot.intake.setMode(ON, ON);
                 telemetry.addData("Shooting State", "Shoot First Two");
-                if (stateTimer.getElapsed() > 0.2 && Robot.intake.getTopSensorState() && !Robot.intake.getBottomSensorState()){
+                if (stateTimer.getElapsed() > 0.3 && Robot.intake.getTopSensorState() && !Robot.intake.getBottomSensorState()){
+                    shootingState = 3;
+                    stateTimer.restart();
+                }
+                if (stateTimer.getElapsed() > 1){
                     shootingState = 3;
                     stateTimer.restart();
                 }
                 return;
             case 3:
-                Robot.intake.setMode(OFF, ON);
                 Robot.intake.setTransfer(transferState.UP);
                 telemetry.addData("Shooting State", "Shoot Final");
                 if (stateTimer.getElapsed() > 0.4) {

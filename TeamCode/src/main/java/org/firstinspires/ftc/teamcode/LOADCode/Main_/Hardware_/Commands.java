@@ -188,7 +188,7 @@ public class Commands {
                                         new NullCommand()
                                 ),
                                 new ParallelGroup(
-                                        new Delay(0.3),
+                                        new Delay(0.4),
                                         new WaitUntil(() -> (Robot.intake.getTopSensorState() && !Robot.intake.getBottomSensorState()))
                                 ),
 

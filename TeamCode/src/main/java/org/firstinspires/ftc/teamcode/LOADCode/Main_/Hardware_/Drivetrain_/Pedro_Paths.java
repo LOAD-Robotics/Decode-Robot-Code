@@ -32,7 +32,7 @@ public class Pedro_Paths {
     public Pose midPreload = new Pose(131.000, 59.500, Math.toRadians(0));
     public Pose farPreload = new Pose(131.000, 35.500, Math.toRadians(0));
     public Pose hpPreload = new Pose(136, 9, Math.toRadians(-90));
-    public Pose rampIntake = new Pose(134, 20, 0);
+    public Pose rampIntake = new Pose(134, 25, 0);
     public Pose hpPreloadLine = new Pose(134, 8, 0);
     // Shooting Poses
     public Pose nearShoot = new Pose(115, 120, Math.toRadians(-35));
@@ -472,7 +472,7 @@ public class Pedro_Paths {
                 ))
                 .setLinearHeadingInterpolation(midShoot.getHeading(), openGateBasic.getHeading())
                 .build();
-        Pose subPose2 = openGateIntakeRamp.withY(openGateIntakeRamp.getY()-1);
+        Pose subPose2 = openGateIntakeRamp.withY(openGateIntakeRamp.getY()-3);
         if (alliance == BLUE){
             openGateIntakeRamp = openGateIntakeRamp.plus(new Pose(-2, -1));
         }
@@ -482,16 +482,11 @@ public class Pedro_Paths {
                         autoMirror(new Pose(96, 66.5)),
                         openGateIntakeRamp
                 ))
-//                .setLinearHeadingInterpolation(midShoot.getHeading(), openGateIntakeRamp.getHeading())
-//                .addPath(new BezierLine(
-//                        openGateIntakeRamp,
-//                        subPose2
-//                ))
-//                .setConstantHeadingInterpolation(openGateIntakeRamp.getHeading())
-//                .addPath(new BezierLine(
-//                        subPose2,
-//                        openGateIntakeRamp
-//                ))
+                .setLinearHeadingInterpolation(midShoot.getHeading(), openGateIntakeRamp.getHeading())
+                .addPath(new BezierLine(
+                        openGateIntakeRamp,
+                        subPose2
+                ))
                 .setConstantHeadingInterpolation(openGateIntakeRamp.getHeading())
                 .build();
     }
