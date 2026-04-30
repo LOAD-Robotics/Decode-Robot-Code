@@ -26,7 +26,7 @@ import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.LoadHardwareClass
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 import dev.nextftc.core.commands.Command;
-import dev.nextftc.core.commands.delays.WaitUntil;
+import dev.nextftc.core.commands.delays.Delay;
 import dev.nextftc.core.commands.groups.SequentialGroup;
 import dev.nextftc.core.commands.utility.InstantCommand;
 import dev.nextftc.extensions.pedro.PedroComponent;
@@ -71,14 +71,17 @@ public class Auto_Main_ extends NextFTCOpMode {
                 ));
         prompter.prompt("auto",
                 new OptionPrompt<>("Select Auto",
-                        new testAuto(),
+                        //new testAuto(),
                         new MOE_365_FAR(),
+                        new Heart_Of_Robots_20265_NEAR(),
+                        new Heart_Of_Robots_20265_FAR(),
                         new Near_15Ball(),
                         new Near_15Ball2(),
                         new Near_12Ball(),
                         new Near_9Ball(),
                         new Far_12Ball(),
                         new Far_9Ball()
+
                 ));
         prompter.onComplete(() -> {
             selectedAlliance = prompter.get("alliance");
@@ -192,7 +195,7 @@ public class Auto_Main_ extends NextFTCOpMode {
         }
         @Override
         double getHoodOffset() {
-            return 0;
+            return -20;
         }
         @Override
         public boolean getTurretEnabled(){
@@ -240,7 +243,7 @@ public class Auto_Main_ extends NextFTCOpMode {
         }
         @Override
         double getHoodOffset() {
-            return 0;
+            return -20;
         }
         @Override
         boolean autoLeave() {
@@ -533,6 +536,115 @@ public class Auto_Main_ extends NextFTCOpMode {
         @Override
         public String toString(){return "MOE 365 Far";}
     }
+    private class Heart_Of_Robots_20265_NEAR extends Auto{
+        @Override
+        public Pose getStartPose(){
+            return paths.nearStart;
+        }
+        @Override
+        public Pose getEndPose(){
+            return paths.nearLeave;
+        }
+        @Override
+        public boolean getTurretEnabled(){
+            return true;
+        }
+        @Override
+        double getHoodOffset() {
+            return 0;
+        }
+        @Override
+        boolean autoLeave() {
+            return true;
+        }
+
+        @Override
+        public Command runAuto(){
+            return new SequentialGroup(
+                    new InstantCommand(Commands.setFlywheelState(Turret.flywheelState.ON)),
+                    Commands.runPath(paths.nearStart_to_midShoot),
+                    Commands.shootBalls(),
+                    Commands.setIntakeMode(ON),
+                    Commands.runPath(paths.midShoot_to_midPreload),
+                    Commands.runPath(paths.midPreload_to_openGateBasic),
+                    new Delay(2.2),
+                    Commands.runPath(paths.openGateBasic_to_midShoot),
+                    Commands.shootBalls(),
+                    new Delay(1.5),
+                    Commands.setIntakeMode(ON),
+                    Commands.runPath(paths.midShoot_to_openGateIntake),
+                    Commands.waitForArtifacts(),
+                    Commands.runPath(paths.openGateIntake_to_midShoot),
+                    Commands.shootBalls(),
+                    Commands.setIntakeMode(ON),
+                    Commands.runPath(paths.midShoot_to_nearPreload),
+                    Commands.runPath(paths.nearPreload_to_openGateBasic),
+                    new Delay(2.2),
+                    Commands.runPath(paths.openGateBasic_to_nearLeave),
+                    Commands.shootBalls()
+            );
+        }
+
+        @NonNull
+        @Override
+        public String toString(){return "Heart Of Robots 20265 NEAR";}
+    }
+    private class Heart_Of_Robots_20265_FAR extends Auto{
+        @Override
+        public Pose getStartPose(){
+            return paths.farStart;
+        }
+        @Override
+        public Pose getEndPose(){
+            return paths.farLeave;
+        }
+        @Override
+        public boolean getTurretEnabled(){
+            return true;
+        }
+        @Override
+        double getHoodOffset() {
+            return 0;
+        }
+        @Override
+        boolean autoLeave() {
+            return true;
+        }
+
+        @Override
+        public Command runAuto(){
+            return new SequentialGroup(
+                    new InstantCommand(Commands.setFlywheelState(Turret.flywheelState.ON)),
+                    Commands.runPath(paths.farStart_to_farShoot),
+                    Commands.shootBalls(),
+                    Commands.setIntakeMode(ON),
+                    Commands.runPath(paths.farShoot_to_hpPreloadLine),
+                    Commands.runPath(paths.hpPreloadLine_to_farShoot),
+                    Commands.shootBalls(),
+                    Commands.setIntakeMode(ON),
+                    Commands.runPath(paths.farShoot_to_hpPreloadLine),
+                    Commands.runPath(paths.hpPreloadLine_to_farShoot),
+                    Commands.shootBalls(),
+                    Commands.setIntakeMode(ON),
+                    Commands.runPath(paths.farShoot_to_hpPreloadLine),
+                    Commands.runPath(paths.hpPreloadLine_to_farShoot),
+                    Commands.shootBalls(),
+                    Commands.setIntakeMode(ON),
+                    Commands.runPath(paths.farShoot_to_hpPreloadLine),
+                    Commands.runPath(paths.hpPreloadLine_to_farShoot),
+                    Commands.shootBalls(),
+                    Commands.setIntakeMode(ON),
+                    Commands.runPath(paths.farShoot_to_hpPreloadLine),
+                    Commands.runPath(paths.hpPreloadLine_to_farShoot),
+                    Commands.shootBalls(),
+                    Commands.setIntakeMode(ON)
+            );
+        }
+
+        @NonNull
+        @Override
+        public String toString(){return "Heart Of Robots 20265 FAR";}
+    }
 
     private class testAuto extends Auto{
         @Override
@@ -563,10 +675,7 @@ public class Auto_Main_ extends NextFTCOpMode {
                     Commands.setIntakeMode(ON),
                     Commands.runPath(paths.midShoot_to_openGateIntake),
                     Commands.waitForArtifacts(),
-                    new WaitUntil(() -> gamepad1.bWasPressed()),
-                    new WaitUntil(() -> gamepad1.bWasReleased()),
-                    Commands.runPath(paths.openGateIntake_to_midShoot),
-                    Commands.setIntakeMode(OFF)
+                    Commands.runPath(paths.openGateIntake_to_midShoot)
             );
         }
 

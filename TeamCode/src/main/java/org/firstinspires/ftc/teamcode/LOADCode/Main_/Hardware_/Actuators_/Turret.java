@@ -78,7 +78,7 @@ public class Turret {
     /**
      * Stores the offset of the turret's rotation
      */
-    public static double turretOffset = 117 ;
+    public double turretOffset = 117 ;
     /**
      * Stores the zeroing state of the turret
      */
@@ -229,12 +229,13 @@ public class Turret {
         Pose goalPose = new Pose(0,144,0);
         if (selectedAlliance == LoadHardwareClass.Alliance.RED) {goalPose = new Pose(144, 144, 0);}
         double distance = Math.max(0, Math.min(Robot.drivetrain.follower.getPose().distanceFrom(goalPose), 300));
+        double angle = 0;
         if (robotZone.isInside(LoadHardwareClass.FarLaunchZone)){
-            setHood(hoodLUTfar.get(distance));
+            angle = hoodLUTfar.get(distance);
         }else{
-            setHood(hoodLUTnear.get(distance));
+            angle = hoodLUTnear.get(distance);
         }
-        setHood(getHood() + offset);
+        setHood(angle + offset);
     }
 
     /**
@@ -256,10 +257,10 @@ public class Turret {
         }
     }
 
-    public static Pose rotationalNearGoalPoseBlue = new Pose(6, 138);
-    public static Pose rotationalFarGoalPoseBlue = new Pose(6, 144);
-    public static Pose rotationalNearGoalPoseRed = new Pose(130, 146);
-    public static Pose rotationalFarGoalPoseRed = new Pose(138, 144);
+    public static Pose rotationalNearGoalPoseBlue = new Pose(8, 136);
+    public static Pose rotationalFarGoalPoseBlue = new Pose(6, 138);
+    public static Pose rotationalNearGoalPoseRed = new Pose(136, 136);
+    public static Pose rotationalFarGoalPoseRed = new Pose(138, 138);
 
     /**
      * Calculates the proper goal pose for the odometry-based turret auto-aim.

@@ -9,7 +9,6 @@ import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
-import com.skeletonarmy.marrow.TimerEx;
 
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.LoadHardwareClass;
 
@@ -18,8 +17,6 @@ public class Pedro_Paths {
     private Follower follower;
     private LoadHardwareClass.Alliance alliance = LoadHardwareClass.selectedAlliance;
     private final LoadHardwareClass.IsLiftAttached isUsingGarage = LoadHardwareClass.IsLiftAttached.NO;
-
-    private TimerEx timer = new TimerEx();
 
     /**
      * Define primary poses to be used in paths
@@ -45,10 +42,9 @@ public class Pedro_Paths {
     public Pose midLeave = new Pose(95,55, Math.toRadians(90));
     public Pose farLeave = new Pose(105,20, Math.toRadians(90));
     // Open Gate Pose
-    public Pose openGateBasic = new Pose(127.5, 72, Math.toRadians(90));
-    public Pose openGateBasicReversed = new Pose(127.5, 72, Math.toRadians(-90));
+    public Pose openGateBasic = new Pose(126, 72, Math.toRadians(0));
     public Pose openGateIntakeGate = new Pose(123, 68, Math.toRadians(0));
-    public Pose openGateIntakeRamp = new Pose(128, 63, Math.toRadians(30));
+    public Pose openGateIntakeRamp = new Pose(127, 63, Math.toRadians(25));
 
     /**
      * <h4>Define all path variables.</h4></br>
@@ -129,7 +125,7 @@ public class Pedro_Paths {
      * <hr></br>
      * <h4>Open Gate Basic Pose (No Intake)</h4>
      */
-    public PathChain openGateBasic_to_nearShoot, openGateBasic_to_midShoot, openGateBasic_to_farShoot;
+    public PathChain openGateBasic_to_nearLeave, openGateBasic_to_midShoot, openGateBasic_to_farShoot;
     /**
      * <hr></br>
      * <h4>Open Gate Basic Pose (Intake)</h4>
@@ -472,9 +468,9 @@ public class Pedro_Paths {
                 ))
                 .setLinearHeadingInterpolation(midShoot.getHeading(), openGateBasic.getHeading())
                 .build();
-        Pose subPose2 = openGateIntakeRamp.withY(openGateIntakeRamp.getY()-3);
+        Pose subPose2 = openGateIntakeRamp.withY(openGateIntakeRamp.getY()-1);
         if (alliance == BLUE){
-            openGateIntakeRamp = openGateIntakeRamp.plus(new Pose(-2, -1));
+            openGateIntakeRamp = openGateIntakeRamp.plus(new Pose(-2, 0, Math.toRadians(0)));
         }
         midShoot_to_openGateIntake = follower.pathBuilder()
                 .addPath(new BezierCurve(
@@ -549,6 +545,14 @@ public class Pedro_Paths {
                 ))
                 .setLinearHeadingInterpolation(openGateBasic.getHeading(), midShoot.getHeading())
                 .build();
+        openGateBasic_to_nearLeave = follower.pathBuilder()
+                .addPath(new BezierLine(
+                        openGateBasic,
+                        nearLeave
+                ))
+                .setTangentHeadingInterpolation()
+                .setReversed()
+                .build();
     }
     public void buildPreloadsToOpenGateBasic(){
         nearPreload_to_openGateBasic = follower.pathBuilder()
@@ -563,9 +567,9 @@ public class Pedro_Paths {
                 .addPath(new BezierCurve(
                         midPreload,
                         autoMirror(new Pose(110, 59)),
-                        openGateBasicReversed
+                        openGateBasic
                 ))
-                .setLinearHeadingInterpolation(midPreload.getHeading(), openGateBasicReversed.getHeading())
+                .setLinearHeadingInterpolation(midPreload.getHeading(), openGateBasic.getHeading())
                 .build();
     }
     public void buildShootingsToHPPreload(){
@@ -702,7 +706,6 @@ public class Pedro_Paths {
         farLeave = autoMirror(farLeave);
 
         openGateBasic = autoMirror(openGateBasic);
-        openGateBasicReversed = autoMirror(openGateBasicReversed);
         openGateIntakeGate = autoMirror(openGateIntakeGate);
         openGateIntakeRamp = autoMirror(openGateIntakeRamp);
 

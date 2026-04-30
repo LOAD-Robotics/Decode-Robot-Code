@@ -258,7 +258,7 @@ public class Teleop_Main_ extends LinearOpMode {
             telemetry.addData("Turret Motor Target", Robot.turret.rotation.target);
             telemetry.addData("Turret Actual Angle", Robot.turret.rotation.getAngleAbsolute());
             telemetry.addData("Turret Angular Velocity (Deg/sec)", Robot.turret.rotation.getDegreesPerSecond());
-            telemetry.addData("Turret Rotation Offset", Turret.turretOffset-117);
+            telemetry.addData("Turret Rotation Offset", Robot.turret.turretOffset-117);
             telemetry.addData("Turret Set Power %", Robot.turret.rotation.getPower()*100);
             telemetry.addData("Turret Target [X, Y]", "[" + Robot.turret.calcGoalPose().getX() + ", " + Robot.turret.calcGoalPose().getY() + "]");
             telemetry.addData("Turret Rotation Motor Current", Robot.turret.rotation.getCurrent(CurrentUnit.AMPS));
@@ -532,9 +532,9 @@ public class Teleop_Main_ extends LinearOpMode {
             hoodOffset -= 10;
         }
         if (gamepad2.dpadLeftWasPressed()){
-            Turret.turretOffset -= turretOffsetStep;
+            Robot.turret.turretOffset -= turretOffsetStep;
         }else if (gamepad2.dpadRightWasPressed()){
-            Turret.turretOffset += turretOffsetStep;
+            Robot.turret.turretOffset += turretOffsetStep;
         }
 
         if (gamepad2.backWasPressed()){

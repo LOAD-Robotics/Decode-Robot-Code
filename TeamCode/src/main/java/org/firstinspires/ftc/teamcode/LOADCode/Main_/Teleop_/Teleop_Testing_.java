@@ -29,9 +29,6 @@
 
 package org.firstinspires.ftc.teamcode.LOADCode.Main_.Teleop_;
 
-import static org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Intake.intakeMode.OFF;
-import static org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Intake.intakeMode.ON;
-
 import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.JoinedTelemetry;
 import com.bylazar.telemetry.PanelsTelemetry;
@@ -42,9 +39,6 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.skeletonarmy.marrow.TimerEx;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
-import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Intake;
-import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Turret;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Drawing;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Drivetrain_.Pedro_Paths;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.LoadHardwareClass;
@@ -76,116 +70,22 @@ public class Teleop_Testing_ extends LinearOpMode {
         LoadHardwareClass.selectedAlliance = LoadHardwareClass.Alliance.RED;
         Drawing.init();
 
-        Turret.zeroed = false;
-        Turret.zeroingState = 0;
-
-        while (!isStopRequested() && Robot.turret.zeroTurret()){
-            Robot.sleep(0);
-            telemetry.addData("Current", Robot.turret.rotation.getCurrent(CurrentUnit.AMPS));
-            telemetry.update();
-        }
+        Robot.turret.setHood(0);
 
         // Wait for the game to start (driver presses START)
         waitForStart();
         runtime.reset();
-        Robot.drivetrain.startTeleOpDrive();
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
 
-            Robot.drivetrain.pedroMecanumDrive(
-                    gamepad1.left_stick_y/3,
-                    gamepad1.left_stick_x/3,
-                    gamepad1.right_stick_x / 4,
-                    true
-            );
+            Robot.turret.updateAimbot(false, true, 0);
+            Robot.drivetrain.follower.update();
 
-            int change = 10;
-
-            if (gamepad1.dpadUpWasPressed()){
-                hood += change;
-            }
-            if (gamepad1.dpadDownWasPressed()){
-                hood -= change;
-            }
-            if (gamepad1.guide){
-                Robot.intake.setTransfer(Intake.transferState.UP);
-            }else{
-                Robot.intake.setTransfer(Intake.transferState.DOWN);
-            }
-
-            telemetry.addData("Hood Angle", hood);
+            telemetry.addData("Hood Angle", Robot.turret.getHood());
             telemetry.addData("Distance", Robot.drivetrain.distanceFromGoal());
             telemetry.addData("Speed", Robot.turret.getFlywheelCurrentMaxSpeed());
             telemetry.addData("Intake Current", Robot.intake.getCurrent());
-
-            if (gamepad1.left_trigger > 0.5){
-                Robot.intake.setMode(ON, ON);
-            }else{
-                Robot.intake.setMode(OFF, OFF);
-            }
-
-            if (gamepad1.yWasPressed()){
-                Robot.turret.setFlywheelState(Turret.flywheelState.ON);
-            }else if (gamepad1.aWasPressed()){
-                Robot.turret.setFlywheelState(Turret.flywheelState.OFF);
-            }
-            Robot.turret.updateFlywheel(0);
-
-            if (gamepad1.bWasPressed() && shootingState < 1 && Robot.turret.getFlywheelRPM() > Robot.turret.getFlywheelCurrentMaxSpeed()-100) {
-                shootingState++;
-            }
-            if (gamepad1.xWasPressed()){
-                shootingState = 4;
-            }
-            boolean forceGateOpen = false;
-            switch (shootingState) {
-                case 0:
-                    telemetry.addData("Shooting State", "OFF");
-                    break;
-                case 1:
-                    Robot.turret.setFlywheelState(Turret.flywheelState.ON);
-                    if (Robot.turret.getGate() == Turret.gatestate.CLOSED){
-                        stateTimer.restart();
-                    }
-                    if (!forceGateOpen){
-                        Robot.turret.setGateState(Turret.gatestate.OPEN);
-                    }
-                    telemetry.addData("Shooting State", "GATE OPENING");
-                    if (stateTimer.getElapsed() > 0.2){
-                        shootingState = 2;
-                        stateTimer.restart();
-                    }
-                    break;
-                case 2:
-                    Robot.intake.setMode(ON, ON);
-                    telemetry.addData("Shooting State", "INTAKE_NOINTAKE FIRST TWO");
-                    if (stateTimer.getElapsed() > 0.7 && Robot.intake.getTopSensorState() && !Robot.intake.getBottomSensorState()){
-                        shootingState = 3;
-                        stateTimer.restart();
-                    }
-                    break;
-                case 3:
-                    Robot.intake.setMode(OFF, ON);
-                    Robot.intake.setTransfer(Intake.transferState.UP);
-                    telemetry.addData("Shooting State", "INTAKE_NOINTAKE FINAL");
-                    if (stateTimer.getElapsed() > 0.5) {
-                        shootingState = 4;
-                    }
-                    break;
-                case 4:
-                    if (!forceGateOpen){
-                        Robot.turret.setGateState(Turret.gatestate.CLOSED);
-                    }
-                    Robot.intake.setMode(OFF, OFF);
-                    Robot.intake.setTransfer(Intake.transferState.DOWN);
-                    telemetry.addData("Shooting State", "RESET");
-                    shootingState = 0;
-            }
-
-            Robot.turret.rotation.setAngle(90);
-            Robot.turret.setHood(Math.max(0, Math.min(hood, Turret.upperHoodLimit)));
-            Robot.turret.updatePIDs();
 
             telemetry.addData("Loop Time (ms)", loopTimer.time(TimeUnit.MILLISECONDS));
             telemetry.update();
