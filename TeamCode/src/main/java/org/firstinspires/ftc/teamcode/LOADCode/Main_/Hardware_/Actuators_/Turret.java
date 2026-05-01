@@ -258,9 +258,9 @@ public class Turret {
     }
 
     public static Pose rotationalNearGoalPoseBlue = new Pose(8, 136);
-    public static Pose rotationalFarGoalPoseBlue = new Pose(6, 138);
+    public static Pose rotationalFarGoalPoseBlue = new Pose(8, 138);
     public static Pose rotationalNearGoalPoseRed = new Pose(136, 136);
-    public static Pose rotationalFarGoalPoseRed = new Pose(138, 138);
+    public static Pose rotationalFarGoalPoseRed = new Pose(136, 138);
 
     /**
      * Calculates the proper goal pose for the odometry-based turret auto-aim.

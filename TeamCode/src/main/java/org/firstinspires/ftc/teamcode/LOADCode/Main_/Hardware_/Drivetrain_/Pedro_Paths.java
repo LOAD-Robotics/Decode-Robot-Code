@@ -42,7 +42,7 @@ public class Pedro_Paths {
     public Pose midLeave = new Pose(95,55, Math.toRadians(90));
     public Pose farLeave = new Pose(105,20, Math.toRadians(90));
     // Open Gate Pose
-    public Pose openGateBasic = new Pose(126, 72, Math.toRadians(0));
+    public Pose openGateBasic = new Pose(127, 72, Math.toRadians(0));
     public Pose openGateIntakeGate = new Pose(123, 68, Math.toRadians(0));
     public Pose openGateIntakeRamp = new Pose(127, 63, Math.toRadians(25));
 
@@ -581,7 +581,6 @@ public class Pedro_Paths {
                 .withHeading(0));
         Pose subPose2 = autoMirror(redHpPreload
                 .withY(25)
-                .withX(redHpPreload.getX()-4)
                 .withHeading(0));
 
         farShoot_to_hpPreload = follower.pathBuilder()
