@@ -35,7 +35,10 @@ import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.skeletonarmy.marrow.TimerEx;
 
+import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Intake;
+import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Turret;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.LoadHardwareClass;
 
 @TeleOp(name="Teleop_Outreach_", group="TeleOp")
@@ -45,20 +48,26 @@ public class Teleop_Outreach_ extends LinearOpMode {
     private ElapsedTime runtime = new ElapsedTime();
     private TelemetryManager panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
 
-    // Contains the start Pose of our robot. This can be changed or saved from the autonomous period.
-    private final Pose startPose = new Pose(88.5,7.8, Math.toRadians(90));
+    private double targetRPM = 0;
+    public int shootingState = 0;
+    public TimerEx stateTimerFifthSec = new TimerEx(0.2);
+    public TimerEx stateTimerFullSec = new TimerEx(1);
+    public TimerEx stateTimerHalfSec = new TimerEx(0.5);
 
+    LoadHardwareClass Robot = new LoadHardwareClass(this);
     @Override
     public void runOpMode() {
         telemetry.addData("Status", "Initialized");
         telemetry.update();
 
-        // Create a new instance of our Robot class
-        LoadHardwareClass Robot = new LoadHardwareClass(this);
         // Initialize all hardware of the robot
-        Robot.init(startPose);
-        // TODO uncomment this once the function has been verified
-        //Robot.turret.zeroTurret(isStopRequested());
+        Robot.init(new Pose(72, 72, 90));
+
+        if (!Turret.zeroed){
+            while (!isStopRequested() && Robot.turret.zeroTurret()){
+                Robot.sleep(0);
+            }
+        }
 
         // Wait for the game to start (driver presses START)
         waitForStart();
@@ -66,32 +75,87 @@ public class Teleop_Outreach_ extends LinearOpMode {
         Robot.drivetrain.startTeleOpDrive();
 
         // run until the end of the match (driver presses STOP)
-        while (opModeIsActive()) {
+        while (opModeIsActive()){
 
             // Pass the joystick positions to our mecanum drive controller
             Robot.drivetrain.pedroMecanumDrive(
-                    gamepad1.left_stick_y/2,
-                    gamepad1.left_stick_x/2,
-                    gamepad1.right_stick_x/2,
+                    gamepad1.left_stick_y/3,
+                    gamepad1.left_stick_x/2.5,
+                    gamepad1.right_stick_x/3,
                     true
             );
 
-            if (gamepad1.dpad_up){
-                Robot.turret.setHood(Robot.turret.getHood() + 2);
-            }else if (gamepad1.dpad_down){
-                Robot.turret.setHood(Robot.turret.getHood() + 2);
+            if (Math.abs(gamepad1.right_stick_y) > 0.1){
+                Robot.intake.setMode(Intake.intakeMode.ON, Intake.intakeMode.ON);
+            }else{
+                Robot.intake.setMode(Intake.intakeMode.OFF, Intake.intakeMode.OFF);
             }
-            telemetry.addData("Hood Angle", Robot.turret.getHood());
 
-            telemetry.addLine();
-            telemetry.addData("Robot Pose X", Math.round(Robot.drivetrain.follower.getPose().getX()));
-            telemetry.addData("Robot Pose Y", Math.round(Robot.drivetrain.follower.getPose().getY()));
-            telemetry.addData("Robot Pose H", Math.round(Math.toDegrees(Robot.drivetrain.follower.getPose().getHeading())));
+            if (gamepad1.yWasPressed()){
+                if (targetRPM == 0){
+                    targetRPM = 1000;
+                }else{
+                    targetRPM = 0;
+                }
+            }
 
-            // System-related Telemetry
-            telemetry.addLine();
-            telemetry.addData("Status", "Run Time: " + runtime.toString());
-            telemetry.addData("Version: ", "11/4/25");
+            //Shoot (B Button Press)
+            // Increment the shooting state
+            if (gamepad1.bWasPressed() && shootingState < 1 && Robot.turret.getFlywheelRPM() > 900) {
+                shootingState++;
+            }
+            if (gamepad1.xWasPressed()){
+                shootingState = 4;
+            }
+            switch (shootingState) {
+                case 0:
+                    telemetry.addData("Shooting State", "OFF");
+                    break;
+                case 1:
+                    Robot.turret.setFlywheelState(Turret.flywheelState.ON);
+                    if (Robot.turret.getGate() == Turret.gatestate.CLOSED){
+                        stateTimerFifthSec.restart();
+                        stateTimerFifthSec.start();
+                    }
+                    Robot.turret.setGateState(Turret.gatestate.OPEN);
+                    telemetry.addData("Shooting State", "GATE OPENING");
+                    if (stateTimerFifthSec.isDone()){
+                        shootingState = 2;
+                        stateTimerHalfSec.restart();
+                        stateTimerHalfSec.start();
+                    }
+                    break;
+                case 2:
+                    Robot.intake.setMode(Intake.intakeMode.ON, Intake.intakeMode.ON);
+                    telemetry.addData("Shooting State", "INTAKE_NOINTAKE FIRST TWO");
+                    if (stateTimerHalfSec.isDone() && Robot.intake.getTopSensorState() && !Robot.intake.getBottomSensorState()){
+                        shootingState = 3;
+                        stateTimerHalfSec.restart();
+                        stateTimerHalfSec.start();
+                    }
+                    break;
+                case 3:
+                    Robot.intake.setMode(Intake.intakeMode.OFF, Intake.intakeMode.ON);
+                    Robot.intake.setTransfer(Intake.transferState.UP);
+                    telemetry.addData("Shooting State", "INTAKE_NOINTAKE FINAL");
+                    if (stateTimerHalfSec.isDone()) {
+                        shootingState = 4;
+                    }
+                    break;
+                case 4:
+                    Robot.turret.setGateState(Turret.gatestate.CLOSED);
+                    Robot.intake.setMode(Intake.intakeMode.OFF, Intake.intakeMode.OFF);
+                    Robot.intake.setTransfer(Intake.transferState.DOWN);
+                    telemetry.addData("Shooting State", "RESET");
+                    shootingState = 0;
+            }
+
+            Robot.turret.flywheel.setRPM(targetRPM);
+            Robot.turret.rotation.setAngle(90);
+            Robot.turret.setHood(0);
+
+            telemetry.addData("Flywheel RPM", Robot.turret.getFlywheelRPM());
+
             telemetry.update();
             panelsTelemetry.update(telemetry);
         }

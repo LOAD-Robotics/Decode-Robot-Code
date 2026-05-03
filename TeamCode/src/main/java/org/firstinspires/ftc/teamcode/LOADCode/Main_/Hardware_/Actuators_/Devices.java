@@ -2,7 +2,11 @@ package org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_;
 
 import androidx.annotation.NonNull;
 
+import com.bylazar.configurables.annotations.Configurable;
+import com.qualcomm.hardware.limelightvision.LLResult;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -24,36 +28,100 @@ import dev.nextftc.control.feedback.PIDCoefficients;
 import dev.nextftc.control.feedforward.BasicFeedforwardParameters;
 
 public class Devices {
-
     public static class CRServoClass {
-        private CRServo servo;
-
+        // CR for Continuous Rotation
+        protected CRServo servo;
+        protected DcMotorSimple.Direction servoDirection;
         public void init(@NonNull OpMode opmode, String servoName) {
             servo = opmode.hardwareMap.get(CRServo.class, servoName);
         }
-
+        /**
+         * @return The power the servo was last set to.
+         */
+        public double getPower() {
+            return servo.getPower();
+        }
         /**
          * @param power The power to set the servo to. Must be a value between -1 and 1.
          */
         public void setPower(double power) {
             servo.setPower(power);
         }
-
+        /**
+         * @return servoDirection : The direction the servo is currently set to.
+         */
+        public DcMotorSimple.Direction getDirection(){
+            return servoDirection;
+        }
         /**
          * @param direction The direction to set the servo to.
          */
         public void setDirection(DcMotorSimple.Direction direction) {
             servo.setDirection(direction);
+            servoDirection = direction;
+        }
+
+
+    }
+
+    /**
+     * Extension of the CRServo class for Axons specifically and equipped to track rotations outside of the [0,360] range.
+     */
+    public static class AxonClass extends CRServoClass {
+
+        private AnalogInput encoderObject;
+
+        // THE UNITS FOR THE FOLLOWING VARIABLES ARE IN VOLTS ON A SCALE OF 0-3.3
+        private double rawAngleV;
+        private double deltaAngleV;
+        private double totalAngleV;
+        private double targetAngleV;
+
+
+        public void init(@NonNull OpMode opmode, String servoName) {
+            super.init(opmode, servoName);
+            encoderObject = opmode.hardwareMap.get(AnalogInput.class, servoName + "-encoder");
+            rawAngleV = encoderObject.getVoltage();
         }
 
         /**
-         * @return The power the servo has been set to.
+         * This should run every loop to count rotations
          */
-        public double getPower() {
-            return servo.getPower();
-        }
-    }
+        public void update() {
+            deltaAngleV = encoderObject.getVoltage() - rawAngleV;
+            rawAngleV = encoderObject.getVoltage();
 
+            if (deltaAngleV > 3.3 / 2) deltaAngleV -= 3.3;
+            else if (deltaAngleV < -3.3 / 2) deltaAngleV += 3.3;
+
+            totalAngleV += deltaAngleV;
+        }
+
+        /**
+         * Resets the <code>totalAngleV</code> to zero
+         */
+        public void resetZeroPos(){
+            totalAngleV = 0;
+        }
+
+        /**
+         * @param angle angle in degrees in range [0,360]
+         * @return <code>angle</code> - angle in volts in range [0:3.3]
+         */
+        public double degreesToVolts(double angle){return angle * (3.3/360);}
+        /**
+         * @param angle angle in volts in range [0,3.3]
+         * @return <code>angle</code> - angle in degrees in range [0:360]
+         */
+        public double voltsToDegrees(double angle){return angle * (360/3.3);}
+        /**
+         * @return absolute rotations count
+         */
+        public double getTotalRotations(){return totalAngleV/3.3;}
+
+
+    }
+    @Configurable
     public static class DcMotorExClass {
 
         // Old PID Coefficients
@@ -63,6 +131,8 @@ public class Devices {
         // PID Coefficients
         PIDCoefficients pidCoefficients = new PIDCoefficients(0, 0, 0);
         BasicFeedforwardParameters ffCoefficients = new BasicFeedforwardParameters(0,0,0);
+
+        public double constantFFparameter = 0;
         /**
          * <h4>Encoder ticks/rotation:</h4><br>
          *      1620rpm Gobilda - 103.8<br>
@@ -74,6 +144,8 @@ public class Devices {
         public double target = 0;
         // Offset position of the motor
         public double offset = 0;
+        // Maximum acceptable error of the angle PID
+        public KineticState maxAcceptableError = new KineticState(1, 5);
         // Motor object
         private DcMotorEx motorObject = null;
 
@@ -103,9 +175,14 @@ public class Devices {
         ControlSystem velPID = null;
         ControlSystem posPID = null;
 
-        public void buildPIDs(){
+        /**
+         * Rebuilds the PIDs if they have changed from the last run of the method.
+         */
+        private void buildPIDs(){
             if (old_pidCoefficients != pidCoefficients || old_ffCoefficients != ffCoefficients){
-                posPID = ControlSystem.builder().posPid(pidCoefficients).build();
+                posPID = ControlSystem.builder().
+                        posPid(pidCoefficients)
+                        .build();
                 velPID = ControlSystem.builder()
                         .velPid(pidCoefficients)
                         .basicFF(ffCoefficients)
@@ -142,83 +219,87 @@ public class Devices {
         public void setOffsetTicks(double ticks){
             offset = ticks;
         }
+
+        /**
+         * Sets a position offset on the motor in degrees
+         */
         public void setOffsetDegrees(double degrees){
             setOffsetTicks(degrees * (ticksPerRotation/360));
         }
+        /**
+         * @return The current offset of the motor in encoder ticks.
+         */
         public double getOffsetTicks(){
             return offset;
         }
+        /**
+         * @return The current offset of the motor in degrees.
+         */
         public double getOffsetDegrees(){
             return offset/(ticksPerRotation/360);
         }
         /**
          * Sets the runMode of the motor.
-         * @param runMode The mode to set the motor to.
          */
         public void setRunMode(DcMotor.RunMode runMode){
             motorObject.setMode(runMode);
         }
         /**
          * Sets the zeroPowerBehaviour of the motor.
-         * @param behaviour The behaviour to apply to the motor.
          */
         public void setZeroPowerBehaviour(DcMotor.ZeroPowerBehavior behaviour){
             motorObject.setZeroPowerBehavior(behaviour);
         }
         /**
-         * @param direction The direction to set the motor to.
+         * Sets the direction of the motor
          */
         public void setDirection(DcMotorSimple.Direction direction){
             motorObject.setDirection(direction);
         }
-        public void setEncoderTicks(int ticks){
-            motorObject.setTargetPosition(ticks);
-            setRunMode(DcMotor.RunMode.RUN_TO_POSITION);
-        }
         /**
-         * @return The current position of the turret motor in encoder ticks. Can be any value.
+         * @return The current position of the motor in encoder ticks. Can be any value.
          */
         public double getEncoderTicks(){
             return motorObject.getCurrentPosition() + offset;
         }
         /**
-         * @param power A value between -1 and 1 that the turret motor's power will be set to.
+         * @param power A value between -1 and 1 that the motor's power will be set to.
          */
         public void setPower(double power){
             motorObject.setPower(power);
         }
         /**
-         * @return The angle of the turret in degrees. Can be any value.
+         * @return The angle of the motor in degrees. Can be any value.
          */
         public double getAngleAbsolute(){
             return (getEncoderTicks()/ticksPerRotation*360);
         }
         /**
-         * @return The angle of the turret in degrees. Can be any value between 0 and 360.
+         * @return The angle of the motor in degrees. Can be any value between 0 and 360.
          */
         public double getAngle(){
             return getAngleAbsolute()%360;
         }
         /**
-         * @return The velocity of the turret in encoder ticks/second.
+         * @return The velocity of the motor in encoder ticks/second.
          */
         public double getVelocity(){
             return motorObject.getVelocity();
         }
         /**
-         * @return The velocity of the turret in degrees/second.
+         * @return The velocity of the motor in degrees/second.
          */
         public double getDegreesPerSecond(){
             return (getVelocity()/ticksPerRotation)*360;
         }
         /**
-         * @return The velocity of the turret in RPM.
+         * @return The velocity of the motor in RPM.
          */
         public double getRPM(){
             return (getVelocity()/ticksPerRotation)*60;
         }
         /**
-         * @return The power that the turret motor has been set to.
+         * @return The power that the motor has been set to.
          */
         public double getPower(){
             return motorObject.getPower();
@@ -232,7 +313,7 @@ public class Devices {
             setAngle(angle, 0);
         }
         /**
-         * Uses a PID controller to move the motor to the desired position.
+         * Uses a PID controller to move the motor to the desired position and velocity. <br>
          * Must be called every loop to function properly.
          * @param angle The angle in degrees to move the motor to. Can be any number.
          * @param velocity The velocity in degrees/sec that the motor should be spinning at when it reaches the target point.
@@ -242,11 +323,20 @@ public class Devices {
             buildPIDs();
             KineticState currentKineticState = new KineticState(getAngleAbsolute(), getDegreesPerSecond());
             posPID.setGoal(new KineticState(target, velocity));
-            setPower(posPID.calculate(currentKineticState));
+            double pidPower = posPID.calculate(currentKineticState);
+            if (!isWithinMaxError()){
+                setPower(pidPower + Math.signum(pidPower) * constantFFparameter);
+            }else{
+                setPower(0);
+            }
+        }
+
+        public boolean isWithinMaxError(){
+            return posPID.isWithinTolerance(maxAcceptableError);
         }
 
         /**
-         * Uses a PID controller to accelerate the motor to the desired RPM.
+         * Uses a PID controller to accelerate the motor to the desired RPM.<br>
          * Must be called every loop to function properly.
          * @param rpm The RPM to accelerate the motor to. Can be any number
          */
@@ -259,6 +349,10 @@ public class Devices {
             setPower(velPID.calculate(currentKineticState));
         }
 
+        /**
+         * @param units The units to use for the returned motor current
+         * @return The current draw of the motor
+         */
         public double getCurrent(CurrentUnit units){
             return motorObject.getCurrent(units);
         }
@@ -298,19 +392,29 @@ public class Devices {
         public void init(@NonNull OpMode opmode, String sensorName){
             sensor = opmode.hardwareMap.get(NormalizedColorSensor.class, sensorName);
         }
-
+        /**
+         * @return The current detected color of the sensor
+         */
         public NormalizedRGBA getNormalizedColors(){
             return sensor.getNormalizedColors();
         }
-
+        /**
+         * @return The current gain of the sensor
+         */
         public double getGain(){
             return sensor.getGain();
         }
-
+        /**
+         * Sets the current gain of the sensor
+         */
         public void setGain(double gain){
             sensor.setGain((float) gain);
         }
 
+        /**
+         * @param units The units to be used for the returned distance
+         * @return The current distance detected by the sensor
+         */
         public double getDistance(DistanceUnit units){
             return ((DistanceSensor) sensor).getDistance(units);
         }
@@ -318,6 +422,10 @@ public class Devices {
     public static class DualProximitySensorClass {
         private final REVColorSensorV3Class sensor1 = new REVColorSensorV3Class();
         private final REVColorSensorV3Class sensor2 = new REVColorSensorV3Class();
+
+        private boolean sensor1WasLastRead = false;
+        private boolean sensor1Triggered = false;
+        private boolean sensor2Triggered = false;
 
         public double threshold = 2;
         public DistanceUnit units = DistanceUnit.CM;
@@ -327,15 +435,32 @@ public class Devices {
             sensor2.init(opmode, sensor2Name);
         }
 
+        /**
+         * Sets the gain of the sensors
+         */
         public void setGain(double gain){
             sensor1.setGain(gain);
             sensor2.setGain(gain);
         }
 
+        /**
+         * @return <code>true</code> if either sensor detects and object closer than the <br>
+         * set threshold, otherwise <code>false</code>.
+         */
         public boolean objectDetected(){
-            return (sensor1.getDistance(units) < threshold || sensor2.getDistance(units) < threshold);
+            if (!sensor1WasLastRead){
+                sensor1WasLastRead = true;
+                sensor1Triggered = (sensor1.getDistance(units) < threshold);
+            } else {
+                sensor1WasLastRead = false;
+                sensor2Triggered = (sensor2.getDistance(units) < threshold);
+            }
+            return sensor1Triggered || sensor2Triggered;
         }
 
+        /**
+         * @return A list containing the distance values for each sensor
+         */
         public double[] getDistances(){
             return new double[]{sensor1.getDistance(units), sensor2.getDistance(units)};
         }
@@ -348,14 +473,12 @@ public class Devices {
             sensor.setMode(DigitalChannel.Mode.INPUT);
         }
 
+        /**
+         * @return <code>true</code> if the sensor detects a magnet, otherwise <code>false</code>.
+         */
         public Boolean getTriggered(){
             return !sensor.getState();
         }
-    }
-    public enum StripState {
-        PROGRESS,
-        BLINK,
-        OFF
     }
     public static class GoBildaPrismBarClass {
         // Maximum length of 4 daisy chained strips is 36 (12 + 12 + 6 + 6)
@@ -401,6 +524,41 @@ public class Devices {
             }else if (alliance == LoadHardwareClass.Alliance.BLUE){
                 setDisplayedArtboard(blinkingBLUE);
             }
+        }
+    }
+    public static class Limelight3AClass {
+        public Limelight3A device;
+        public LLResult result = null;
+        public boolean initialized = false;
+
+        public void init(@NonNull OpMode opMode){
+            device = opMode.hardwareMap.get(Limelight3A.class, "limelight");
+            initialized = true;
+            device.start();
+        }
+
+        /**
+         * Updates the current result of the limelight camera. <br>
+         * Must be called every loop.
+         * @param robotHeading the current heading of the robot in Pedropathing Radians, used for more accurate 3D tracking
+         */
+        public void updateResult(double robotHeading){
+            device.updateRobotOrientation(Math.toDegrees(robotHeading) + 90);
+            result = device.getLatestResult();
+        }
+
+        /**
+         * Sets the current pipeline of the limelight camera.
+         */
+        public void setPipeline(int pipelineIndex){
+            device.pipelineSwitch(pipelineIndex);
+        }
+
+        /**
+         * @return The currently selected pipeline of the limelight camera.
+         */
+        public int getPipeline(){
+            return device.getStatus().getPipelineIndex();
         }
     }
 }

@@ -43,7 +43,7 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDir
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.ExposureControl;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.GainControl;
-import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode.pedroPathing.Constants_Predictive;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
@@ -119,7 +119,7 @@ public class TurretAprilTagTracking extends LinearOpMode
         if (USE_WEBCAM)
             setManualExposure(6, 250);  // Use low exposure time to reduce motion blur
 
-        follower = Constants.createFollower(hardwareMap);   // Initializes the PedroPathing path follower
+        follower = Constants_Predictive.createFollower(hardwareMap);   // Initializes the PedroPathing path follower
         follower.setStartingPose(startPose);                // Sets the initial position of the robot on the field
         follower.update();                                  // Applies the initialization
 
@@ -223,7 +223,7 @@ public class TurretAprilTagTracking extends LinearOpMode
         // Note: Decimation can be changed on-the-fly to adapt during a match.
         aprilTag.setDecimation(3);
 
-        // Create the vision portal by using a builder.
+        // Create the limelight portal by using a builder.
         if (USE_WEBCAM) {
             visionPortal = new VisionPortal.Builder()
                     .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))

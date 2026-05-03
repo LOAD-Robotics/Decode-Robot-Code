@@ -6,6 +6,7 @@ import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.skeletonarmy.marrow.zones.PolygonZone;
 
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.LoadHardwareClass;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
@@ -28,7 +29,7 @@ public class MecanumDrivetrainClass {
     public void init (@NonNull OpMode myOpMode, Pose initialPose){
         // PedroPathing initialization
         follower = Constants.createFollower(myOpMode.hardwareMap);  // Initializes the PedroPathing path follower
-        follower.setStartingPose(initialPose);                      // Sets the initial position of the robot on the field
+        follower.setStartingPose(initialPose);
         follower.update(); // Applies the initialization
     }
 
@@ -42,7 +43,7 @@ public class MecanumDrivetrainClass {
     public void init (@NonNull OpMode myOpMode, Pose initialPose, Follower follow){
         // PedroPathing initialization
         follower = follow;  // Initializes the PedroPathing path follower
-        follower.setPose(initialPose);                      // Sets the initial position of the robot on the field
+        follower.setStartingPose(initialPose);
         follower.update(); // Applies the initialization
     }
 
@@ -81,5 +82,13 @@ public class MecanumDrivetrainClass {
 
     public boolean pathComplete(){
         return !follower.isBusy();
+    }
+
+    public boolean isFullyInNearZone(){
+        PolygonZone robotZone = new PolygonZone(15, 16);
+        robotZone.setPosition(follower.getPose().getX(), follower.getPose().getY());
+        robotZone.setRotation(follower.getPose().getHeading());
+
+        return (robotZone.isFullyInside(LoadHardwareClass.NearLaunchZone));
     }
 }

@@ -25,6 +25,7 @@ package org.firstinspires.ftc.teamcode.Prism;
 
 import static org.firstinspires.ftc.teamcode.Prism.GoBildaPrismDriver.LayerHeight;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -55,7 +56,7 @@ import java.util.concurrent.TimeUnit;
  */
 
 @TeleOp(name="Prism Animations Example", group="Linear OpMode")
-//@Disabled
+@Disabled
 
 public class GoBildaPrismExample extends LinearOpMode {
 

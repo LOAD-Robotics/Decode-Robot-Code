@@ -43,13 +43,13 @@ import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Drivetrain_.Pedro
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.LoadHardwareClass;
 
 @Configurable
-@TeleOp(name="Teleop_Tuning_", group="TeleOp")
-public class Teleop_Tuning_ extends LinearOpMode {
+@TeleOp(name="Teleop_Init_", group="TeleOp")
+public class Teleop_Init_ extends LinearOpMode {
 
     // Declare OpMode members.
-    private ElapsedTime runtime = new ElapsedTime();
-    private ElapsedTime loopTimer = new ElapsedTime();
-    private TelemetryManager panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
+    private final ElapsedTime runtime = new ElapsedTime();
+    private final ElapsedTime loopTimer = new ElapsedTime();
+    private final TelemetryManager panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
 
     public static double hoodOffset = 0;
 
@@ -72,10 +72,11 @@ public class Teleop_Tuning_ extends LinearOpMode {
         Robot.turret.setGateState(Turret.gatestate.CLOSED);
         Robot.lights.setStripRainbow();
 
-        if (!Turret.zeroed){
-            while (!isStopRequested() && Robot.turret.zeroTurret()){
-                sleep(0);
-            }
+        Turret.zeroed = false;
+        Turret.zeroingState = 0;
+
+        while (!isStopRequested() && Robot.turret.zeroTurret()){
+            Robot.sleep(0);
         }
 
         // Wait for the game to start (driver presses START)
@@ -98,12 +99,12 @@ public class Teleop_Tuning_ extends LinearOpMode {
                     Robot.turret.setFlywheelState(Turret.flywheelState.OFF);
                 }
             }
-            Robot.turret.updateFlywheel();
+            Robot.turret.updateFlywheel(0);
 
             if (Math.abs(gamepad2.left_stick_y) < 0.1){
-                Robot.intake.setMode(Intake.intakeMode.INTAKING);
+                Robot.intake.setMode(Intake.intakeMode.ON, Intake.intakeMode.ON);
             }else{
-                Robot.intake.setMode(Intake.intakeMode.OFF);
+                Robot.intake.setMode(Intake.intakeMode.OFF, Intake.intakeMode.OFF);
             }
             if (gamepad2.dpadUpWasPressed()) hoodOffset += 10;
             if (gamepad2.dpadDownWasPressed()) hoodOffset -= 10;

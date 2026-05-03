@@ -39,6 +39,7 @@ import com.skeletonarmy.marrow.zones.PolygonZone;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Devices;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Intake;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Turret;
+import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Drivetrain_.LimeLight_Localizer;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Drivetrain_.MecanumDrivetrainClass;
 
 /*
@@ -56,10 +57,17 @@ public class LoadHardwareClass {
     public final Turret turret;
     public final Intake intake;
     public final Devices.GoBildaPrismBarClass lights;
+    public final LimeLight_Localizer limelightLocalizer;
 
     // Declare various enums & other variables that are useful across files
     public static Alliance selectedAlliance = null;
     public Pose goalPose = new Pose(144, 144);
+
+    public enum IsLiftAttached {
+        YES,
+        NO
+    }
+
     public enum Alliance {
         RED,
         BLUE
@@ -71,7 +79,7 @@ public class LoadHardwareClass {
             new Point(48, 0),
             new Point(72, 24)
     );
-    public static PolygonZone ReallyNearLaunchZoneRed = new PolygonZone(
+    public static PolygonZone NearLaunchZone = new PolygonZone(
             new Point(72, 72),
             new Point(144, 144),
             new Point(0, 144)
@@ -99,6 +107,7 @@ public class LoadHardwareClass {
         this.turret     = new Turret();
         this.intake     = new Intake();
         this.lights     = new Devices.GoBildaPrismBarClass();
+        this.limelightLocalizer = new LimeLight_Localizer();
     }
 
     /**
@@ -108,15 +117,8 @@ public class LoadHardwareClass {
     public void init(Pose initialPose)    {
         // Initialize all subclasses
         drivetrain.init(myOpMode, initialPose);
-        turret.init(myOpMode, this);
-        intake.init(myOpMode);
-        lights.init(myOpMode, 36);
-
-        // Misc telemetry
-        myOpMode.telemetry.addData(">", "Hardware Initialized");
-        myOpMode.telemetry.update();
+        init();
     }
-
     /**
      * Initializes all hardware for the robot.
      * Must be called once at the start of each op-mode.
@@ -124,12 +126,23 @@ public class LoadHardwareClass {
     public void init(Pose initialPose, Follower follower)    {
         // Initialize all subclasses
         drivetrain.init(myOpMode, initialPose, follower);
+        init();
+    }
+
+    private void init(){
         turret.init(myOpMode, this);
         intake.init(myOpMode);
         lights.init(myOpMode, 36);
+        limelightLocalizer.init(this);
 
         // Misc telemetry
         myOpMode.telemetry.addData(">", "Hardware Initialized");
         myOpMode.telemetry.update();
+    }
+
+    public void updatePanelsDrawing(){
+        Drawing.ROBOT_RADIUS = 9;
+        Drawing.drawRobot(drivetrain.follower.getPose());
+        Drawing.sendPacket();
     }
 }

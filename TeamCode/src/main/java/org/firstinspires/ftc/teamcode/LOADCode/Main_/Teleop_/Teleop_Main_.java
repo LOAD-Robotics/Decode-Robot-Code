@@ -29,9 +29,13 @@
 
 package org.firstinspires.ftc.teamcode.LOADCode.Main_.Teleop_;
 
+import static org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Intake.intakeMode.OFF;
+import static org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Intake.intakeMode.ON;
+import static org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Intake.intakeMode.REVERSE;
 import static org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.LoadHardwareClass.selectedAlliance;
 
 import com.bylazar.configurables.annotations.Configurable;
+import com.bylazar.telemetry.JoinedTelemetry;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
 import com.pedropathing.geometry.Pose;
@@ -42,15 +46,18 @@ import com.skeletonarmy.marrow.TimerEx;
 import com.skeletonarmy.marrow.prompts.OptionPrompt;
 import com.skeletonarmy.marrow.prompts.Prompter;
 
-import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Intake;
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Intake.intakeMode;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Intake.transferState;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Turret;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Turret.flywheelState;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Actuators_.Turret.gatestate;
+import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Drawing;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Drivetrain_.MecanumDrivetrainClass;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.Drivetrain_.Pedro_Paths;
 import org.firstinspires.ftc.teamcode.LOADCode.Main_.Hardware_.LoadHardwareClass;
+import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 import java.util.concurrent.TimeUnit;
 
@@ -65,18 +72,23 @@ public class Teleop_Main_ extends LinearOpMode {
     // Declare OpMode members.
     private final ElapsedTime runtime = new ElapsedTime();
     private final ElapsedTime looptime = new ElapsedTime();
-    private final TelemetryManager panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
+    private final TelemetryManager.TelemetryWrapper panelsTelemetry = PanelsTelemetry.INSTANCE.getFtcTelemetry();
+    private final Telemetry ftcTelemetry = super.telemetry;
+    private final JoinedTelemetry telemetry = new JoinedTelemetry(ftcTelemetry, panelsTelemetry);
 
     public int shootingState = 0;
-    public TimerEx stateTimerFifthSec = new TimerEx(0.2);
-    public TimerEx stateTimerFullSec = new TimerEx(1);
-    public TimerEx stateTimerHalfSec = new TimerEx(0.5);
+    public TimerEx stateTimer = new TimerEx();
+    public int manualFlywheelState = 0;
+    public boolean leftTrigOldState = false;
+    public boolean rightTrigOldState = false;
     public double hoodOffset = 0;
-    public double turretOffset = 0;
-    public boolean turretOn = true;
+    public double turretOffsetStep = 3;
+    public boolean turretOn = false;
+    public int zeroState = 0;
     public boolean hoodOn = true;
     public Pose holdPoint = new Pose(72, 72, 90);
     public Boolean holdJustTriggered = false;
+
 
     // Create a new instance of our Robot class
     LoadHardwareClass Robot = new LoadHardwareClass(this);
@@ -95,14 +107,28 @@ public class Teleop_Main_ extends LinearOpMode {
         BLINKING,
         RAINBOW
     }
-    private lightsState ledState = lightsState.SOLID;
+
+    enum turretState {
+        ON,
+        OFF,
+        PAUSED,
+    }
+    private turretState teleopTurretState = turretState.ON;
+
     private lightsState ledStateOld = lightsState.RAINBOW;
+    private boolean forceGateOpen = false;
 
     // Contains the start Pose of our robot. This can be changed or saved from the autonomous period.
     private Pose startPose = Paths.farStart;
 
     @Override
     public void runOpMode() {
+
+//        List<LynxModule> allHubs = hardwareMap.getAll(LynxModule.class);
+//
+//        for (LynxModule hub : allHubs) {
+//            hub.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
+//        }
 
         // Create a new prompter for selecting alliance
         prompter = new Prompter(this);
@@ -146,8 +172,6 @@ public class Teleop_Main_ extends LinearOpMode {
             telemetry.update();
         });
 
-        Robot.turret.initVision(this);
-
         // Runs repeatedly while in init
         while (opModeInInit()) {
             prompter.run();
@@ -161,91 +185,34 @@ public class Teleop_Main_ extends LinearOpMode {
         }else{
             Robot.init(startPose);
         }
+
+        if (!Turret.zeroed){
+            while (!isStopRequested() && Robot.turret.zeroTurret()){
+                Robot.sleep(0);
+//                for (LynxModule hub : allHubs) {
+//                    hub.clearBulkCache();
+//                }
+                telemetry.addData("Looptime", looptime.time(TimeUnit.MILLISECONDS));
+                looptime.reset();
+            }
+        }
+
         runtime.reset();
         Paths.buildPaths(Robot.drivetrain.follower);
         Robot.drivetrain.startTeleOpDrive();
         Robot.intake.setTransfer(transferState.DOWN);
         Robot.lights.setSolidAllianceDisplay(selectedAlliance);
+        telemetry.setMsTransmissionInterval(200);
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
             looptime.reset();
-            if (!Turret.zeroed){
-                while (!isStopRequested() && Robot.turret.zeroTurret()){
-                    sleep(0);
-                }
-            }
 
-            int targetTagID = 24;
-            if (LoadHardwareClass.selectedAlliance == LoadHardwareClass.Alliance.BLUE){
-                targetTagID = 20;
-            }
-
-            Gamepad1();
-            Gamepad2();
-
-            Robot.turret.updatePIDs();
-
-            double flywheelPercentage = (int) Math.round(Robot.turret.getFlywheelRPM()/Robot.turret.getFlywheelCurrentMaxSpeed() *100);
-            telemetry.addData("Flywheel Percentage", flywheelPercentage+"%");
-            panelsTelemetry.addData("Flywheel Percentage", flywheelPercentage+"%");
-            telemetry.addData("ALLIANCE", selectedAlliance);
-
-            telemetry.addData("SpeedMult", Robot.drivetrain.speedMultiplier);
-            //positional telemetry
-            telemetry.addData("Robot Position [X, Y, H]", "[" + Robot.drivetrain.follower.getPose().getX() + ", " + Robot.drivetrain.follower.getPose().getY() + ", " + Robot.drivetrain.follower.getPose().getHeading() + "]");
-            telemetry.addData("Distance From Goal", Robot.drivetrain.distanceFromGoal());
-            telemetry.addData("Angular Velocity (Deg/sec)", Math.toDegrees(Robot.drivetrain.follower.getAngularVelocity()));
-            telemetry.addData("Turret Angular Velocity (Deg/sec)", Robot.turret.rotation.getDegreesPerSecond());
-
-            telemetry.addLine();
-            // Turret-related Telemetry
-            telemetry.addData("Tag Detected", Robot.turret.vision.tagDetected(targetTagID));
-            telemetry.addData("Is using Camera PID", Robot.turret.useCameraAim);
-            telemetry.addData("Camera Error", Robot.turret.cameraTurretError);
-            panelsTelemetry.addData("Camera Turret Error", Robot.turret.cameraTurretError);
-            panelsTelemetry.addData("Turret Target Angle", Robot.turret.rotation.target);
-            panelsTelemetry.addData("Turret Actual Angle", Robot.turret.rotation.getAngleAbsolute());
-            telemetry.addData("Turret Target Angle", Robot.turret.rotation.target);
-            telemetry.addData("Turret Actual Angle", Robot.turret.rotation.getAngleAbsolute());
-            telemetry.addData("Turret Rotation Offset", turretOffset);
-            telemetry.addData("Turret Hood Angle", Robot.turret.getHood());
-            telemetry.addData("Turret Hood Offset", hoodOffset);
-            telemetry.addData("Turret Target [X, Y]", "[" + Robot.turret.calcGoalPose().getX() + ", " + Robot.turret.calcGoalPose().getY() + "]");
-            telemetry.addData("Hall Effect Triggered", Robot.turret.hall.getTriggered());
-
-            telemetry.addLine();
-            panelsTelemetry.addData("Flywheel Target Speed", Robot.turret.flywheel.target);
-            panelsTelemetry.addData("Flywheel Actual Speed", Robot.turret.getFlywheelRPM());
-            panelsTelemetry.addData("Flywheel Power", Robot.turret.flywheel.getPower());
-            telemetry.addData("Flywheel Target Speed", Robot.turret.flywheel.target);
-            telemetry.addData("Flywheel Actual Speed", Robot.turret.getFlywheelRPM());
-            telemetry.addData("Flywheel State", Robot.turret.getFlywheelRPM());
-
-            // Intake-related Telemetry
-            telemetry.addLine();
-            telemetry.addData("Intake Mode", Robot.intake.getMode());
-            telemetry.addData("Intake Current", Robot.intake.getCurrent());
-
-            // Color Sensor Telemetry
-            telemetry.addLine();
-            telemetry.addData("Upper Sensor", Robot.intake.getTopSensorState());
-            telemetry.addData("Lower Sensor", Robot.intake.getBottomSensorState());
-
-            // System-related Telemetry
-            telemetry.addLine();
-            telemetry.addData("Loop Time", looptime);
-            telemetry.addData("Status", "Run Time: " + runtime);
-            telemetry.addData("Version: ", "2/13/25");
-            telemetry.update();
-            panelsTelemetry.update();
-
+            lightsState ledState = lightsState.SOLID;
             if (runtime.time(TimeUnit.SECONDS) > 115){
                 ledState = lightsState.RAINBOW;
             }else if (Robot.turret.isFlywheelReady()){
                 ledState = lightsState.BLINKING;
-            }else{
-                ledState = lightsState.SOLID;
             }
             if (ledState != ledStateOld){
                 switch (ledState){
@@ -261,9 +228,73 @@ public class Teleop_Main_ extends LinearOpMode {
                 ledStateOld = ledState;
             }
             telemetry.addData("lightsState", ledState);
+
+            teleopTurretState = turretState.ON;
+            Gamepad1();
+            Gamepad2();
+
+            Robot.turret.updatePIDs();
+
+            double flywheelPercentage = (int) Math.round(Robot.turret.getFlywheelRPM()/Robot.turret.getFlywheelCurrentMaxSpeed() *100);
+            telemetry.addData("Flywheel Percentage", flywheelPercentage+"%");
+            if (manualFlywheelState != 0){
+                telemetry.addData("manualFlywheelState", manualFlywheelState);
+            }
+            telemetry.addData("ALLIANCE", selectedAlliance);
+
+
+            // Drivetrain Telemetry
+            telemetry.addData("SpeedMult", Robot.drivetrain.speedMultiplier);
+            telemetry.addData("Robot Position [X, Y, H]", "[" + Robot.drivetrain.follower.getPose().getX() + ", " + Robot.drivetrain.follower.getPose().getY() + ", " + Math.toDegrees(Robot.drivetrain.follower.getPose().getHeading()) + "]");
+            telemetry.addData("Distance From Goal", Robot.drivetrain.distanceFromGoal());
+            telemetry.addData("Angular Velocity (Deg/sec)", Math.toDegrees(Robot.drivetrain.follower.getAngularVelocity()));
+            telemetry.addLine();
+
+            telemetry.addData("Zero State", zeroState);
+
+            // Turret Rotation Telemetry
+            telemetry.addData("TurretState", teleopTurretState);
+            telemetry.addData("Turret Target Angle", Robot.turret.rotationalAimbotLocalizer());
+            telemetry.addData("Turret Motor Target", Robot.turret.rotation.target);
+            telemetry.addData("Turret Actual Angle", Robot.turret.rotation.getAngleAbsolute());
+            telemetry.addData("Turret Angular Velocity (Deg/sec)", Robot.turret.rotation.getDegreesPerSecond());
+            telemetry.addData("Turret Rotation Offset", Robot.turret.turretOffset-117);
+            telemetry.addData("Turret Set Power %", Robot.turret.rotation.getPower()*100);
+            telemetry.addData("Turret Target [X, Y]", "[" + Robot.turret.calcGoalPose().getX() + ", " + Robot.turret.calcGoalPose().getY() + "]");
+            telemetry.addData("Turret Rotation Motor Current", Robot.turret.rotation.getCurrent(CurrentUnit.AMPS));
+            telemetry.addLine();
+
+            // Turret Hood Telemetry
+            telemetry.addData("Turret Hood Angle", Robot.turret.getHood());
+            telemetry.addData("Turret Hood Offset", hoodOffset);
+
+            // Flywheel Telemetry
+            telemetry.addLine();
+            telemetry.addData("Flywheel Target Speed", Robot.turret.getFlywheelCurrentMaxSpeed());
+            telemetry.addData("Flywheel Actual Speed", Robot.turret.getFlywheelRPM());
+
+            telemetry.addData("Hall Sensor", Robot.turret.hall.getTriggered());
+
+            // System-related Telemetry
+            telemetry.addLine();
+            telemetry.addData("Loop Time (ms)", looptime.time(TimeUnit.MILLISECONDS));
+            telemetry.addData("Status", "Run Time: " + runtime);
+            telemetry.addData("Version: ", "2/13/25");
+            telemetry.update();
+
+            Drawing.drawRobot(Robot.drivetrain.follower.getPose(), Drawing.blue);
+            Drawing.drawRobot(Robot.limelightLocalizer.updateLLPose(), Drawing.green);
+            Drawing.drawRobot(Constants.getPinpointLocalizer().getPose(), Drawing.yellow);
+            Drawing.sendPacket();
+
+//            for (LynxModule hub : allHubs) {
+//                hub.clearBulkCache();
+//            }
         }
 
         selectedAlliance = null;
+        Turret.zeroed = false;
+        Turret.zeroingState = 0;
     }
 
     /**
@@ -310,6 +341,8 @@ public class Teleop_Main_ extends LinearOpMode {
 
         double ariDeadZone = 0.3;
 
+        if (turretOn && gamepad1.a) {teleopTurretState = turretState.PAUSED;}
+
         if (gamepad1.left_trigger >= ariDeadZone && gamepad1.right_trigger >= ariDeadZone) {
             if (!holdJustTriggered){
                 holdPoint = Robot.drivetrain.follower.getPose();
@@ -336,28 +369,27 @@ public class Teleop_Main_ extends LinearOpMode {
             Robot.drivetrain.speedMultiplier = 0.66;
         }
 
-        if (gamepad1.bWasPressed()){
-            if (selectedAlliance == LoadHardwareClass.Alliance.RED){
-                Robot.drivetrain.follower.setPose(new Pose(7, 7, Math.toRadians(90)));
-            }else if (selectedAlliance == LoadHardwareClass.Alliance.BLUE){
-                Robot.drivetrain.follower.setPose(new Pose(137, 7, Math.toRadians(90)));
-            }
-        }
-
-        double turnMult = 2;
-//        if (gamepad1.left_stick_y == 0 && gamepad1.left_stick_x == 0){
-//            turnMult = 1;
+//        if (gamepad1.bWasPressed()){
+//            if (selectedAlliance == LoadHardwareClass.Alliance.RED){
+//                Robot.drivetrain.follower.setPose(new Pose(9.6, 7.1, Math.toRadians(90)));
+//            }else if (selectedAlliance == LoadHardwareClass.Alliance.BLUE){
+//                Robot.drivetrain.follower.setPose(new Pose(144-9.6, 7.1, Math.toRadians(90)));
+//                Robot.drivetrain.follower.getPoseTracker().setPose();
+//            }
+////            Turret.zeroed = false;
+////            Turret.zeroingState = 0;
+////            while (!isStopRequested() && Robot.turret.zeroTurret()){
+////                Robot.sleep(0);
+////            }
 //        }
+
         Robot.drivetrain.pedroMecanumDrive(
                 gamepad1.left_stick_y,
                 gamepad1.left_stick_x,
-                gamepad1.right_stick_x / turnMult,
+                gamepad1.right_stick_x / 2,
                 true
         );
 
-        if (gamepad1.dpadDownWasPressed()){
-            hoodOn = !hoodOn;
-        }
         if (gamepad1.yWasPressed()){
             turretOn = !turretOn;
         }
@@ -413,35 +445,26 @@ public class Teleop_Main_ extends LinearOpMode {
      * </ul>
      */
     public void Gamepad2() {
-        Robot.turret.updateAimbot(turretOn, hoodOn, hoodOffset);
-        Robot.turret.rotation.setOffsetDegrees(Turret.turretOffset + turretOffset);
+
+        if (!turretOn) {teleopTurretState = turretState.OFF;}
 
         double dylanStickDeadzones = 0.2;
 
         //Intake Controls (Left Stick Y)
         if (shootingState == 0) {
-            if (Math.abs(gamepad2.left_stick_y) >= dylanStickDeadzones &&
-                    Math.abs(gamepad2.right_stick_y) >= dylanStickDeadzones) {
-                Robot.intake.setMode(intakeMode.INTAKING);
-            }else if (Math.abs(gamepad2.left_stick_y) >= dylanStickDeadzones &&
-                    Math.abs(gamepad2.right_stick_y) < dylanStickDeadzones) {
-                Robot.intake.setMode(intakeMode.NO_BELT);
-            }else if (Math.abs(gamepad2.left_stick_y) < dylanStickDeadzones &&
-                    Math.abs(gamepad2.right_stick_y) >= dylanStickDeadzones) {
-                Robot.intake.setMode(intakeMode.SHOOTING);
-            }else if (gamepad2.back){
-                Robot.intake.setMode(intakeMode.REVERSING);
-            }else{ // OFF
-                Robot.intake.setMode(intakeMode.OFF);
+            intakeMode intake = OFF;
+            intakeMode belt = OFF;
+            if (Math.abs(gamepad2.left_stick_y) >= dylanStickDeadzones){
+                intake = ON;
+            }else if (gamepad2.left_bumper){
+                intake = REVERSE;
             }
-
-            /* TODO Uncomment once autobelt control is finished
-            if (Math.abs(gamepad2.left_stick_y) >= dylanStickDeadzones) {
-                Robot.intake.setMode(intakeMode.INTAKING);
-            }else{ // OFF
-                Robot.intake.setMode(intakeMode.OFF);
+            if (Math.abs(gamepad2.right_stick_y) >= dylanStickDeadzones){
+                belt = ON;
+            }else if (gamepad2.right_bumper){
+                belt = REVERSE;
             }
-             */
+            Robot.intake.setMode(intake, belt);
 
             //Flywheel Toggle Control (Y Button)
             if (gamepad2.yWasPressed()) {
@@ -451,8 +474,56 @@ public class Teleop_Main_ extends LinearOpMode {
                     Robot.turret.setFlywheelState(flywheelState.OFF);
                 }
             }
+
+            if (gamepad2.rightStickButtonWasPressed() && zeroState == 0){
+                zeroState = 1;
+            }
+            switch (zeroState){
+                case 1:
+                    Robot.turret.rotation.setAngle(90);
+                    if (Robot.turret.rotation.isWithinMaxError()){
+                        zeroState++;
+                        Turret.zeroed = false;
+                        Turret.zeroingState = 0;
+                    }
+                    break;
+                case 2:
+                    if (!Turret.zeroed){
+                        Robot.turret.zeroTurret();
+                    }else{
+                        zeroState = 0;
+                    }
+                    break;
+            }
+
+            if (forceGateOpen){
+                Robot.turret.setGateState(gatestate.OPEN);
+            }else{
+                Robot.turret.setGateState(gatestate.CLOSED);
+            }
         }
-        Robot.turret.updateFlywheel();
+
+        if (zeroState == 0){
+            Robot.turret.updateAimbot(teleopTurretState==turretState.ON, hoodOn, hoodOffset);
+        }
+
+        if (gamepad2.left_trigger > 0.8 && !leftTrigOldState && manualFlywheelState > 1){
+            leftTrigOldState = true;
+            manualFlywheelState--;
+        }else if (gamepad2.left_trigger < 0.2 && leftTrigOldState){
+            leftTrigOldState = false;
+        }
+        if (gamepad2.right_trigger > 0.8 && !rightTrigOldState && manualFlywheelState < 4){
+            rightTrigOldState = true;
+            manualFlywheelState++;
+        }else if (gamepad2.right_trigger < 0.2 && rightTrigOldState){
+            rightTrigOldState = false;
+        }
+        if (gamepad2.aWasPressed()){
+            manualFlywheelState = 0;
+            hoodOffset = 0;
+        }
+        Robot.turret.updateFlywheel(manualFlywheelState);
 
         // Hood Controls
         if (gamepad2.dpadUpWasPressed()){
@@ -461,11 +532,18 @@ public class Teleop_Main_ extends LinearOpMode {
             hoodOffset -= 10;
         }
         if (gamepad2.dpadLeftWasPressed()){
-            turretOffset += 10;
+            Robot.turret.turretOffset -= turretOffsetStep;
         }else if (gamepad2.dpadRightWasPressed()){
-            turretOffset -= 10;
+            Robot.turret.turretOffset += turretOffsetStep;
         }
 
+        if (gamepad2.backWasPressed()){
+            forceGateOpen = !forceGateOpen;
+        }
+
+        if (Robot.turret.getFlywheelRPM() > Robot.turret.getFlywheelCurrentMaxSpeed()-100){
+            gamepad2.rumble(10);
+        }
 
         //Shoot (B Button Press)
         // Increment the shooting state
@@ -477,48 +555,48 @@ public class Teleop_Main_ extends LinearOpMode {
         }
         switch (shootingState) {
             case 0:
-                telemetry.addData("Shooting State", "OFF");
+                telemetry.addData("Shooting State", "Idle");
                 return;
             case 1:
                 Robot.turret.setFlywheelState(flywheelState.ON);
                 if (Robot.turret.getGate() == gatestate.CLOSED){
-                    stateTimerFifthSec.restart();
-                    stateTimerFifthSec.start();
+                    stateTimer.restart();
                 }
-                Robot.turret.setGateState(gatestate.OPEN);
-                telemetry.addData("Shooting State", "GATE OPENING");
-                if (stateTimerFifthSec.isDone()){
+                if (!forceGateOpen){
+                    Robot.turret.setGateState(gatestate.OPEN);
+                }
+                telemetry.addData("Shooting State", "Open Gate");
+                if (stateTimer.getElapsed() > 0.1){
                     shootingState = 2;
+                    stateTimer.restart();
                 }
                 return;
             case 2:
-                if (Robot.intake.getMode() == intakeMode.OFF){
-                    stateTimerHalfSec.restart();
-                    stateTimerHalfSec.start();
-                }
-                Robot.intake.setMode(intakeMode.INTAKING);
-                telemetry.addData("Shooting State", "SHOOTING FIRST TWO");
-                if (stateTimerHalfSec.isDone() && Robot.intake.getTopSensorState() && !Robot.intake.getBottomSensorState()){
+                Robot.intake.setMode(ON, ON);
+                telemetry.addData("Shooting State", "Shoot First Two");
+                if (stateTimer.getElapsed() > 0.3 && Robot.intake.getTopSensorState() && !Robot.intake.getBottomSensorState()){
                     shootingState = 3;
+                    stateTimer.restart();
+                }
+                if (stateTimer.getElapsed() > 1){
+                    shootingState = 3;
+                    stateTimer.restart();
                 }
                 return;
             case 3:
-                if (Robot.intake.getMode() == intakeMode.INTAKING){
-                    stateTimerHalfSec.restart();
-                    stateTimerHalfSec.start();
-                }
-                Robot.intake.setMode(Intake.intakeMode.SHOOTING);
                 Robot.intake.setTransfer(transferState.UP);
-                telemetry.addData("Shooting State", "SHOOTING FINAL");
-                if (stateTimerHalfSec.isDone()) {
+                telemetry.addData("Shooting State", "Shoot Final");
+                if (stateTimer.getElapsed() > 0.4) {
                     shootingState = 4;
                 }
                 return;
             case 4:
-                Robot.turret.setGateState(gatestate.CLOSED);
-                Robot.intake.setMode(intakeMode.OFF);
+                if (!forceGateOpen){
+                    Robot.turret.setGateState(gatestate.CLOSED);
+                }
+                Robot.intake.setMode(OFF, OFF);
                 Robot.intake.setTransfer(transferState.DOWN);
-                telemetry.addData("Shooting State", "RESET");
+                telemetry.addData("Shooting State", "Reset");
                 shootingState = 0;
         }
     }
