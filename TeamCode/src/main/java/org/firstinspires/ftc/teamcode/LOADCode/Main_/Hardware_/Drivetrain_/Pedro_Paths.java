@@ -44,7 +44,7 @@ public class Pedro_Paths {
     // Open Gate Pose
     public Pose openGateBasic = new Pose(127, 72, Math.toRadians(0));
     public Pose openGateIntakeGate = new Pose(123, 68, Math.toRadians(0));
-    public Pose openGateIntakeRamp = new Pose(127, 63, Math.toRadians(25));
+    public Pose openGateIntakeRamp = new Pose(126, 63, Math.toRadians(25));
 
     /**
      * <h4>Define all path variables.</h4></br>

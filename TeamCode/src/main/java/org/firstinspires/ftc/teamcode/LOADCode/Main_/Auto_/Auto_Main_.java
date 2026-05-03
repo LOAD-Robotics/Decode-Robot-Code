@@ -75,6 +75,7 @@ public class Auto_Main_ extends NextFTCOpMode {
                         new MOE_365_FAR(),
                         new Heart_Of_Robots_20265_NEAR(),
                         new Heart_Of_Robots_20265_FAR(),
+                        new Team_Stealth_21536_NEAR(),
                         new Near_15Ball(),
                         new Near_15Ball2(),
                         new Near_12Ball(),
@@ -535,6 +536,57 @@ public class Auto_Main_ extends NextFTCOpMode {
         @NonNull
         @Override
         public String toString(){return "MOE 365 Far";}
+    }
+    private class Team_Stealth_21536_NEAR extends Auto{
+        @Override
+        public Pose getStartPose(){
+            return paths.nearStart;
+        }
+        @Override
+        public Pose getEndPose(){
+            return paths.nearLeave;
+        }
+        @Override
+        public boolean getTurretEnabled(){
+            return true;
+        }
+        @Override
+        double getHoodOffset() {
+            return 0;
+        }
+        @Override
+        boolean autoLeave() {
+            return true;
+        }
+
+        @Override
+        public Command runAuto(){
+            return new SequentialGroup(
+                    new InstantCommand(Commands.setFlywheelState(Turret.flywheelState.ON)),
+                    Commands.runPath(paths.nearStart_to_midShoot),
+                    Commands.shootBalls(),
+                    Commands.setIntakeMode(ON),
+                    Commands.runPath(paths.midShoot_to_midPreload),
+                    Commands.runPath(paths.midPreload_to_openGateBasic),
+                    new Delay(4),
+                    Commands.runPath(paths.openGateBasic_to_midShoot),
+                    Commands.shootBalls(),
+                    Commands.setIntakeMode(ON),
+                    Commands.runPath(paths.midShoot_to_openGateIntake),
+                    Commands.waitForArtifacts(),
+                    new Delay(0.5),
+                    Commands.runPath(paths.openGateIntake_to_midShoot),
+                    Commands.shootBalls(),
+                    Commands.setIntakeMode(ON),
+                    Commands.runPath(paths.midShoot_to_nearPreload),
+                    Commands.runPath(paths.nearPreload_to_nearLeave),
+                    Commands.shootBalls()
+            );
+        }
+
+        @NonNull
+        @Override
+        public String toString(){return "Team Stealth 21536 NEAR";}
     }
     private class Heart_Of_Robots_20265_NEAR extends Auto{
         @Override
