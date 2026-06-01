@@ -18,7 +18,7 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.2.0'
 
 //    implementation 'com.pedropathing:ftc:LOCAL'
-    implementation 'com.pedropathing:ftc:2.1.0-SNAPSHOT'
+    implementation 'com.pedropathing:ftc:2.1.2'
 
     implementation 'com.pedropathing:telemetry:1.0.0'
 
