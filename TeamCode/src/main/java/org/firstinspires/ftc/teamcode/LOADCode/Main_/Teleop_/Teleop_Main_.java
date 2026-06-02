@@ -83,7 +83,7 @@ public class Teleop_Main_ extends LinearOpMode {
     public boolean rightTrigOldState = false;
     public double hoodOffset = 0;
     public double turretOffsetStep = 3;
-    public boolean turretOn = false;
+    public boolean turretOn = true;
     public int zeroState = 0;
     public boolean hoodOn = true;
     public Pose holdPoint = new Pose(72, 72, 90);

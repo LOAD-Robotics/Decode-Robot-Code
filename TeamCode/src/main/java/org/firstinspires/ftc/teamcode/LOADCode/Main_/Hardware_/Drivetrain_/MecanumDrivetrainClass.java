@@ -69,6 +69,24 @@ public class MecanumDrivetrainClass {
         follower.update();
     }
 
+    /**
+     * Uses PedroPathing's follower class to implement a mecanum drive controller.
+     * Must be called every loop to function properly.
+     * @param forward The joystick value for driving forward/backward
+     * @param strafe The joystick value for strafing
+     * @param rotate The joystick value to turn left/right
+     * @param robotCentric If true, enables robot centric. If false, enables field centric.
+     * @param headingOffset The offset for field centric in radians
+     */
+    public void pedroMecanumDrive(double forward, double strafe, double rotate, boolean robotCentric, double headingOffset){
+        follower.setTeleOpDrive(
+                -forward * speedMultiplier,
+                -strafe * speedMultiplier,
+                -rotate * speedMultiplier,
+                robotCentric, headingOffset);
+        follower.update();
+    }
+
     public void runPath(PathChain path, boolean holdEndpoint){
         follower.followPath(path, holdEndpoint);
         follower.update();

@@ -187,9 +187,12 @@ public class Commands {
                                         ),
                                         new NullCommand()
                                 ),
-                                new ParallelGroup(
-                                        new Delay(0.4),
-                                        new WaitUntil(() -> (Robot.intake.getTopSensorState() && !Robot.intake.getBottomSensorState()))
+                                new ParallelRaceGroup(
+                                        new ParallelGroup(
+                                                new Delay(0.4),
+                                                new WaitUntil(() -> (Robot.intake.getTopSensorState() && !Robot.intake.getBottomSensorState()))
+                                        ),
+                                        new Delay(1)
                                 ),
 
                                 // Shoot the last ball

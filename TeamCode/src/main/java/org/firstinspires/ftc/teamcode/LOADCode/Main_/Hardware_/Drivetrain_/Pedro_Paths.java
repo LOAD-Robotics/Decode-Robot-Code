@@ -581,7 +581,7 @@ public class Pedro_Paths {
                 .withHeading(0));
         Pose subPose2 = autoMirror(redHpPreload
                 .withY(25)
-                .withHeading(0));
+                .withHeading(redHpPreload.getHeading()));
 
         farShoot_to_hpPreload = follower.pathBuilder()
                 .addPath(new BezierLine(
