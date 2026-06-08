@@ -174,16 +174,16 @@ public class Auto_Main_ extends NextFTCOpMode {
         /**
          * @return A boolean indicating whether the turret is enabled.
          */
-        abstract boolean getTurretEnabled();
+        boolean getTurretEnabled(){return true;}
 
-        abstract boolean autoLeave();
+        boolean autoLeave(){return true;}
 
         /** Override this to schedule the auto command*/
         abstract Command runAuto();
         /** Override this to rename the auto*/
         @NonNull
         @Override
-        public abstract String toString();
+        public String toString(){return "auto";}
     }
 
     private class Far_9Ball extends Auto{
@@ -197,10 +197,6 @@ public class Auto_Main_ extends NextFTCOpMode {
         }
         @Override
         public boolean getTurretEnabled(){
-            return true;
-        }
-        @Override
-        boolean autoLeave() {
             return true;
         }
 
@@ -237,10 +233,6 @@ public class Auto_Main_ extends NextFTCOpMode {
         }
         @Override
         public boolean getTurretEnabled(){
-            return true;
-        }
-        @Override
-        boolean autoLeave() {
             return true;
         }
 
@@ -284,10 +276,6 @@ public class Auto_Main_ extends NextFTCOpMode {
         public boolean getTurretEnabled(){
             return true;
         }
-        @Override
-        boolean autoLeave() {
-            return true;
-        }
 
         @Override
         public Command runAuto(){
@@ -325,10 +313,6 @@ public class Auto_Main_ extends NextFTCOpMode {
         public boolean getTurretEnabled(){
             return true;
         }
-        @Override
-        boolean autoLeave() {
-            return true;
-        }
 
         @Override
         public Command runAuto(){
@@ -363,14 +347,6 @@ public class Auto_Main_ extends NextFTCOpMode {
         @Override
         public Pose getEndPose(){
             return paths.nearLeave;
-        }
-        @Override
-        boolean getTurretEnabled() {
-            return true;
-        }
-        @Override
-        boolean autoLeave() {
-            return true;
         }
 
         @Override
@@ -417,14 +393,6 @@ public class Auto_Main_ extends NextFTCOpMode {
         @Override
         public Pose getEndPose(){
             return paths.nearLeave;
-        }
-        @Override
-        boolean getTurretEnabled() {
-            return true;
-        }
-        @Override
-        boolean autoLeave() {
-            return true;
         }
 
         @Override
@@ -475,10 +443,6 @@ public class Auto_Main_ extends NextFTCOpMode {
         public boolean getTurretEnabled(){
             return true;
         }
-        @Override
-        boolean autoLeave() {
-            return true;
-        }
 
         @Override
         public Command runAuto(){
@@ -521,10 +485,6 @@ public class Auto_Main_ extends NextFTCOpMode {
         }
         @Override
         public boolean getTurretEnabled(){
-            return true;
-        }
-        @Override
-        boolean autoLeave() {
             return true;
         }
 
@@ -570,10 +530,6 @@ public class Auto_Main_ extends NextFTCOpMode {
         public boolean getTurretEnabled(){
             return true;
         }
-        @Override
-        boolean autoLeave() {
-            return true;
-        }
 
         @Override
         public Command runAuto(){
@@ -611,10 +567,6 @@ public class Auto_Main_ extends NextFTCOpMode {
         }
         @Override
         public boolean getTurretEnabled(){
-            return true;
-        }
-        @Override
-        boolean autoLeave() {
             return true;
         }
 
@@ -661,10 +613,6 @@ public class Auto_Main_ extends NextFTCOpMode {
         @Override
         public Pose getEndPose(){
             return paths.midShoot;
-        }
-        @Override
-        boolean getTurretEnabled() {
-            return true;
         }
         @Override
         boolean autoLeave() {
