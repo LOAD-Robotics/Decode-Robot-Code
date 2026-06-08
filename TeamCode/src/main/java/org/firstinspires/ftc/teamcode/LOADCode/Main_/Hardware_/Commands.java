@@ -36,28 +36,6 @@ public class Commands {
         Robot = robot;
     }
 
-    // Delay timer for shooting sequence
-    private static final TimerEx shootingTimerFifthSec = new TimerEx(0.2);
-    private static final TimerEx shootingTimerHalfSec = new TimerEx(0.5);
-    private static final TimerEx shootingTimer1sec = new TimerEx(1);
-    private static final TimerEx shootingTimer2sec = new TimerEx(2);
-    private static final TimerEx shootingTimer5sec = new TimerEx(5);
-    private static Command resetShootingTimerFifthsec() {
-        return new LambdaCommand("resetShootingTimer0.2sec").setStart(shootingTimerFifthSec::restart);
-    }
-    private static Command resetShootingTimerHalfsec() {
-        return new LambdaCommand("resetShootingTimer0.5sec").setStart(shootingTimerHalfSec::restart);
-    }
-    private static Command resetShootingTimer1sec() {
-        return new LambdaCommand("resetShootingTimer1sec").setStart(shootingTimer1sec::restart);
-    }
-    private static Command resetShootingTimer2sec() {
-        return new LambdaCommand("resetShootingTimer2sec").setStart(shootingTimer2sec::restart);
-    }
-    private static Command resetShootingTimer5sec() {
-        return new LambdaCommand("resetShootingTimer5sec").setStart(shootingTimer2sec::restart);
-    }
-
     public Command runPath(PathChain path){
         return runPath(path, true, 1);
     }
@@ -98,13 +76,13 @@ public class Commands {
         );
     }
 
-    public Command setTransferState(Intake.transferState state) {
+    private Command setTransferState(Intake.transferState state) {
         return new InstantCommand(new LambdaCommand("setIntakeMode()")
                 .setStart(() -> Robot.intake.setTransfer(state))
         );
     }
 
-    public Command waitForTurret(){
+    private Command waitForTurret(){
         return new ParallelRaceGroup(
                 new WaitUntil(() -> Robot.turret.rotation.isWithinMaxError()),
                 new Delay(1)
@@ -124,7 +102,7 @@ public class Commands {
         );
     }
 
-    public Command resumePathFollowing() {
+    private Command resumePathFollowing() {
         return new InstantCommand(new LambdaCommand("resumePathFollowing()")
                 .setStart(() -> Robot.drivetrain.follower.resumePathFollowing())
         );
@@ -149,7 +127,7 @@ public class Commands {
         );
     }
 
-    public Command leaveLineSafetyCommand(Command mainAuto, double duration){
+    private Command leaveLineSafetyCommand(Command mainAuto, double duration){
         return new SequentialGroup(
                 new ParallelRaceGroup(
                         mainAuto,
