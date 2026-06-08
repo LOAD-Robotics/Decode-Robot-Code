@@ -53,6 +53,7 @@ public class Auto_Main_ extends NextFTCOpMode {
 
     // Auto parameter variables
     private boolean turretOn = true;
+    double storedHoodOffset = 0;
 
     @SuppressWarnings("unused")
     public Auto_Main_() {
@@ -122,6 +123,11 @@ public class Auto_Main_ extends NextFTCOpMode {
             selectedAuto.runAuto().schedule();
         }
         turretOn = selectedAuto.getTurretEnabled();
+        if (selectedAuto.getStartPose() == paths.nearStart){
+            storedHoodOffset = 10;
+        }else{
+            storedHoodOffset = -20;
+        }
         timer25Sec.restart();
 
         // Indicate that initialization is done
@@ -135,7 +141,7 @@ public class Auto_Main_ extends NextFTCOpMode {
         telemetry.addData("Alliance", selectedAlliance);
         panelsTelemetry.addData("Turret Target Pos", Robot.turret.rotation.target);
         panelsTelemetry.addData("Turret Actual Pos", Robot.turret.rotation.getAngleAbsolute());
-        Robot.turret.updateAimbot(turretOn, true, selectedAuto.getHoodOffset());
+        Robot.turret.updateAimbot(turretOn, true, storedHoodOffset);
         Robot.turret.updateFlywheel(0);
         MecanumDrivetrainClass.robotPose = Robot.drivetrain.follower.getPose();
         telemetry.update();
@@ -166,11 +172,6 @@ public class Auto_Main_ extends NextFTCOpMode {
         abstract Pose getEndPose();
 
         /**
-         * @return The offset of the hood for this auto
-         */
-        abstract double getHoodOffset();
-
-        /**
          * @return A boolean indicating whether the turret is enabled.
          */
         abstract boolean getTurretEnabled();
@@ -193,10 +194,6 @@ public class Auto_Main_ extends NextFTCOpMode {
         @Override
         public Pose getEndPose(){
             return paths.farLeave;
-        }
-        @Override
-        double getHoodOffset() {
-            return -20;
         }
         @Override
         public boolean getTurretEnabled(){
@@ -241,10 +238,6 @@ public class Auto_Main_ extends NextFTCOpMode {
         @Override
         public boolean getTurretEnabled(){
             return true;
-        }
-        @Override
-        double getHoodOffset() {
-            return -20;
         }
         @Override
         boolean autoLeave() {
@@ -292,10 +285,6 @@ public class Auto_Main_ extends NextFTCOpMode {
             return true;
         }
         @Override
-        double getHoodOffset() {
-            return 10;
-        }
-        @Override
         boolean autoLeave() {
             return true;
         }
@@ -335,10 +324,6 @@ public class Auto_Main_ extends NextFTCOpMode {
         @Override
         public boolean getTurretEnabled(){
             return true;
-        }
-        @Override
-        double getHoodOffset() {
-            return 10;
         }
         @Override
         boolean autoLeave() {
@@ -382,10 +367,6 @@ public class Auto_Main_ extends NextFTCOpMode {
         @Override
         boolean getTurretEnabled() {
             return true;
-        }
-        @Override
-        double getHoodOffset() {
-            return 10;
         }
         @Override
         boolean autoLeave() {
@@ -442,10 +423,6 @@ public class Auto_Main_ extends NextFTCOpMode {
             return true;
         }
         @Override
-        double getHoodOffset() {
-            return 10;
-        }
-        @Override
         boolean autoLeave() {
             return true;
         }
@@ -499,10 +476,6 @@ public class Auto_Main_ extends NextFTCOpMode {
             return true;
         }
         @Override
-        double getHoodOffset() {
-            return 0;
-        }
-        @Override
         boolean autoLeave() {
             return true;
         }
@@ -549,10 +522,6 @@ public class Auto_Main_ extends NextFTCOpMode {
         @Override
         public boolean getTurretEnabled(){
             return true;
-        }
-        @Override
-        double getHoodOffset() {
-            return 0;
         }
         @Override
         boolean autoLeave() {
@@ -602,10 +571,6 @@ public class Auto_Main_ extends NextFTCOpMode {
             return true;
         }
         @Override
-        double getHoodOffset() {
-            return 0;
-        }
-        @Override
         boolean autoLeave() {
             return true;
         }
@@ -647,10 +612,6 @@ public class Auto_Main_ extends NextFTCOpMode {
         @Override
         public boolean getTurretEnabled(){
             return true;
-        }
-        @Override
-        double getHoodOffset() {
-            return 0;
         }
         @Override
         boolean autoLeave() {
@@ -708,10 +669,6 @@ public class Auto_Main_ extends NextFTCOpMode {
         @Override
         boolean autoLeave() {
             return false;
-        }
-        @Override
-        double getHoodOffset() {
-            return 0;
         }
 
         @Override
