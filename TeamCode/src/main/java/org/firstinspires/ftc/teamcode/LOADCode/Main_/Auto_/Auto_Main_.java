@@ -82,7 +82,8 @@ public class Auto_Main_ extends NextFTCOpMode {
                         new Near_12Ball(),
                         new Near_9Ball(),
                         new Far_12Ball(),
-                        new Far_9Ball()
+                        new Far_9Ball(),
+                        new julietAuto()
 
                 ));
         prompter.onComplete(() -> {
@@ -634,6 +635,39 @@ public class Auto_Main_ extends NextFTCOpMode {
         @Override
         public String toString() {
             return "Test Auto";
+        }
+    }
+
+    private class julietAuto extends Auto{
+        @Override
+        Pose getStartPose() {
+            return paths.nearStart;
+        }
+        @Override
+        public Pose getEndPose(){
+            return paths.nearLeave;
+        }
+
+        @Override
+        public Command runAuto(){
+            return new SequentialGroup(
+                    new InstantCommand(Commands.setFlywheelState( Turret.flywheelState.ON)),
+                    Commands.runPath(paths.nearStart_to_midShoot),
+                    Commands.setIntakeMode(ON),
+                    Commands.runPath(paths.midPreload_to_nearShoot),
+                    Commands.runPath(paths.openGateBasic_to_midShoot),
+                    Commands.runPath(paths.nearLeave)
+
+
+
+
+            );
+        }
+
+        @NonNull
+        @Override
+        public String toString() {
+            return "juliets Test Auto";
         }
     }
 }
