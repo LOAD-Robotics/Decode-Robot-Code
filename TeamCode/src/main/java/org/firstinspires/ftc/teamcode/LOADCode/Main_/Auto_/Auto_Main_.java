@@ -653,10 +653,11 @@ public class Auto_Main_ extends NextFTCOpMode {
             return new SequentialGroup(
                     new InstantCommand(Commands.setFlywheelState( Turret.flywheelState.ON)),
                     Commands.runPath(paths.nearStart_to_midShoot),
+                    Commands.shootBalls(),
                     Commands.setIntakeMode(ON),
                     Commands.runPath(paths.midPreload_to_nearShoot),
                     Commands.runPath(paths.openGateBasic_to_midShoot),
-                    Commands.runPath(paths.nearLeave)
+                    Commands.runPath(paths.midShoot_to_nearLeave)
 
 
 
