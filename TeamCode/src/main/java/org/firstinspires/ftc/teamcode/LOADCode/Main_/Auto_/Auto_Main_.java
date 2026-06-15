@@ -655,7 +655,8 @@ public class Auto_Main_ extends NextFTCOpMode {
                     Commands.runPath(paths.nearStart_to_midShoot),
                     Commands.shootBalls(),
                     Commands.setIntakeMode(ON),
-                    Commands.runPath(paths.midPreload_to_nearShoot),
+                    Commands.runPath(paths.midShoot_to_midPreload),
+                    Commands.runPath(paths.midPreload_to_midShoot),
                     Commands.shootBalls()
 
 
